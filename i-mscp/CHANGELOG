@@ -1,0 +1,13 @@
+i-MSCP ChangeLog
+~~~~~~~~~~~~~~~~
+-------------------------------------------------------------------------------------
+i-MSCP 1.1.1.0 (beta 1)
+-------------------------------------------------------------------------------------
+
+Features / Enhancements:
+
+Tickets:
+	- Fixed #163:	Enhancement - Add Support for Roundcube Mail (or switch from Squirrel)
+	- Fixed #368: Enhancement - Add custom TXT DNS resource records
+	- Fixed #387: Enhancement - php.ini modifications to allow the usage of roundcube
+	- Fixed #396: Defect - File Manager (ajaxplorer) no compatible with php5.4
