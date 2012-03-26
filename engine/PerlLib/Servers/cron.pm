@@ -28,7 +28,7 @@ package Servers::cron;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 use vars qw/@ISA/;
 
@@ -38,7 +38,7 @@ use Common::SingletonClass;
 sub _init{
 	my $self	= shift;
 
-	$self->{cfgDir} = "$main::imscpConfig{'CONF_DIR'}/cron.d";
+	$self->{cfgDir} = "$main::selityConfig{'CONF_DIR'}/cron.d";
 	$self->{bkpDir} = "$self->{cfgDir}/backup";
 	$self->{wrkDir} = "$self->{cfgDir}/working";
 	$self->{tplDir}	= "$self->{cfgDir}/parts";
@@ -48,8 +48,8 @@ sub factory{ return Servers::cron->new(); }
 
 sub addTask{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -75,25 +75,25 @@ sub addTask{
 	$data->{DAY}		= 1 unless exists $data->{DAY};
 	$data->{MONTH}		= 1 unless exists $data->{MONTH};
 	$data->{DWEEK}		= 1 unless exists $data->{DWEEK};
-	$data->{LOG_DIR}	= $main::imscpConfig{LOG_DIR};
+	$data->{LOG_DIR}	= $main::selityConfig{LOG_DIR};
 
 	##BACKUP PRODUCTION FILE
-	$rs |=	iMSCP::File->new(
-				filename => "$main::imscpConfig{CRON_D_DIR}/imscp"
+	$rs |=	Selity::File->new(
+				filename => "$main::selityConfig{CRON_D_DIR}/selity"
 			)->copyFile(
-				"$self->{bkpDir}/imscp." . time
-			) if(-f "$main::imscpConfig{CRON_D_DIR}/imscp");
+				"$self->{bkpDir}/selity." . time
+			) if(-f "$main::selityConfig{CRON_D_DIR}/selity");
 
-	my $file	= iMSCP::File->new(filename => "$self->{wrkDir}/imscp");
+	my $file	= Selity::File->new(filename => "$self->{wrkDir}/selity");
 	my $wrkFileContent	= $file->get();
 
 	unless($wrkFileContent){
-		error("Can not read $self->{wrkDir}/imscp");
+		error("Can not read $self->{wrkDir}/selity");
 		$rs = 1;
 	} else {
-		my $cleanBTag	= iMSCP::File->new(filename => "$self->{tplDir}/task_b.tpl")->get();
-		my $cleanTag	= iMSCP::File->new(filename => "$self->{tplDir}/task_entry.tpl")->get();
-		my $cleanETag	= iMSCP::File->new(filename => "$self->{tplDir}/task_e.tpl")->get();
+		my $cleanBTag	= Selity::File->new(filename => "$self->{tplDir}/task_b.tpl")->get();
+		my $cleanTag	= Selity::File->new(filename => "$self->{tplDir}/task_entry.tpl")->get();
+		my $cleanETag	= Selity::File->new(filename => "$self->{tplDir}/task_e.tpl")->get();
 		my $bTag 		= process({TASKID => $data->{TASKID}}, $cleanBTag);
 		my $eTag 		= process({TASKID => $data->{TASKID}}, $cleanETag);
 		my $tag			= process($data, $cleanTag);
@@ -102,14 +102,14 @@ sub addTask{
 		$wrkFileContent = replaceBloc($cleanBTag, $cleanETag, "$bTag$tag$eTag", $wrkFileContent, 'keep');
 
 		# Store the file in the working directory
-		my $file = iMSCP::File->new(filename =>"$self->{wrkDir}/imscp");
+		my $file = Selity::File->new(filename =>"$self->{wrkDir}/selity");
 		$rs |= $file->set($wrkFileContent);
 		$rs |= $file->save();
 		$rs |= $file->mode(0644);
-		$rs |= $file->owner($main::imscpConfig{ROOT_USER}, $main::imscpConfig{ROOT_GROUP});
+		$rs |= $file->owner($main::selityConfig{ROOT_USER}, $main::selityConfig{ROOT_GROUP});
 
 		# Install the file in the production directory
-		$rs |= $file->copyFile("$main::imscpConfig{CRON_D_DIR}/imscp");
+		$rs |= $file->copyFile("$main::selityConfig{CRON_D_DIR}/selity");
 	}
 
 	$rs;
@@ -117,8 +117,8 @@ sub addTask{
 
 sub delTask{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -139,35 +139,35 @@ sub delTask{
 	}
 
 	##BACKUP PRODUCTION FILE
-	$rs |=	iMSCP::File->new(
-				filename => "$main::imscpConfig{CRON_D_DIR}/imscp"
+	$rs |=	Selity::File->new(
+				filename => "$main::selityConfig{CRON_D_DIR}/selity"
 			)->copyFile(
-				"$self->{bkpDir}/imscp." . time
-			) if(-f "$main::imscpConfig{CRON_D_DIR}/imscp");
+				"$self->{bkpDir}/selity." . time
+			) if(-f "$main::selityConfig{CRON_D_DIR}/selity");
 
-	my $file	= iMSCP::File->new(filename => "$self->{wrkDir}/imscp");
+	my $file	= Selity::File->new(filename => "$self->{wrkDir}/selity");
 	my $wrkFileContent	= $file->get();
 
 	unless($wrkFileContent){
-		error("Can not read $self->{wrkDir}/imscp");
+		error("Can not read $self->{wrkDir}/selity");
 		$rs = 1;
 	} else {
-		my $cleanBTag	= iMSCP::File->new(filename => "$self->{tplDir}/task_b.tpl")->get();
-		my $cleanETag	= iMSCP::File->new(filename => "$self->{tplDir}/task_e.tpl")->get();
+		my $cleanBTag	= Selity::File->new(filename => "$self->{tplDir}/task_b.tpl")->get();
+		my $cleanETag	= Selity::File->new(filename => "$self->{tplDir}/task_e.tpl")->get();
 		my $bTag 		= process({TASKID => $data->{TASKID}}, $cleanBTag);
 		my $eTag 		= process({TASKID => $data->{TASKID}}, $cleanETag);
 
 		$wrkFileContent = replaceBloc($bTag, $eTag, '', $wrkFileContent, undef);
 
 		# Store the file in the working directory
-		my $file = iMSCP::File->new(filename =>"$self->{wrkDir}/imscp");
+		my $file = Selity::File->new(filename =>"$self->{wrkDir}/selity");
 		$rs |= $file->set($wrkFileContent);
 		$rs |= $file->save();
 		$rs |= $file->mode(0644);
-		$rs |= $file->owner($main::imscpConfig{ROOT_USER}, $main::imscpConfig{ROOT_GROUP});
+		$rs |= $file->owner($main::selityConfig{ROOT_USER}, $main::selityConfig{ROOT_GROUP});
 
 		# Install the file in the production directory
-		$rs |= $file->copyFile("$main::imscpConfig{CRON_D_DIR}/imscp");
+		$rs |= $file->copyFile("$main::selityConfig{CRON_D_DIR}/selity");
 	}
 
 	$rs;

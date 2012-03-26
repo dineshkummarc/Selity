@@ -28,7 +28,7 @@ package Modules::Htusers;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -59,7 +59,7 @@ sub loadData{
 			`t1`.`id` = ?
 	";
 
-	my $rdata = iMSCP::Database->factory()->doQuery('id', $sql, $self->{htuserId});
+	my $rdata = Selity::Database->factory()->doQuery('id', $sql, $self->{htuserId});
 
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 	error("No user in table htaccess_users has id = $self->{htuserId}") and return 1 unless(exists $rdata->{$self->{htuserId}});
@@ -72,7 +72,7 @@ sub loadData{
 			"Orphan entry: ".Dumper($rdata->{$self->{htuserId}}),
 			$self->{htuserId}
 		);
-		my $rdata = iMSCP::Database->factory()->doQuery('update', @sql);
+		my $rdata = Selity::Database->factory()->doQuery('update', @sql);
 		return 1;
 	}
 
@@ -111,7 +111,7 @@ sub process{
 		}
 	}
 
-	my $rdata = iMSCP::Database->factory()->doQuery('delete', @sql);
+	my $rdata = Selity::Database->factory()->doQuery('delete', @sql);
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 	$rs;

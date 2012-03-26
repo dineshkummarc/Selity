@@ -20,7 +20,7 @@
 # @category		i-MSCP
 # @copyright	2010 - 2012 by i-MSCP | http://i-mscp.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @version		SVN: $Id: imscp-dsk-quota 5308 2011-09-25 15:46:35Z sci2tech $
+# @version		SVN: $Id: selity-dsk-quota 5308 2011-09-25 15:46:35Z sci2tech $
 # @link			http://i-mscp.net i-MSCP Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
@@ -31,20 +31,20 @@ use FindBin;
 use lib "$FindBin::Bin/..";
 use lib "$FindBin::Bin/../PerlLib";
 
-use iMSCP::Debug;
-use iMSCP::Boot;
-use iMSCP::Execute;
-use iMSCP::Mail;
-use iMSCP::Servers;
+use Selity::Debug;
+use Selity::Boot;
+use Selity::Execute;
+use Selity::Mail;
+use Selity::Servers;
 use Data::Dumper;
 
-newDebug('imscp-vrl-traff.log');
+newDebug('selity-vrl-traff.log');
 
 sub traff_start_up {
 
 	umask(027);
-	iMSCP::Boot->new()->init({nolock => 'yes'});
-	@{$main::Servers} = iMSCP::Servers->new()->get();
+	Selity::Boot->new()->init({nolock => 'yes'});
+	@{$main::Servers} = Selity::Servers->new()->get();
 
 	0;
 }
@@ -68,11 +68,11 @@ sub traff_count{
 		UNION
 		SELECT `domain_id`, CONCAT(`subdomain_alias_name`, '.', `alias_name`), 'subdomain_alias' AS `type` FROM `subdomain_alias` LEFT JOIN `domain_aliasses` USING (`alias_id`)
 	";
-	my $rdata = iMSCP::Database->new()->factory()->doQuery('domain_name', $sql);
+	my $rdata = Selity::Database->new()->factory()->doQuery('domain_name', $sql);
 
 	if (ref $rdata ne 'HASH'){
 		error("$rdata");
-		iMSCP::Mail->new()->errmsg($rdata);
+		Selity::Mail->new()->errmsg($rdata);
 		$rs = 1;
 	} else {
 
@@ -101,11 +101,11 @@ sub traff_count{
 		next unless $traff{$_}->{httpd} || $traff{$_}->{ftpd} || $traff{$_}->{mta} || $traff{$_}->{po};
 
 		$sql = "SELECT `domain_id` FROM `domain_traffic` WHERE `domain_id` = ? AND `dtraff_time` >= UNIX_TIMESTAMP(CURRENT_DATE())";
-		my $result = iMSCP::Database->new()->factory()->doQuery('domain_id', $sql, $_);
+		my $result = Selity::Database->new()->factory()->doQuery('domain_id', $sql, $_);
 
 		if (ref $result ne 'HASH'){
 			error("$result");
-			iMSCP::Mail->new()->errmsg($result);
+			Selity::Mail->new()->errmsg($result);
 			$rs = 1;
 		} else {
 			unless (scalar keys %{$result}) {
@@ -119,7 +119,7 @@ sub traff_count{
 						?, ?, ?, ?, ?, ?
 					)
 				";
-				$result = iMSCP::Database->new()->factory()->doQuery(
+				$result = Selity::Database->new()->factory()->doQuery(
 					'update',
 					$sql,
 					$_,
@@ -131,7 +131,7 @@ sub traff_count{
 				);
 				if (ref $result ne 'HASH'){
 					error("$result");
-					iMSCP::Mail->new()->errmsg($result);
+					Selity::Mail->new()->errmsg($result);
 					$rs = 1;
 				}
 			} else {
@@ -150,7 +150,7 @@ sub traff_count{
 						`dtraff_time` >= UNIX_TIMESTAMP(CURRENT_DATE())
 					LIMIT 1
 				";
-				$result = iMSCP::Database->new()->factory()->doQuery(
+				$result = Selity::Database->new()->factory()->doQuery(
 					'update',
 					$sql,
 					exists $traff{$_}->{httpd} ? $traff{$_}->{httpd} : 0,
@@ -162,7 +162,7 @@ sub traff_count{
 				);
 				if (ref $result ne 'HASH'){
 					error("$result");
-					iMSCP::Mail->new()->errmsg($result);
+					Selity::Mail->new()->errmsg($result);
 					$rs = 1;
 				}
 			}

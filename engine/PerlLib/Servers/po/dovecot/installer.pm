@@ -28,9 +28,9 @@ package Servers::po::dovecot::installer;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::File;
-use iMSCP::Execute;
+use Selity::Debug;
+use Selity::File;
+use Selity::Execute;
 
 use vars qw/@ISA/;
 
@@ -40,15 +40,15 @@ use Common::SingletonClass;
 sub _init{
 
 	my $self		= shift;
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/dovecot";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/dovecot";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/dovecot.data";
 	my $oldConf		= "$self->{cfgDir}/dovecot.old.data";
 
-	tie %self::dovecotConfig, 'iMSCP::Config','fileName' => $conf;
-	tie %self::dovecotOldConfig, 'iMSCP::Config','fileName' => $oldConf, noerror => 1 if -f $oldConf;
+	tie %self::dovecotConfig, 'Selity::Config','fileName' => $conf;
+	tie %self::dovecotOldConfig, 'Selity::Config','fileName' => $oldConf, noerror => 1 if -f $oldConf;
 
 	0;
 }
@@ -79,19 +79,19 @@ sub install{
 sub migrateMailboxes{
 
 	if(
-		$main::imscpConfigOld{PO_SERVER}
+		$main::selityConfigOld{PO_SERVER}
 		&&
-		$main::imscpConfigOld{PO_SERVER} eq 'courier'
+		$main::selityConfigOld{PO_SERVER} eq 'courier'
 		&&
-		$main::imscpConfig{PO_SERVER}  eq 'dovecot'
+		$main::selityConfig{PO_SERVER}  eq 'dovecot'
 	){
-		use iMSCP::Execute;
+		use Selity::Execute;
 		use FindBin;
 		use Servers::mta;
 
 		my $mta	= Servers::mta->factory();
 		my ($rs, $stdout, $stderr);
-		my $binPath = "perl $main::imscpConfig{'ENGINE_ROOT_DIR'}/PerlVendor/courier-dovecot-migrate.pl";
+		my $binPath = "perl $main::selityConfig{'ENGINE_ROOT_DIR'}/PerlVendor/courier-dovecot-migrate.pl";
 		my $mailPath = "$mta->{'MTA_VIRTUAL_MAIL_DIR'}";
 
 		$rs = execute("$binPath --to-dovecot --convert --recursive $mailPath", \$stdout, \$stderr);
@@ -130,19 +130,19 @@ sub getVersion{
 
 sub saveConf{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self		= shift;
-	my $file = iMSCP::File->new(filename => "$self->{cfgDir}/dovecot.data");
+	my $file = Selity::File->new(filename => "$self->{cfgDir}/dovecot.data");
 	my $cfg = $file->get() or return 1;
 	$file->mode(0640) and return 1;
-	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+	$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 
-	$file = iMSCP::File->new(filename => "$self->{cfgDir}/dovecot.old.data");
+	$file = Selity::File->new(filename => "$self->{cfgDir}/dovecot.old.data");
 	$file->set($cfg) and return 1;
 	$file->save and return 1;
 	$file->mode(0640) and return 1;
-	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+	$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 
 	0;
 }
@@ -155,7 +155,7 @@ sub bkpConfFile{
 	my $timestamp	= time;
 
 	if(-f "$self::dovecotConfig{'DOVECOT_CONF_DIR'}/$cfgFile"){
-		my $file	= iMSCP::File->new(
+		my $file	= Selity::File->new(
 						filename => "$self::dovecotConfig{'DOVECOT_CONF_DIR'}/$cfgFile"
 					);
 		if(!-f "$self->{bkpDir}/$cfgFile.system") {
@@ -173,24 +173,24 @@ sub buildConf{
 	use Servers::mta;
 
 	my $self		= shift;
-	my $mta	= Servers::mta->factory($main::imscpConfig{MTA_SERVER});
+	my $mta	= Servers::mta->factory($main::selityConfig{MTA_SERVER});
 
 	my $cfg = {
-		DATABASE_TYPE		=> $main::imscpConfig{DATABASE_TYPE},
+		DATABASE_TYPE		=> $main::selityConfig{DATABASE_TYPE},
 		DATABASE_HOST		=> (
-									$main::imscpConfig{DATABASE_PORT}
+									$main::selityConfig{DATABASE_PORT}
 									?
-									"$main::imscpConfig{DATABASE_HOST} port=$main::imscpConfig{DATABASE_PORT}"
+									"$main::selityConfig{DATABASE_HOST} port=$main::selityConfig{DATABASE_PORT}"
 									:
-									$main::imscpConfig{DATABASE_HOST}
+									$main::selityConfig{DATABASE_HOST}
 								),
 		DATABASE_USER		=> $self::dovecotConfig{DATABASE_USER},
 		DATABASE_PASSWORD	=> $self::dovecotConfig{DATABASE_PASSWORD},
-		DATABASE_NAME		=> $main::imscpConfig{DATABASE_NAME},
-		GUI_CERT_DIR		=> $main::imscpConfig{GUI_CERT_DIR},
-		HOST_NAME			=> $main::imscpConfig{SERVER_HOSTNAME},
-		DOVECOT_SSL			=> ($main::imscpConfig{SSL_ENABLED} eq 'yes' ? 'yes' : 'no'),
-		COMMENT_SSL			=> ($main::imscpConfig{SSL_ENABLED} eq 'yes' ? '' : '#'),
+		DATABASE_NAME		=> $main::selityConfig{DATABASE_NAME},
+		GUI_CERT_DIR		=> $main::selityConfig{GUI_CERT_DIR},
+		HOST_NAME			=> $main::selityConfig{SERVER_HOSTNAME},
+		DOVECOT_SSL			=> ($main::selityConfig{SSL_ENABLED} eq 'yes' ? 'yes' : 'no'),
+		COMMENT_SSL			=> ($main::selityConfig{SSL_ENABLED} eq 'yes' ? '' : '#'),
 		MAIL_USER			=> $mta->{'MTA_MAILBOX_UID_NAME'},
 		MAIL_GROUP			=> $mta->{'MTA_MAILBOX_GID_NAME'},
 		vmailUID			=> scalar getpwnam($mta->{'MTA_MAILBOX_UID_NAME'}),
@@ -212,20 +212,20 @@ sub buildConf{
 	};
 
 	for (keys %{$cfgFiles}) {
-		my $file	= iMSCP::File->new(filename => "$self->{cfgDir}/$cfgFiles->{$_}");
+		my $file	= Selity::File->new(filename => "$self->{cfgDir}/$cfgFiles->{$_}");
 		my $cfgTpl	= $file->get();
 		return 1 if (!$cfgTpl);
-		$cfgTpl = iMSCP::Templator::process($cfg, $cfgTpl);
+		$cfgTpl = Selity::Templator::process($cfg, $cfgTpl);
 		return 1 if (!$cfgTpl);
-		$file = iMSCP::File->new(filename => "$self->{wrkDir}/$_");
+		$file = Selity::File->new(filename => "$self->{wrkDir}/$_");
 		$file->set($cfgTpl) and return 1;
 		$file->save() and return 1;
 		$file->mode(0640) and return 1;
-		$file->owner($main::imscpConfig{'ROOT_USER'}, $mta->{'MTA_MAILBOX_GID_NAME'}) and return 1;
+		$file->owner($main::selityConfig{'ROOT_USER'}, $mta->{'MTA_MAILBOX_GID_NAME'}) and return 1;
 		$file->copyFile($self::dovecotConfig{'DOVECOT_CONF_DIR'}) and return 1;
 	}
 
-	my $file	= iMSCP::File->new(filename => "$self::dovecotConfig{'DOVECOT_CONF_DIR'}/dovecot.conf");
+	my $file	= Selity::File->new(filename => "$self::dovecotConfig{'DOVECOT_CONF_DIR'}/dovecot.conf");
 	$file->mode(0644) and return 1;
 
 	0;
@@ -256,34 +256,34 @@ sub setupDB{
 		my $dbUser = 'dovecot_user';
 
 		do{
-			$dbUser = iMSCP::Dialog->factory()->inputbox("Please enter database user name for the restricted dovecot user (default dovecot_user)", $dbUser);
+			$dbUser = Selity::Dialog->factory()->inputbox("Please enter database user name for the restricted dovecot user (default dovecot_user)", $dbUser);
 			#we will not allow root user to be used as database user for dovecot since account will be restricted
-			if($dbUser eq $main::imscpConfig{DATABASE_USER}){
-				iMSCP::Dialog->factory()->msgbox("You can not use $main::imscpConfig{DATABASE_USER} as restricted user");
+			if($dbUser eq $main::selityConfig{DATABASE_USER}){
+				Selity::Dialog->factory()->msgbox("You can not use $main::selityConfig{DATABASE_USER} as restricted user");
 				$dbUser = undef;
 			}
 		} while (!$dbUser);
 
-		iMSCP::Dialog->factory()->set('cancel-label','Autogenerate');
+		Selity::Dialog->factory()->set('cancel-label','Autogenerate');
 		my $dbPass;
-		$dbPass = iMSCP::Dialog->factory()->inputbox("Please enter database password (leave blank for autogenerate)", $dbPass);
+		$dbPass = Selity::Dialog->factory()->inputbox("Please enter database password (leave blank for autogenerate)", $dbPass);
 		if(!$dbPass){
 			$dbPass = '';
 			my @allowedChars = ('A'..'Z', 'a'..'z', '0'..'9', '_');
 			$dbPass .= $allowedChars[rand()*($#allowedChars + 1)] for (1..16);
 		}
 		$dbPass =~ s/('|"|`|#|;|\/|\s|\||<|\?|\\)/_/g;
-		iMSCP::Dialog->factory()->msgbox("Your password is '".$dbPass."' (we have stripped not allowed chars)");
-		iMSCP::Dialog->factory()->set('cancel-label');
+		Selity::Dialog->factory()->msgbox("Your password is '".$dbPass."' (we have stripped not allowed chars)");
+		Selity::Dialog->factory()->set('cancel-label');
 		$self::dovecotConfig{'DATABASE_USER'}		= $dbUser;
 		$self::dovecotConfig{'DATABASE_PASSWORD'}	= $dbPass;
 	}
 
 	#restore db connection
-	my $crypt = iMSCP::Crypt->new();
+	my $crypt = Selity::Crypt->new();
 	my $err = $self->check_sql_connection(
-			$main::imscpConfig{'DATABASE_USER'},
-			$main::imscpConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::imscpConfig{'DATABASE_PASSWORD'}) : ''
+			$main::selityConfig{'DATABASE_USER'},
+			$main::selityConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::selityConfig{'DATABASE_PASSWORD'}) : ''
 	);
 	if ($err){
 		error("$err");
@@ -291,7 +291,7 @@ sub setupDB{
 	}
 
 	if(!$connData) {
-		my $database = iMSCP::Database->new(db => $main::imscpConfig{DATABASE_TYPE})->factory();
+		my $database = Selity::Database->new(db => $main::selityConfig{DATABASE_TYPE})->factory();
 
 		## We ensure that new data doesn't exist in database
 		$err = $database->doQuery(
@@ -305,7 +305,7 @@ sub setupDB{
 					`Db` = ?
 				AND
 					`User` = ?;
-			", $main::imscpConfig{'DATABASE_HOST'}, $main::imscpConfig{'DATABASE_NAME'}, $self::dovecotConfig{'DATABASE_USER'}
+			", $main::selityConfig{'DATABASE_HOST'}, $main::selityConfig{'DATABASE_NAME'}, $self::dovecotConfig{'DATABASE_USER'}
 		);
 		return $err if (ref $err ne 'HASH');
 
@@ -318,7 +318,7 @@ sub setupDB{
 					`Host` = ?
 				AND
 					`User` = ?;
-			", $main::imscpConfig{'DATABASE_HOST'}, $self::dovecotConfig{'DATABASE_USER'}
+			", $main::selityConfig{'DATABASE_HOST'}, $self::dovecotConfig{'DATABASE_USER'}
 		);
 		return $err if (ref $err ne 'HASH');
 
@@ -330,19 +330,19 @@ sub setupDB{
 		$err = $database->doQuery(
 			'dummy',
 			"
-				GRANT SELECT ON `$main::imscpConfig{DATABASE_NAME}`.*
+				GRANT SELECT ON `$main::selityConfig{DATABASE_NAME}`.*
 				TO ?@?
 				IDENTIFIED BY ?;
-			", $self::dovecotConfig{DATABASE_USER}, $main::imscpConfig{DATABASE_HOST}, $self::dovecotConfig{DATABASE_PASSWORD}
+			", $self::dovecotConfig{DATABASE_USER}, $main::selityConfig{DATABASE_HOST}, $self::dovecotConfig{DATABASE_PASSWORD}
 		);
 		return $err if (ref $err ne 'HASH');
 
 		$err = $database->doQuery(
 			'dummy',
 			"
-				GRANT SELECT,INSERT,UPDATE,DELETE ON `$main::imscpConfig{DATABASE_NAME}`.`quota_dovecot`
+				GRANT SELECT,INSERT,UPDATE,DELETE ON `$main::selityConfig{DATABASE_NAME}`.`quota_dovecot`
 				TO ?@?
-			", $self::dovecotConfig{DATABASE_USER}, $main::imscpConfig{DATABASE_HOST}
+			", $self::dovecotConfig{DATABASE_USER}, $main::selityConfig{DATABASE_HOST}
 		);
 		return $err if (ref $err ne 'HASH');
 	}
@@ -352,10 +352,10 @@ sub setupDB{
 
 sub check_sql_connection{
 
-	use iMSCP::Database;
+	use Selity::Database;
 
 	my ($self, $dbUser, $dbPass) = (@_);
-	my $database = iMSCP::Database->new(db => $main::imscpConfig{DATABASE_TYPE})->factory();
+	my $database = Selity::Database->new(db => $main::selityConfig{DATABASE_TYPE})->factory();
 	$database->set('DATABASE_USER',		$dbUser);
 	$database->set('DATABASE_PASSWORD',	$dbPass);
 
@@ -384,10 +384,10 @@ sub mtaConf{
 
 	debug($content);
 
-	use iMSCP::Templator;
+	use Selity::Templator;
 	use Servers::mta;
 
-	my $mta	= Servers::mta->factory($main::imscpConfig{MTA_SERVER});
+	my $mta	= Servers::mta->factory($main::selityConfig{MTA_SERVER});
 
 	my $poBloc = getBloc(
 		"$mta->{commentChar} dovecot begin",

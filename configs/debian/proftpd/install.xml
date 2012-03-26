@@ -28,7 +28,7 @@ program. If not, see <http://www.gnu.org/licenses/>
 	<folders>${SYSTEM_CONF}/proftpd/backup</folders>
 	<folders>${SYSTEM_CONF}/proftpd/working</folders>
 	<folders>${ROOT_CONF}/proftpd</folders>
-	<folders>${ROOT_CONF}/proftpd/imscp</folders>
+	<folders>${ROOT_CONF}/proftpd/selity</folders>
 
 	<copy_config>${SYSTEM_CONF}/proftpd/parts</copy_config>
 	<copy_config>${ROOT_CONF}/proftpd/root_domain.conf</copy_config>

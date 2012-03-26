@@ -32,30 +32,30 @@ use lib "$FindBin::Bin/..";
 use lib "$FindBin::Bin/../PerlLib";
 use lib "$FindBin::Bin/../PerlVendor";
 
-use iMSCP::Debug;
-use iMSCP::Boot;
+use Selity::Debug;
+use Selity::Boot;
 
 
-newDebug('imscp-set-gui-permissions.log');
+newDebug('selity-set-gui-permissions.log');
 
 sub start_up {
 
 	umask(027);
-	iMSCP::Boot->new()->init({nolock => 'yes', nodatabase => 'yes'});
+	Selity::Boot->new()->init({nolock => 'yes', nodatabase => 'yes'});
 
 	0;
 }
 
 sub shut_down {
 
-	use iMSCP::Mail;
+	use Selity::Mail;
 
 	my @warnings	= getMessageByType('WARNING');
 	my @errors		= getMessageByType('ERROR');
 
 	my $msg	 = "\nWARNINGS:\n"		. join("\n", @warnings)	. "\n" if @warnings > 0;
 	$msg	.= "\nERRORS:\n"		. join("\n", @errors)	. "\n" if @errors > 0;
-	iMSCP::Mail->new()->errmsg($msg) if ($msg);
+	Selity::Mail->new()->errmsg($msg) if ($msg);
 
 	0;
 }

@@ -29,10 +29,10 @@ package Servers::mta::postfix::uninstaller;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::Execute;
-use iMSCP::File;
-use iMSCP::Templator;
+use Selity::Debug;
+use Selity::Execute;
+use Selity::File;
+use Selity::Templator;
 
 use vars qw/@ISA/;
 
@@ -43,14 +43,14 @@ sub _init{
 
 	my $self		= shift;
 
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/postfix";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/postfix";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
-	$self->{vrlDir} = "$self->{cfgDir}/imscp";
+	$self->{vrlDir} = "$self->{cfgDir}/selity";
 
 	my $conf		= "$self->{cfgDir}/postfix.data";
 
-	tie %self::postfixConfig, 'iMSCP::Config','fileName' => $conf;
+	tie %self::postfixConfig, 'Selity::Config','fileName' => $conf;
 
 	0;
 }
@@ -68,7 +68,7 @@ sub uninstall{
 }
 
 sub removeDirs{
-	use iMSCP::Dir;
+	use Selity::Dir;
 
 	my $self	= shift;
 	my $rs		= 0;
@@ -79,7 +79,7 @@ sub removeDirs{
 		$self::postfixConfig{'MTA_VIRTUAL_CONF_DIR'},
 		$self::postfixConfig{'MTA_VIRTUAL_MAIL_DIR'},
 	) {
-		$rs |= iMSCP::Dir->new(dirname => $_)->remove();
+		$rs |= Selity::Dir->new(dirname => $_)->remove();
 	}
 
 	$rs;
@@ -114,7 +114,7 @@ sub buildAliasses{
 
 sub restoreConfFile{
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $rs		= 0;
@@ -125,7 +125,7 @@ sub restoreConfFile{
 	) {
 		my ($filename, $directories, $suffix) = fileparse($_);
 		if(-f "$self->{bkpDir}/$filename$suffix.system"){
-			$rs	|=	iMSCP::File->new(
+			$rs	|=	Selity::File->new(
 						filename => "$self->{bkpDir}/$filename$suffix.system"
 					)->copyFile(
 						$_

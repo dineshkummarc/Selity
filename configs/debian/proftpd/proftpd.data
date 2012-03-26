@@ -26,7 +26,7 @@ CMD_FTPD = /etc/init.d/proftpd
 
 FTPD_CONF_FILE = /etc/proftpd/proftpd.conf
 
-FTPD_CONF_DIR = /etc/proftpd/imscp
+FTPD_CONF_DIR = /etc/proftpd/selity
 
 FTP_TRAFF_LOG = /proftpd/ftp_traff.log
 

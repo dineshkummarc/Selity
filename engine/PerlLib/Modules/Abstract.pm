@@ -28,7 +28,7 @@ package Modules::Abstract;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -59,8 +59,8 @@ sub add{
 
 sub delete{
 
-	use iMSCP::Servers;
-	use iMSCP::Addons;
+	use Selity::Servers;
+	use Selity::Addons;
 
 	my $self		= shift;
 	$self->{mode}	= 'del';
@@ -75,8 +75,8 @@ sub restore{
 
 sub disable{
 
-	use iMSCP::Servers;
-	use iMSCP::Addons;
+	use Selity::Servers;
+	use Selity::Addons;
 
 	my $self		= shift;
 	$self->{mode}	= 'disable';
@@ -87,18 +87,18 @@ sub disable{
 
 sub runAllSteps{
 
-	use iMSCP::Servers;
-	use iMSCP::Addons;
+	use Selity::Servers;
+	use Selity::Addons;
 
 	my $self		= shift;
 	my $rs = 0;
 
-	@{$self->{Addons}}	= iMSCP::Addons->new()->get();
+	@{$self->{Addons}}	= Selity::Addons->new()->get();
 	unless(scalar @{$self->{Addons}}){
 		error("Can not get addons list");
 		return 1;
 	}
-	@{$self->{Servers}}	= iMSCP::Servers->new()->get();
+	@{$self->{Servers}}	= Selity::Servers->new()->get();
 	unless(scalar @{$self->{Servers}}){
 		error("Can not get servers list");
 		return 1;
@@ -156,16 +156,16 @@ sub runStep{
 
 
 sub testCert{
-	use iMSCP::File;
+	use Selity::File;
 	use Modules::openssl;
 
 	my $self		= shift;
 	my $dmn_name	= shift;
 	my $rs			= 0;
-	my $certPath	= "$main::imscpConfig{GUI_ROOT_DIR}/data/certs";
+	my $certPath	= "$main::selityConfig{GUI_ROOT_DIR}/data/certs";
 	my $certFile	= "$certPath/$dmn_name.pem";
 
-	Modules::openssl->new()->{openssl_path}				= $main::imscpConfig{'CMD_OPENSSL'};
+	Modules::openssl->new()->{openssl_path}				= $main::selityConfig{'CMD_OPENSSL'};
 	Modules::openssl->new()->{cert_path}				= $certFile;
 	Modules::openssl->new()->{intermediate_cert_path}	= $certFile;
 	Modules::openssl->new()->{key_path}					= $certFile;

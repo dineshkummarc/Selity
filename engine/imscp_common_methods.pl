@@ -41,9 +41,9 @@ no warnings 'once';
 
 # Global variables;
 
-$main::cc_stdout = '/tmp/imscp-cc.stdout';
+$main::cc_stdout = '/tmp/selity-cc.stdout';
 
-$main::cc_stderr = '/tmp/imscp-cc.stderr';
+$main::cc_stderr = '/tmp/selity-cc.stderr';
 
 $main::el_sep = "\t#\t";
 
@@ -86,7 +86,7 @@ $main::db = undef;
 
 $main::use_crypted_pwd = undef;
 
-$main::master_name = 'imscp-rqst-mngr';
+$main::master_name = 'selity-rqst-mngr';
 
 %main::cfg = ();
 
@@ -1486,9 +1486,9 @@ sub lock_system {
 	0;
 }
 
-sub connect_imscp_daemon {
+sub connect_selity_daemon {
 
-	push_el(\@main::el, 'connect_imscp_daemon()', 'Starting...');
+	push_el(\@main::el, 'connect_selity_daemon()', 'Starting...');
 
 	my $fd = IO::Socket::INET -> new(
 		Proto => 'tcp',
@@ -1500,14 +1500,14 @@ sub connect_imscp_daemon {
 
 		push_el(
 			\@main::el,
-			'connect_imscp_daemon()',
+			'connect_selity_daemon()',
 			"[ERROR] Can't connect to I-MSCP license daemon !"
 		);
 
 		return (-1, '');
 	}
 
-	push_el(\@main::el, 'connect_imscp_daemon()', 'Ending...');
+	push_el(\@main::el, 'connect_selity_daemon()', 'Ending...');
 
 	return (0, $fd);
 }
@@ -1566,22 +1566,22 @@ sub send_line {
 	return (0, '');
 }
 
-sub close_imscp_daemon {
+sub close_selity_daemon {
 
-	push_el(\@main::el, 'close_imscp_daemon()', 'Starting...');
+	push_el(\@main::el, 'close_selity_daemon()', 'Starting...');
 
 	my ($fd) = @_;
 
 	close($fd);
 
-	push_el(\@main::el, 'close_imscp_daemon()', 'Ending...');
+	push_el(\@main::el, 'close_selity_daemon()', 'Ending...');
 }
 
 sub license_request {
 
 	push_el(\@main::el, 'license_query()', 'Starting...');
 
-	my ($rs, $rdata) = connect_imscp_daemon();
+	my ($rs, $rdata) = connect_selity_daemon();
 	return ($rs, $rdata) if ($rs != 0);
 
 	my $fd = $rdata;
@@ -1624,7 +1624,7 @@ sub license_request {
 	($rs, $rdata) = send_line($fd, "bye\r\n");
 	($rs, $rdata) = recv_line($fd);
 
-	close_imscp_daemon($fd);
+	close_selity_daemon($fd);
 
 	push_el(\@main::el, 'license_query()', 'Ending...');
 
@@ -1757,7 +1757,7 @@ sub setup_main_vars {
 # global database variables and redefines the DSN.
 #
 # @param [scalar $file_name filename from where the configuration must be loaded]
-# Default value is the main i-MSCP configuration file (imscp.conf)
+# Default value is the main i-MSCP configuration file (selity.conf)
 # @return int 0 on success, 1 otherwise
 #
 sub get_conf {
@@ -1829,7 +1829,7 @@ sub set_conf_val {
 }
 
 ################################################################################
-# Store all cached configuration parameters in the imscp.conf file
+# Store all cached configuration parameters in the selity.conf file
 #
 # This function updates the configuration settings to a file with those stored
 # in the global $main::cfg_reg hash . Only parameters that have a different
@@ -1841,7 +1841,7 @@ sub set_conf_val {
 # not exist in the configuration file.
 #
 # @param [scalar optional filename where the configuration must be stored]
-# Default value is the main i-MSCP configuration file (imscp.conf)
+# Default value is the main i-MSCP configuration file (selity.conf)
 # @return int 0 on success, 1 otherwise
 #
 sub store_conf {
@@ -2299,9 +2299,9 @@ sub sort_domains {
 ## SN tag. In case  where the SN tag was never generated, $wrkFile should
 ## contains the prepared SN tag like:
 ##
-## ; dmn [imscp.net] timestamp entry BEGIN.
+## ; dmn [selity.net] timestamp entry BEGIN.
 ##                {TIMESTAMPS}      ; Serial
-## ; dmn [imscp.net] timestamp entry END.
+## ; dmn [selity.net] timestamp entry END.
 ##
 ## @author  Laurent Declercq <laurent.declercq@i-mscp.net>
 ## @since   1.0.7

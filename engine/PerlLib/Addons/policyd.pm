@@ -29,7 +29,7 @@ package Addons::policyd;
 use strict;
 use warnings;
 use Data::Dumper;
-use iMSCP::Debug;
+use Selity::Debug;
 
 use vars qw/@ISA/;
 
@@ -40,7 +40,7 @@ sub _init{
 
 	my $self				= shift;
 
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/policyd";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/policyd";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 	$self->{tplDir}	= "$self->{cfgDir}/parts";

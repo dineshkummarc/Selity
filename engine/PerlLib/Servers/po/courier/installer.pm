@@ -28,9 +28,9 @@ package Servers::po::courier::installer;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::File;
-use iMSCP::Execute;
+use Selity::Debug;
+use Selity::File;
+use Selity::Execute;
 
 use vars qw/@ISA/;
 
@@ -40,15 +40,15 @@ use Common::SingletonClass;
 sub _init{
 
 	my $self		= shift;
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/courier";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/courier";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/courier.data";
 	my $oldConf		= "$self->{cfgDir}/courier.old.data";
 
-	tie %self::courierConfig, 'iMSCP::Config','fileName' => $conf;
-	tie %self::courierOldConfig, 'iMSCP::Config','fileName' => $oldConf if -f $oldConf;
+	tie %self::courierConfig, 'Selity::Config','fileName' => $conf;
+	tie %self::courierOldConfig, 'Selity::Config','fileName' => $oldConf if -f $oldConf;
 
 	0;
 }
@@ -56,19 +56,19 @@ sub _init{
 sub migrateMailboxes{
 
 	if(
-		$main::imscpConfigOld{PO_SERVER}
+		$main::selityConfigOld{PO_SERVER}
 		&&
-		$main::imscpConfigOld{PO_SERVER} eq 'dovecot'
+		$main::selityConfigOld{PO_SERVER} eq 'dovecot'
 		&&
-		$main::imscpConfig{PO_SERVER}  eq 'courier'
+		$main::selityConfig{PO_SERVER}  eq 'courier'
 	){
-		use iMSCP::Execute;
+		use Selity::Execute;
 		use FindBin;
 		use Servers::mta;
 
-		my $mta	= Servers::mta->factory($main::imscpConfig{MTA_SERVER});
+		my $mta	= Servers::mta->factory($main::selityConfig{MTA_SERVER});
 		my ($rs, $stdout, $stderr);
-		my $binPath = "perl $main::imscpConfig{'ENGINE_ROOT_DIR'}/PerlVendor/courier-dovecot-migrate.pl";
+		my $binPath = "perl $main::selityConfig{'ENGINE_ROOT_DIR'}/PerlVendor/courier-dovecot-migrate.pl";
 		my $mailPath = "$mta->{'MTA_VIRTUAL_MAIL_DIR'}";
 
 		$rs = execute("$binPath --to-courier --convert --recursive $mailPath", \$stdout, \$stderr);
@@ -114,18 +114,18 @@ sub install{
 
 sub saveConf{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $rs		= 0;
-	my$file		= iMSCP::File->new(filename => "$self->{cfgDir}/courier.data");
+	my$file		= Selity::File->new(filename => "$self->{cfgDir}/courier.data");
 	my $cfg		= $file->get() or return 1;
 
-	$file = iMSCP::File->new(filename => "$self->{cfgDir}/courier.old.data");
+	$file = Selity::File->new(filename => "$self->{cfgDir}/courier.old.data");
 	$rs |= $file->set($cfg);
 	$rs |= $file->save();
 	$rs |= $file->mode(0640);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	$rs;
 }
@@ -137,7 +137,7 @@ sub bkpConfFile{
 	my $timestamp	= time;
 
 	if(-f "$self::courierConfig{'AUTHLIB_CONF_DIR'}/$cfgFile"){
-		my $file	= iMSCP::File->new(
+		my $file	= Selity::File->new(
 						filename => "$self::courierConfig{'AUTHLIB_CONF_DIR'}/$cfgFile"
 					);
 		if(!-f "$self->{bkpDir}/$cfgFile.system") {
@@ -155,8 +155,8 @@ sub authDaemon{
 	my $self = shift;
 	my ($rdata, $file);
 
-	# Loading the system file from /etc/imscp/backup
-	$file = iMSCP::File->new(filename => "$self->{bkpDir}/authdaemonrc.system");
+	# Loading the system file from /etc/selity/backup
+	$file = Selity::File->new(filename => "$self->{bkpDir}/authdaemonrc.system");
 	$rdata = $file->get();
 	if (!$rdata){
 		error("Error while reading $self->{bkpDir}/authdaemonrc.system");
@@ -169,11 +169,11 @@ sub authDaemon{
 	}
 
 	# Storing the new file in the working directory
-	$file = iMSCP::File->new(filename => "$self->{wrkDir}/authdaemonrc");
+	$file = Selity::File->new(filename => "$self->{wrkDir}/authdaemonrc");
 	$file->set($rdata) and return 1;
 	$file->save() and return 1;
 	$file->mode(0660) and return 1;
-	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+	$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 
 	# Installing the new file in the production directory
 	$file->copyFile("$self::courierConfig{'AUTHLIB_CONF_DIR'}") and return 1;
@@ -187,20 +187,20 @@ sub userDB{
 	my ($rdata, $file);
 
 	# Storing the new file in the working directory
-	iMSCP::File->new(filename => "$self->{cfgDir}/userdb")->copyFile("$self->{wrkDir}") and return 1;
+	Selity::File->new(filename => "$self->{cfgDir}/userdb")->copyFile("$self->{wrkDir}") and return 1;
 
 	# After build this file is world readable which is is bad
 	# Permissions are inherited by production file
-	$file = iMSCP::File->new(filename => "$self->{wrkDir}/userdb");
+	$file = Selity::File->new(filename => "$self->{wrkDir}/userdb");
 	$file->mode(0600) and return 1;
-	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+	$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 
 	# Installing the new file in the production directory
 	$file->copyFile("$self::courierConfig{'AUTHLIB_CONF_DIR'}") and return 1;
 
-	$file = iMSCP::File->new(filename => "$self::courierConfig{'AUTHLIB_CONF_DIR'}/userdb");
+	$file = Selity::File->new(filename => "$self::courierConfig{'AUTHLIB_CONF_DIR'}/userdb");
 	$file->mode(0600) and return 1;
-	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+	$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 
 	# Creating/Updating userdb.dat file from the contents of the userdb file
 	my ($rs, $stdout, $stderr);
@@ -224,10 +224,10 @@ sub sslConf{
 	for (($self::courierConfig{'COURIER_IMAP_SSL'}, $self::courierConfig{'COURIER_POP_SSL'})) {
 
 		#if ssl is not enabled
-		last if lc($main::imscpConfig{'SSL_ENABLED'}) ne 'yes';
+		last if lc($main::selityConfig{'SSL_ENABLED'}) ne 'yes';
 
 
-		$file = iMSCP::File->new(filename => "$self::courierConfig{'AUTHLIB_CONF_DIR'}/$_");
+		$file = Selity::File->new(filename => "$self::courierConfig{'AUTHLIB_CONF_DIR'}/$_");
 		#read file exit if can not read
 		$rdata = $file->get();
 		if (!$rdata){
@@ -238,16 +238,16 @@ sub sslConf{
 
 		#if ssl conf not in place we add if
 		if($rdata =~ m/^TLS_CERTFILE=/msg){
-			$rdata =~ s!^TLS_CERTFILE=.*$!TLS_CERTFILE=$main::imscpConfig{'GUI_CERT_DIR'}/$main::imscpConfig{'SERVER_HOSTNAME'}.pem!mg;
+			$rdata =~ s!^TLS_CERTFILE=.*$!TLS_CERTFILE=$main::selityConfig{'GUI_CERT_DIR'}/$main::selityConfig{'SERVER_HOSTNAME'}.pem!mg;
 		} else {
-			$rdata .= "TLS_CERTFILE=$main::imscpConfig{'GUI_CERT_DIR'}/$main::imscpConfig{'SERVER_HOSTNAME'}.pem";
+			$rdata .= "TLS_CERTFILE=$main::selityConfig{'GUI_CERT_DIR'}/$main::selityConfig{'SERVER_HOSTNAME'}.pem";
 		}
 
-		$file = iMSCP::File->new(filename => "$self->{wrkDir}/$_");
+		$file = Selity::File->new(filename => "$self->{wrkDir}/$_");
 		$rs |= $file->set($rdata);
 		$rs |= $file->save();
 		$rs |= $file->mode(0644);
-		$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+		$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 		# Installing the new file in the production directory
 		$rs |= $file->copyFile("$self::courierConfig{'AUTHLIB_CONF_DIR'}");
 	}
@@ -260,7 +260,7 @@ sub registerHooks{
 
 	use Servers::mta;
 
-	my $mta = Servers::mta->factory($main::imscpConfig{MTA_SERVER});
+	my $mta = Servers::mta->factory($main::selityConfig{MTA_SERVER});
 
 	$mta->registerPostHook(
 		'buildConf', sub { return $self->mtaConf(@_); }
@@ -274,10 +274,10 @@ sub mtaConf{
 	my $self	= shift;
 	my $content	= shift || '';
 
-	use iMSCP::Templator;
+	use Selity::Templator;
 	use Servers::mta;
 
-	my $mta	= Servers::mta->factory($main::imscpConfig{MTA_SERVER});
+	my $mta	= Servers::mta->factory($main::selityConfig{MTA_SERVER});
 
 	my $poBloc = getBloc(
 		"$mta->{commentChar} courier begin",

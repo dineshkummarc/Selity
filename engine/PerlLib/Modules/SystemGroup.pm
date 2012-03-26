@@ -28,8 +28,8 @@ package Modules::SystemGroup;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::Execute;
+use Selity::Debug;
+use Selity::Execute;
 
 use vars qw/@ISA/;
 
@@ -56,7 +56,7 @@ sub addSystemGroup{
 		my $systemGroup		= $self->{system} ? '-r' : '';
 
 		my  @cmd = (
-			"$main::imscpConfig{'CMD_GROUPADD'}",
+			"$main::selityConfig{'CMD_GROUPADD'}",
 			($^O !~ /bsd$/ ? "$systemGroup" : ''),	#system group
 			"\"$groupName\""							#group name
 		);
@@ -87,7 +87,7 @@ sub delSystemGroup{
 	if(getgrnam($groupName)){
 		my ($rs, $stdout, $stderr);
 		my  @cmd = (
-			"$main::imscpConfig{'CMD_GROUPDEL'}",
+			"$main::selityConfig{'CMD_GROUPDEL'}",
 			"\"$groupName\""
 		);
 		$rs = execute("@cmd", \$stdout, \$stderr);

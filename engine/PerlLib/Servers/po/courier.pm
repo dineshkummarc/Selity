@@ -28,7 +28,7 @@ package Servers::po::courier;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -39,12 +39,12 @@ use Common::SingletonClass;
 sub _init{
 
 	my $self		= shift;
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/courier";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/courier";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/courier.data";
-	tie %self::courierConfig, 'iMSCP::Config','fileName' => $conf;
+	tie %self::courierConfig, 'Selity::Config','fileName' => $conf;
 
 	$self->{$_} = $self::courierConfig{$_} foreach(keys %self::courierConfig);
 
@@ -100,7 +100,7 @@ sub start{
 	my $self = shift;
 	my ($rs, $stdout, $stderr);
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	# Reload config
 	$rs = execute("$self::courierConfig{'CMD_AUTHD'} start", \$stdout, \$stderr);
@@ -136,7 +136,7 @@ sub stop{
 	my $self = shift;
 	my ($rs, $stdout, $stderr);
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	# Reload config
 	$rs = execute("$self::courierConfig{'CMD_AUTHD'} stop", \$stdout, \$stderr);
@@ -173,7 +173,7 @@ sub restart{
 	my $rs		= 0;
 	my ($stdout, $stderr);
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	# Reload config
 	$rs |= execute("$self::courierConfig{'CMD_AUTHD'} restart", \$stdout, \$stderr);
@@ -201,8 +201,8 @@ sub restart{
 
 sub addMail{
 
-	use iMSCP::File;
-	use iMSCP::Execute;
+	use Selity::File;
+	use Selity::Execute;
 	use Servers::mta;
 	use Crypt::PasswdMD5;
 
@@ -225,7 +225,7 @@ sub addMail{
 	}
 
 	if(-f "$self->{AUTHLIB_CONF_DIR}/userdb"){
-		$rs |=	iMSCP::File->new(
+		$rs |=	Selity::File->new(
 					filename => "$self->{AUTHLIB_CONF_DIR}/userdb"
 				)->copyFile(
 					"$self->{bkpDir}/userdb.".time
@@ -243,7 +243,7 @@ sub addMail{
 		);
 
 		my $wrkFileName	= "$self->{wrkDir}/userdb";
-		my $wrkFileH	= iMSCP::File->new(filename => $mBoxHashFile);
+		my $wrkFileH	= Selity::File->new(filename => $mBoxHashFile);
 		my $wrkContent	= $wrkFileH->get();
 		return 1 unless defined $wrkContent;
 
@@ -261,13 +261,13 @@ sub addMail{
 		$wrkContent		.=	"$data->{MAIL_ADDR}\tuid=$uid|gid=$gid|home=$mailDir/".
 							"$data->{DMN_NAME}/$data->{MAIL_ACC}|shell=/bin/false|".
 							"systempw=$password|mail=$mailDir/$data->{DMN_NAME}/$data->{MAIL_ACC}\n";
-		$wrkFileH	= iMSCP::File->new(filename => $wrkFileName);
+		$wrkFileH	= Selity::File->new(filename => $wrkFileName);
 		$wrkFileH->set($wrkContent);
 		return 1 if $wrkFileH->save();
 		$rs |=	$wrkFileH->mode(0600);
 		$rs |=	$wrkFileH->owner(
-					$main::imscpConfig{ROOT_USER},
-					$main::imscpConfig{ROOT_GROUP}
+					$main::selityConfig{ROOT_USER},
+					$main::selityConfig{ROOT_GROUP}
 				);
 		$rs |= $wrkFileH->copyFile("$self->{AUTHLIB_CONF_DIR}/userdb");
 
@@ -281,8 +281,8 @@ sub addMail{
 
 sub delMail{
 
-	use iMSCP::File;
-	use iMSCP::Execute;
+	use Selity::File;
+	use Selity::Execute;
 
 	my $self = shift;
 	my $data = shift;
@@ -303,7 +303,7 @@ sub delMail{
 	}
 
 	if(-f "$self->{AUTHLIB_CONF_DIR}/userdb"){
-		$rs |=	iMSCP::File->new(
+		$rs |=	Selity::File->new(
 					filename => "$self->{AUTHLIB_CONF_DIR}/userdb"
 				)->copyFile(
 					"$self->{bkpDir}/userdb.".time
@@ -320,20 +320,20 @@ sub delMail{
 	);
 
 	my $wrkFileName	= "$self->{wrkDir}/userdb";
-	my $wrkFileH	= iMSCP::File->new(filename => $mBoxHashFile);
+	my $wrkFileH	= Selity::File->new(filename => $mBoxHashFile);
 	my $wrkContent	= $wrkFileH->get();
 	return 1 unless defined $wrkContent;
 
 	my $mailbox		= $data->{MAIL_ADDR};
 	$mailbox		=~ s/\./\\\./g;
 	$wrkContent		=~ s/^$mailbox\t[^\n]*\n//gmi;
-	$wrkFileH	= iMSCP::File->new(filename => $wrkFileName);
+	$wrkFileH	= Selity::File->new(filename => $wrkFileName);
 	$wrkFileH->set($wrkContent);
 	return 1 if $wrkFileH->save();
 	$rs |=	$wrkFileH->mode(0600);
 	$rs |=	$wrkFileH->owner(
-				$main::imscpConfig{ROOT_USER},
-				$main::imscpConfig{ROOT_GROUP}
+				$main::selityConfig{ROOT_USER},
+				$main::selityConfig{ROOT_GROUP}
 			);
 	$rs |= $wrkFileH->copyFile("$self->{AUTHLIB_CONF_DIR}/userdb");
 
@@ -346,29 +346,29 @@ sub delMail{
 
 sub getTraffic{
 
-	use iMSCP::Execute;
-	use iMSCP::File;
-	use iMSCP::Config;
+	use Selity::Execute;
+	use Selity::File;
+	use Selity::Config;
 	use Tie::File;
 
 	my $self		= shift;
 	my $who			= shift;
 	my $dbName		= "$self->{wrkDir}/log.db";
-	my $logFile		= "$main::imscpConfig{TRAFF_LOG_DIR}/mail.log";
-	my $wrkLogFile	= "$main::imscpConfig{LOG_DIR}/mail.po.log";
+	my $logFile		= "$main::selityConfig{TRAFF_LOG_DIR}/mail.log";
+	my $wrkLogFile	= "$main::selityConfig{LOG_DIR}/mail.po.log";
 	my ($rv, $rs, $stdout, $stderr);
 
 	##only if files was not aleady parsed this session
 	unless($self->{logDb}){
 		#use a small conf file to memorize last line readed and his content
-		tie %{$self->{logDb}}, 'iMSCP::Config','fileName' => $dbName, noerrors => 1;
+		tie %{$self->{logDb}}, 'Selity::Config','fileName' => $dbName, noerrors => 1;
 		##first use? we zero line and content
 		$self->{logDb}->{line}		= 0 unless $self->{logDb}->{line};
 		$self->{logDb}->{content}	= '' unless $self->{logDb}->{content};
 		my $lastLineNo	= $self->{logDb}->{line};
 		my $lastLine	= $self->{logDb}->{content};
 		##copy log file
-		$rs = iMSCP::File->new(filename => $logFile)->copyFile($wrkLogFile) if -f $logFile;
+		$rs = Selity::File->new(filename => $logFile)->copyFile($wrkLogFile) if -f $logFile;
 		#retunt 0 traffic if we fail
 		return 0 if $rs;
 		#link log file to array
@@ -385,7 +385,7 @@ sub getTraffic{
 		}
 
 		# Read log file
-		my $content = iMSCP::File->new(filename => $wrkLogFile)->get() || '';
+		my $content = Selity::File->new(filename => $wrkLogFile)->get() || '';
 
 		#IMAP
 		#Oct 15 12:56:42 daniel imapd: LOGOUT, user=ndmn@test1.eu.bogus, ip=[::ffff:192.168.1.2], headers=0, body=0, rcvd=172, sent=310, time=205
@@ -428,12 +428,12 @@ END{
 
 	my $endCode		= $?;
 	my $self		= Servers::po::courier->new();
-	my $wrkLogFile	= "$main::imscpConfig{LOG_DIR}/mail.po.log";
+	my $wrkLogFile	= "$main::selityConfig{LOG_DIR}/mail.po.log";
 	my $rs			= 0;
 
 	$rs |= $self->restart() if $self->{restart} && $self->{restart} eq 'yes';
 
-	$rs |= iMSCP::File->new(filename => $wrkLogFile)->delFile() if -f $wrkLogFile;
+	$rs |= Selity::File->new(filename => $wrkLogFile)->delFile() if -f $wrkLogFile;
 
 	$? = $endCode || $rs;
 }

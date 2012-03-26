@@ -28,7 +28,7 @@ package Addons::policyd::installer;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 
 use vars qw/@ISA/;
 
@@ -38,15 +38,15 @@ use Common::SingletonClass;
 sub _init{
 
 	my $self		= shift;
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/policyd";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/policyd";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/policyd.data";
 	my $oldConf		= "$self->{cfgDir}/policyd.old.data";
 
-	tie %self::policydConfig, 'iMSCP::Config','fileName' => $conf, noerrors => 1;
-	tie %self::policydOldConfig, 'iMSCP::Config','fileName' => $oldConf, noerrors => 1 if -f $oldConf;
+	tie %self::policydConfig, 'Selity::Config','fileName' => $conf, noerrors => 1;
+	tie %self::policydOldConfig, 'Selity::Config','fileName' => $oldConf, noerrors => 1 if -f $oldConf;
 
 	0;
 }
@@ -66,20 +66,20 @@ sub install{
 
 sub saveConf{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
-	my $rootUsr	= $main::imscpConfig{'ROOT_USER'};
-	my $rootGrp	= $main::imscpConfig{'ROOT_GROUP'};
+	my $rootUsr	= $main::selityConfig{'ROOT_USER'};
+	my $rootGrp	= $main::selityConfig{'ROOT_GROUP'};
 	my $rs		= 0;
 
-	my $file	= iMSCP::File->new(filename => "$self->{cfgDir}/policyd.data");
+	my $file	= Selity::File->new(filename => "$self->{cfgDir}/policyd.data");
 	my $cfg		= $file->get();
 	return 1 unless $cfg;
 	$rs			|= $file->mode(0640);
 	$rs			|= $file->owner($rootUsr, $rootGrp);
 
-	$file	= iMSCP::File->new(filename => "$self->{cfgDir}/policyd.old.data");
+	$file	= Selity::File->new(filename => "$self->{cfgDir}/policyd.old.data");
 	$rs		|= $file->set($cfg);
 	$rs		|= $file->save();
 	$rs		|= $file->mode(0640);
@@ -99,7 +99,7 @@ sub bkpConfFile{
 	my ($name,$path,$suffix) = fileparse($cfgFile);
 
 	if(-f $cfgFile){
-		my $file	= iMSCP::File->new(filename => $cfgFile);
+		my $file	= Selity::File->new(filename => $cfgFile);
 		$file->copyFile("$self->{bkpDir}/$name$suffix.$timestamp") and return 1;
 	}
 
@@ -108,7 +108,7 @@ sub bkpConfFile{
 
 sub askRBL{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 
 	my $rs;
 
@@ -116,7 +116,7 @@ sub askRBL{
 		if(defined $self::policydOldConfig{'DNSBL_CHECKS_ONLY'} && $self::policydOldConfig{'DNSBL_CHECKS_ONLY'} =~ /0|1/){
 			$self::policydConfig{'DNSBL_CHECKS_ONLY'} = $self::policydOldConfig{'DNSBL_CHECKS_ONLY'};
 		} else {
-			while (! ($rs = iMSCP::Dialog->factory()->radiolist(
+			while (! ($rs = Selity::Dialog->factory()->radiolist(
 				"Do you want to disable additional checks for MTA, HELO and domain?\n\n".
 				"YES (may cause some spam messages to be accepted).\n\n".
 				"NO (default, some misconfigured mail service providers\n\t\t\twill be treat as spam and messages will be rejected).\n",
@@ -133,7 +133,7 @@ sub askRBL{
 
 sub buildConf{
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 	use File::Basename;
 
 	my $self		= shift;
@@ -153,13 +153,13 @@ sub buildConf{
 		return $rs if $rs;
 	}
 
-	my $file	= iMSCP::File->new(filename => $self::policydConfig{POLICYD_CONF_FILE});
+	my $file	= Selity::File->new(filename => $self::policydConfig{POLICYD_CONF_FILE});
 	my $cfgTpl	= $file->get();
 	return 1 unless $cfgTpl;
 
 	$cfgTpl =~ s/^\s{0,}\$dnsbl_checks_only\s{0,}=.*$/\n   \$dnsbl_checks_only = $self::policydConfig{DNSBL_CHECKS_ONLY};          # 1: ON, 0: OFF (default)/mi;
 
-	$file = iMSCP::File->new(filename => "$self->{wrkDir}/$name$suffix");
+	$file = Selity::File->new(filename => "$self->{wrkDir}/$name$suffix");
 	$rs |= $file->set($cfgTpl);
 	$rs |= $file->save();
 	$rs |= $file->mode(0640);

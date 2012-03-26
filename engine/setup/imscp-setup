@@ -34,11 +34,11 @@ use lib "$FindBin::Bin/../PerlVendor";
 
 umask(027);
 
-use iMSCP::Debug;
-use iMSCP::Boot;
-use iMSCP::Dialog;
+use Selity::Debug;
+use Selity::Boot;
+use Selity::Dialog;
 
-newDebug('imscp-setup.log');
+newDebug('selity-setup.log');
 
 our $noprompt;
 
@@ -48,9 +48,9 @@ my $opt = ''; # option variable with default value (false)
 GetOptions ('noprompt' => \$noprompt);
 
 
-iMSCP::Dialog->factory()->set('exitOnPrompt', 'yes') if $noprompt;
+Selity::Dialog->factory()->set('exitOnPrompt', 'yes') if $noprompt;
 
-require "$FindBin::Bin/imscp-setup-methods.pl";
+require "$FindBin::Bin/selity-setup-methods.pl";
 
 
 ################################################################################
@@ -62,13 +62,13 @@ sub setup_shut_down {
 
 	return 0 if $main::noprompt;
 
-	iMSCP::Dialog->factory()->msgbox(
+	Selity::Dialog->factory()->msgbox(
 					"\n
 					\\Z1Congratulations!!!\\Zn
 
-					You installed i-MSCP '$main::imscpConfig{'Version'}' successfully!\n\n
+					You installed i-MSCP '$main::selityConfig{'Version'}' successfully!\n\n
 
-					Please type $main::imscpConfig{'BASE_SERVER_VHOST_PREFIX'}$main::imscpConfig{'BASE_SERVER_VHOST'} in your browser and log in with your Administrator Account to use i-MSCP."
+					Please type $main::selityConfig{'BASE_SERVER_VHOST_PREFIX'}$main::selityConfig{'BASE_SERVER_VHOST'} in your browser and log in with your Administrator Account to use i-MSCP."
 	);
 
 	0;

@@ -36,8 +36,8 @@ package library::ubuntu_autoinstall;
 use strict;
 use warnings;
 
-use iMSCP::Debug;
-use iMSCP::Execute qw/execute/;
+use Selity::Debug;
+use Selity::Execute qw/execute/;
 
 use vars qw/@ISA/;
 @ISA = ('Common::SingletonClass', 'library::debian_autoinstall');
@@ -46,7 +46,7 @@ use library::debian_autoinstall;
 
 # Initializer.
 #
-# @param self $self iMSCP::debian_autoinstall instance
+# @param self $self Selity::debian_autoinstall instance
 # return int 0
 sub _init {
 	debug('Starting...');

@@ -36,10 +36,10 @@ package library::debian_autoinstall;
 use strict;
 use warnings;
 
-use iMSCP::Debug;
+use Selity::Debug;
 use Symbol;
-use iMSCP::Execute qw/execute/;
-use iMSCP::Dialog;
+use Selity::Execute qw/execute/;
+use Selity::Dialog;
 
 use vars qw/@ISA/;
 @ISA = ('Common::SingletonClass');
@@ -47,7 +47,7 @@ use Common::SingletonClass;
 
 # Initializer.
 #
-# @param self $self iMSCP::debian_autoinstall instance
+# @param self $self Selity::debian_autoinstall instance
 # @return int 0
 sub _init {
 	debug('Starting...');
@@ -62,7 +62,7 @@ sub _init {
 
 # Process pre-build tasks.
 #
-# @param self $self iMSCP::debian_autoinstall instance
+# @param self $self Selity::debian_autoinstall instance
 # @return int 0 on success, other on failure
 sub preBuild {
 	debug('Starting...');
@@ -76,7 +76,7 @@ sub preBuild {
 	$rs = $self->preRequish();
 	return $rs if $rs;
 
-	$self->loadOldImscpConfigFile();
+	$self->loadOldSelityConfigFile();
 
 	$rs = $self->UpdateAptSourceList();
 	return $rs if $rs;
@@ -105,7 +105,7 @@ sub preBuild {
 sub updateSystemPackagesIndex {
 	debug('Starting...');
 
-	iMSCP::Dialog->factory()->infobox('Updating system packages index');
+	Selity::Dialog->factory()->infobox('Updating system packages index');
 
 	my ($rs, $stdout, $stderr);
 
@@ -121,14 +121,14 @@ sub updateSystemPackagesIndex {
 
 # Installs pre-required packages.
 #
-# @param self $self iMSCP::debian_autoinstall instance
+# @param self $self Selity::debian_autoinstall instance
 # @return int 0 on success, other on failure
 sub preRequish {
 	debug('Starting...');
 
 	my $self = shift;
 
-	iMSCP::Dialog->factory()->infobox('Installing pre-required packages');
+	Selity::Dialog->factory()->infobox('Installing pre-required packages');
 
 	my($rs, $stderr);
 
@@ -138,7 +138,7 @@ sub preRequish {
 	return $rs if $rs;
 
 	# Force dialog now
-	iMSCP::Dialog->reset();
+	Selity::Dialog->reset();
 
 	debug('Ending...');
 	0;
@@ -147,17 +147,17 @@ sub preRequish {
 # Load old i-MSCP main configuration file.
 #
 # @return int 0
-sub loadOldImscpConfigFile {
+sub loadOldSelityConfigFile {
 
 	debug('Starting...');
 
-	use iMSCP::Config;
+	use Selity::Config;
 
-	$main::imscpConfigOld = {};
+	$main::selityConfigOld = {};
 
-	my $oldConf = "$main::defaultConf{'CONF_DIR'}/imscp.old.conf";
+	my $oldConf = "$main::defaultConf{'CONF_DIR'}/selity.old.conf";
 
-	tie %main::imscpConfigOld, 'iMSCP::Config', 'fileName' => $oldConf, noerrors => 1 if (-f $oldConf);
+	tie %main::selityConfigOld, 'Selity::Config', 'fileName' => $oldConf, noerrors => 1 if (-f $oldConf);
 
 	debug('Ending...');
 	0;
@@ -169,18 +169,18 @@ sub loadOldImscpConfigFile {
 # packages availability. If non-free section is not already enabled, this method try
 # to find in on the remote repository and add it to the current Debian repository URI.
 #
-# @param self $self iMSCP::debian_autoinstall instance
+# @param self $self Selity::debian_autoinstall instance
 # @return int 0 on success, other on failure
 sub UpdateAptSourceList {
 	debug('Starting...');
 
 	my $self = shift;
 
-	use iMSCP::File;
+	use Selity::File;
 
-	iMSCP::Dialog->factory()->infobox('Processing apt sources list');
+	Selity::Dialog->factory()->infobox('Processing apt sources list');
 
-	my $file = iMSCP::File->new(filename => '/etc/apt/sources.list');
+	my $file = Selity::File->new(filename => '/etc/apt/sources.list');
 
 	$file->copyFile('/etc/apt/sources.list.bkp') unless( -f '/etc/apt/sources.list.bkp');
 	my $content = $file->get();
@@ -234,13 +234,13 @@ sub UpdateAptSourceList {
 
 # Reads packages list to be installed.
 #
-# @param self $self iMSCP::debian_autoinstall instance
+# @param self $self Selity::debian_autoinstall instance
 # @return int 0 on success, other on failure
 sub readPackagesList {
 	debug('Starting...');
 
 	my $self = shift;
-	my $SO = iMSCP::SO->new();
+	my $SO = Selity::SO->new();
 	my $confile = "$FindBin::Bin/docs/" . ucfirst($SO->{Distribution}) . "/" .
 		lc($SO->{Distribution}) . "-packages-" . lc($SO->{CodeName}) . ".xml";
 
@@ -272,7 +272,7 @@ sub readPackagesList {
 
 		for (my $index = $#{$alternatives{$_}}; $index >= 0; --$index ){
 			my $defServer = @{$alternatives{$_}}[$index];
-			my $oldServer = $main::imscpConfigOld{uc($_) . '_SERVER'};
+			my $oldServer = $main::selityConfigOld{uc($_) . '_SERVER'};
 
 			if($@){
 				error("$@");
@@ -287,7 +287,7 @@ sub readPackagesList {
 		}
 
 		do{
-			$rs = iMSCP::Dialog->factory()->radiolist(
+			$rs = Selity::Dialog->factory()->radiolist(
 					"Choose server $_",
 					@{$alternatives{$_}},
 					'Not Used'
@@ -316,7 +316,7 @@ sub readPackagesList {
 	foreach(split(" ", $self->{require_server})){
 		next unless $_;
 		unless( exists $self->{userSelection}->{$_} && $self->{userSelection}->{$_} ne 'no') {
-			iMSCP::Dialog->factory()->msgbox("Following selection is not valid, require $_ server but was not selected");
+			Selity::Dialog->factory()->msgbox("Following selection is not valid, require $_ server but was not selected");
 			return -1;
 		}
 	}
@@ -327,14 +327,14 @@ sub readPackagesList {
 
 # Install Debian packages list required by i-MSCP.
 #
-# @param self $self iMSCP::debian_autoinstall instance
+# @param self $self Selity::debian_autoinstall instance
 # @return in 0 on success, other on failure
 sub installPackagesList {
 	debug('Starting...');
 
 	my $self = shift;
 
-	iMSCP::Dialog->factory()->infobox('Installing needed packages');
+	Selity::Dialog->factory()->infobox('Installing needed packages');
 
 	my($rs, $stderr);
 
@@ -349,7 +349,7 @@ sub installPackagesList {
 
 # Remove Debian packages that might conflict with those required by i-MSCP.
 #
-# @param self $self iMSCP::debian_autoinstall instance
+# @param self $self Selity::debian_autoinstall instance
 # @return in 0 on success, other on failure
 sub removeNotNeeded {
 	debug('Starting...');
@@ -358,7 +358,7 @@ sub removeNotNeeded {
 
 	return 0 unless $self->{remove};
 
-	iMSCP::Dialog->factory()->infobox('Removing needed packages');
+	Selity::Dialog->factory()->infobox('Removing needed packages');
 
 	my($rs, $stderr);
 
@@ -373,7 +373,7 @@ sub removeNotNeeded {
 
 # Perfomr post-build tasks.
 #
-# @param self $self iMSCP::debian_autoinstall instance
+# @param self $self Selity::debian_autoinstall instance
 # @return in 0 on success, other on failure
 sub postBuild {
 	debug('Starting...');
@@ -382,8 +382,8 @@ sub postBuild {
 
 	my $x = qualify_to_ref("SYSTEM_CONF", 'main');
 
-	my $nextConf = $$$x . '/imscp.conf';
-	tie %main::nextConf, 'iMSCP::Config', 'fileName' => $nextConf;
+	my $nextConf = $$$x . '/selity.conf';
+	tie %main::nextConf, 'Selity::Config', 'fileName' => $nextConf;
 
 	$main::nextConf{uc($_) . "_SERVER"} = lc($self->{userSelection}->{$_}) foreach(keys %{$self->{userSelection}});
 
@@ -419,7 +419,7 @@ sub _clean {
 # Parse hash.
 #
 # @access private
-# @param self $self iMSCP::debian_autoinstall instance
+# @param self $self Selity::debian_autoinstall instance
 # @param HASH $hash Hash to be parsed
 # @return void
 sub _parseHash {
@@ -442,7 +442,7 @@ sub _parseHash {
 # Parse array
 #
 # @access private
-# @param self $self iMSCP::debian_autoinstall instance
+# @param self $self Selity::debian_autoinstall instance
 # @param ARRAY $array Array to be parsed
 # @return void
 sub _parseArray {

@@ -28,7 +28,7 @@ package Modules::Htgroup;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -80,7 +80,7 @@ sub loadData{
 		WHERE `id` = ?
 	";
 
-	my $rdata = iMSCP::Database->factory()->doQuery('id', $sql, $self->{htgroupId}, $self->{htgroupId});
+	my $rdata = Selity::Database->factory()->doQuery('id', $sql, $self->{htgroupId}, $self->{htgroupId});
 
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 	error("No group in table htaccess_groups has id = $self->{htgroupId}") and return 1 unless(exists $rdata->{$self->{htgroupId}});
@@ -93,7 +93,7 @@ sub loadData{
 			"Orphan entry: ".Dumper($rdata->{$self->{htgroupId}}),
 			$self->{htgroupId}
 		);
-		my $rdata = iMSCP::Database->factory()->doQuery('update', @sql);
+		my $rdata = Selity::Database->factory()->doQuery('update', @sql);
 		return 1;
 	}
 
@@ -132,7 +132,7 @@ sub process{
 		}
 	}
 
-	my $rdata = iMSCP::Database->factory()->doQuery('delete', @sql);
+	my $rdata = Selity::Database->factory()->doQuery('delete', @sql);
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 	$rs;

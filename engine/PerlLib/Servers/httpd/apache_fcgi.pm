@@ -28,7 +28,7 @@ package Servers::httpd::apache_fcgi;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -43,13 +43,13 @@ sub _init{
 	$self->{masterConf}		= '00_master.conf';
 	$self->{masterSSLConf}	= '00_master_ssl.conf';
 
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/apache";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/apache";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 	$self->{tplDir}	= "$self->{cfgDir}/parts";
 
 	my $conf		= "$self->{cfgDir}/apache.data";
-	tie %self::apacheConfig, 'iMSCP::Config','fileName' => $conf;
+	tie %self::apacheConfig, 'Selity::Config','fileName' => $conf;
 
 	$self->{tplValues}->{$_} = $self::apacheConfig{$_} foreach(keys %self::apacheConfig);
 
@@ -155,7 +155,7 @@ sub registerPostHook{
 
 sub enableSite{
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	my $self	= shift;
 	my $sites	= shift;
@@ -177,7 +177,7 @@ sub enableSite{
 
 sub disableSite{
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	my $self	= shift;
 	my $sites	= shift;
@@ -199,7 +199,7 @@ sub disableSite{
 
 sub enableMod{
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	my $self	= shift;
 	my $mod		= shift;
@@ -215,7 +215,7 @@ sub enableMod{
 
 sub disableMod{
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	my $self	= shift;
 	my $mod		= shift;
@@ -242,7 +242,7 @@ sub start{
 	my $self			= shift;
 	my ($rs, $stdout, $stderr);
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	# Reload apache config
 	$rs = execute("$self->{tplValues}->{CMD_HTTPD} start", \$stdout, \$stderr);
@@ -260,7 +260,7 @@ sub stop{
 	my $self			= shift;
 	my ($rs, $stdout, $stderr);
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	# Reload apache config
 	$rs = execute("$self->{tplValues}->{CMD_HTTPD} stop", \$stdout, \$stderr);
@@ -278,7 +278,7 @@ sub restart{
 	my $self			= shift;
 	my ($rs, $stdout, $stderr);
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	# Reload apache config
 	$rs = execute("$self->{tplValues}->{CMD_HTTPD} ".($self->{forceRestart} ? 'restart' : 'reload'), \$stdout, \$stderr);
@@ -293,7 +293,7 @@ sub restart{
 
 sub buildConf($ $ $){
 
-	use iMSCP::Templator;
+	use Selity::Templator;
 
 	my $self		= shift;
 	my $cfgTpl		= shift;
@@ -347,7 +347,7 @@ sub buildConf($ $ $){
 sub buildConfFile{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $file	= shift;
@@ -359,7 +359,7 @@ sub buildConfFile{
 
 	$file = "$self->{cfgDir}/$file" unless -d $directories && $directories ne './';
 
-	my $fileH = iMSCP::File->new(filename => $file);
+	my $fileH = Selity::File->new(filename => $file);
 	my $cfgTpl = $fileH->get();
 	error("Empty config template $file...") unless $cfgTpl;
 	return 1 unless $cfgTpl;
@@ -399,7 +399,7 @@ sub buildConfFile{
 		return undef if $@;
 	}
 
-	$fileH = iMSCP::File->new(
+	$fileH = Selity::File->new(
 				filename => ($option->{destination}
 				?
 				$option->{destination} :
@@ -409,8 +409,8 @@ sub buildConfFile{
 	$fileH->save() and return 1;
 	$fileH->mode($option->{mode} ? $option->{mode} : 0644) and return 1;
 	$fileH->owner(
-			$option->{user}		? $option->{user}	: $main::imscpConfig{'ROOT_USER'},
-			$option->{group}	? $option->{group}	: $main::imscpConfig{'ROOT_GROUP'}
+			$option->{user}		? $option->{user}	: $main::selityConfig{'ROOT_USER'},
+			$option->{group}	? $option->{group}	: $main::selityConfig{'ROOT_GROUP'}
 	) and return 1;
 
 	0;
@@ -419,7 +419,7 @@ sub buildConfFile{
 sub installConfFile{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $file	= shift;
@@ -431,12 +431,12 @@ sub installConfFile{
 
 	$file = "$self->{wrkDir}/$file" unless -d $directories && $directories ne './';
 
-	my $fileH = iMSCP::File->new(filename => $file);
+	my $fileH = Selity::File->new(filename => $file);
 
 	$fileH->mode($option->{mode} ? $option->{mode} : 0644) and return 1;
 	$fileH->owner(
-			$option->{user}		? $option->{user}	: $main::imscpConfig{'ROOT_USER'},
-			$option->{group}	? $option->{group}	: $main::imscpConfig{'ROOT_GROUP'}
+			$option->{user}		? $option->{user}	: $main::selityConfig{'ROOT_USER'},
+			$option->{group}	? $option->{group}	: $main::selityConfig{'ROOT_GROUP'}
 	) and return 1;
 
 	$fileH->copyFile(
@@ -470,7 +470,7 @@ sub getRunningGroup{
 
 sub removeSection{
 
-	use iMSCP::Templator;
+	use Selity::Templator;
 
 	my $self	= shift;
 	my $section	= shift;
@@ -486,13 +486,13 @@ sub removeSection{
 
 sub buildPHPini{
 
-	use iMSCP::Rights;
+	use Selity::Rights;
 
 	my $self		= shift;
 	my $data		= shift;
 	my $rs			= 0;
 	my $php5Dir		= "$self::apacheConfig{PHP_STARTER_DIR}/$data->{DMN_NAME}";
-	my $fileSource	= "$main::imscpConfig{CONF_DIR}/fcgi/parts/php5-fcgi-starter.tpl";
+	my $fileSource	= "$main::selityConfig{CONF_DIR}/fcgi/parts/php5-fcgi-starter.tpl";
 	my $destFile	= "$php5Dir/php5-fcgi-starter";
 
 	$rs |= $self->buildConfFile($fileSource, {destination => $destFile});
@@ -504,7 +504,7 @@ sub buildPHPini{
 		}
 	);
 
-	$fileSource	= "$main::imscpConfig{CONF_DIR}/fcgi/parts/php5/php.ini";
+	$fileSource	= "$main::selityConfig{CONF_DIR}/fcgi/parts/php5/php.ini";
 	$destFile	= "$php5Dir/php5/php.ini";
 
 	$rs |= $self->buildConfFile($fileSource, {destination => $destFile});
@@ -523,8 +523,8 @@ sub buildPHPini{
 ##			DOMAIN LEVEL
 sub addUser{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 
 	my $self		= shift;
 	my $data		= shift;
@@ -533,8 +533,8 @@ sub addUser{
 	debug("Data: ". (Dumper $data));
 
 	my $hDir		= $data->{HOME_DIR};
-	my $rootUser	= $main::imscpConfig{ROOT_USER};
-	my $rootGroup	= $main::imscpConfig{ROOT_GROUP};
+	my $rootUser	= $main::selityConfig{ROOT_USER};
+	my $rootGroup	= $main::selityConfig{ROOT_GROUP};
 	my $apacheGroup	= $self::apacheConfig{APACHE_GROUP};
 	my $php5Dir		= "$self::apacheConfig{PHP_STARTER_DIR}/$data->{DMN_NAME}";
 	my ($rs, $stdout, $stderr);
@@ -552,7 +552,7 @@ sub addUser{
 	$self->{data} = $data;
 
 	########################## START MOD CBAND SECTION ##############################
-	$rs |= iMSCP::File->new(
+	$rs |= Selity::File->new(
 			filename => "$self->{cfgDir}/00_modcband.conf"
 	)->copyFile(
 		"$self->{bkpDir}/00_modcband.conf.". time
@@ -566,7 +566,7 @@ sub addUser{
 		"$self->{cfgDir}/00_modcband.conf"
 	);
 
-	my $file	= iMSCP::File->new(filename => $filename);
+	my $file	= Selity::File->new(filename => $filename);
 	my $content	= $file->get();
 
 	unless($content){
@@ -590,7 +590,7 @@ sub addUser{
 		$entry		= $self->buildConf($bTag.$entry.$eTag);
 		$content	= replaceBloc($bTag, $eTag, $entry, $content, 'yes');
 
-		$file = iMSCP::File->new(filename => "$self->{wrkDir}/00_modcband.conf");
+		$file = Selity::File->new(filename => "$self->{wrkDir}/00_modcband.conf");
 		$file->set($content);
 		$rs = 1 if $file->save();
 
@@ -599,7 +599,7 @@ sub addUser{
 		$rs |= $self->enableSite("00_modcband.conf");
 
 		unless( -f "$self::apacheConfig{SCOREBOARDS_DIR}/$data->{USER}"){
-			$rs	|=	iMSCP::File->new(
+			$rs	|=	Selity::File->new(
 						filename => "$self::apacheConfig{SCOREBOARDS_DIR}/$data->{USER}"
 					)->save();
 		}
@@ -612,7 +612,7 @@ sub addUser{
 			["$php5Dir",		$data->{USER},	$data->{GROUP},	0555],
 			["$php5Dir/php5",	$data->{USER},	$data->{GROUP},	0550]
 		){
-			$rs |= iMSCP::Dir->new( dirname => $_->[0])->make({
+			$rs |= Selity::Dir->new( dirname => $_->[0])->make({
 				user	=> $_->[1],
 				group	=> $_->[2],
 				mode	=> $_->[3]
@@ -625,7 +625,7 @@ sub addUser{
 	##################### START COMMON FILES IN USER FOLDER #########################
 
 	#ERROR DOCS
-	$rs |= execute("cp -vnRT $main::imscpConfig{GUI_ROOT_DIR}/public/errordocs $hDir/errors", \$stdout, \$stderr);
+	$rs |= execute("cp -vnRT $main::selityConfig{GUI_ROOT_DIR}/public/errordocs $hDir/errors", \$stdout, \$stderr);
 	debug("$stdout") if $stdout;
 	error("$stderr") if $stderr;
 
@@ -644,7 +644,7 @@ sub addUser{
 		"$hDir/$self::apacheConfig{HTACCESS_USERS_FILE_NAME}",
 		"$hDir/$self::apacheConfig{HTACCESS_GROUPS_FILE_NAME}"
 	){
-		my $fileH	=	iMSCP::File->new(filename => $_);
+		my $fileH	=	Selity::File->new(filename => $_);
 		$rs		|=	$fileH->save() unless( -f $_);
 		$rs		|=	$fileH->mode(0640);
 	}
@@ -658,9 +658,9 @@ sub addUser{
 
 sub delUser{
 
-	use iMSCP::File;
-	use iMSCP::Dir;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Dir;
+	use Selity::Templator;
 
 	my $self		= shift;
 	my $data		= shift;
@@ -682,7 +682,7 @@ sub delUser{
 	$self->{data} = $data;
 
 	########################## START MOD CBAND SECTION ##############################
-	$rs |= iMSCP::File->new(
+	$rs |= Selity::File->new(
 			filename => "$self->{cfgDir}/00_modcband.conf"
 	)->copyFile(
 		"$self->{bkpDir}/00_modcband.conf.". time
@@ -696,7 +696,7 @@ sub delUser{
 		"$self->{cfgDir}/00_modcband.conf"
 	);
 
-	my $file	= iMSCP::File->new(filename => $filename);
+	my $file	= Selity::File->new(filename => $filename);
 	my $content	= $file->get();
 	unless($content){
 		error("Can not read $filename");
@@ -707,7 +707,7 @@ sub delUser{
 
 		$content	= replaceBloc($bUTag, $eUTag, '', $content, undef);
 
-		$file = iMSCP::File->new(filename => "$self->{wrkDir}/00_modcband.conf");
+		$file = Selity::File->new(filename => "$self->{wrkDir}/00_modcband.conf");
 		$file->set($content);
 		$rs |= $file->save();
 
@@ -716,7 +716,7 @@ sub delUser{
 		$rs |= $self->enableSite("00_modcband.conf");
 
 		if( -f "$self::apacheConfig{SCOREBOARDS_DIR}/$data->{USER}"){
-			$rs |= iMSCP::File->new(
+			$rs |= Selity::File->new(
 				filename => "$self::apacheConfig{SCOREBOARDS_DIR}/$data->{USER}"
 			)->delFile();
 		}
@@ -727,7 +727,7 @@ sub delUser{
 		"$self::apacheConfig{PHP_STARTER_DIR}/$data->{DMN_NAME}",
 		$hDir,
 	){
-		$rs |= iMSCP::Dir->new(dirname => $_)->remove() if -d $_;
+		$rs |= Selity::Dir->new(dirname => $_)->remove() if -d $_;
 	}
 
 	$self->{restart} = 'yes';
@@ -768,12 +768,12 @@ sub addDmn{
 
 sub addCfg{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self		= shift;
 	my $data		= shift;
 	my $rs			= 0;
-	my $certPath	= "$main::imscpConfig{GUI_ROOT_DIR}/data/certs";
+	my $certPath	= "$main::selityConfig{GUI_ROOT_DIR}/data/certs";
 	my $certFile	= "$certPath/$data->{DMN_NAME}.pem";
 
 	$self->{data} = $data;
@@ -792,7 +792,7 @@ sub addCfg{
 		"$self->{wrkDir}/$data->{DMN_NAME}.conf",
 		"$self->{wrkDir}/$data->{DMN_NAME}_ssl.conf"
 	){
-		$rs |= iMSCP::File->new(filename => $_)->delFile() if -f $_;
+		$rs |= Selity::File->new(filename => $_)->delFile() if -f $_;
 	}
 
 	my %configs;
@@ -829,7 +829,7 @@ sub addCfg{
 		$self->{data}->{FCGID_NAME} = $data->{DMN_NAME}			if($self::apacheConfig{INI_LEVEL} =~ /^per_vhost$/i);
 
 
-		$rs |= iMSCP::File->new(
+		$rs |= Selity::File->new(
 			filename => "$self->{cfgDir}/$_"
 		)->copyFile(
 			"$self->{bkpDir}/$_.". time
@@ -864,8 +864,8 @@ sub dmnFolders{
 	my $self		= shift;
 	my $data		= shift;
 	my $hDir		= $data->{HOME_DIR};
-	my $rootUser	= $main::imscpConfig{ROOT_USER};
-	my $rootGroup	= $main::imscpConfig{ROOT_GROUP};
+	my $rootUser	= $main::selityConfig{ROOT_USER};
+	my $rootGroup	= $main::selityConfig{ROOT_GROUP};
 	my $apacheGroup	= $self::apacheConfig{APACHE_GROUP};
 	my $newHtdocs	= -d "$hDir/htdocs";
 	my $php5Dir	= "$self::apacheConfig{PHP_STARTER_DIR}/$data->{DMN_NAME}";
@@ -896,20 +896,20 @@ sub dmnFolders{
 
 sub addFiles{
 
-	use iMSCP::Dir;
-	use iMSCP::Rights;
+	use Selity::Dir;
+	use Selity::Rights;
 
 	my $self		= shift;
 	my $data		= shift;
 	my $hDir		= $data->{HOME_DIR};
-	my $rootUser	= $main::imscpConfig{ROOT_USER};
-	my $rootGroup	= $main::imscpConfig{ROOT_GROUP};
+	my $rootUser	= $main::selityConfig{ROOT_USER};
+	my $rootGroup	= $main::selityConfig{ROOT_GROUP};
 	my $apacheGroup	= $self::apacheConfig{APACHE_GROUP};
 	my $newHtdocs	= -d "$hDir/htdocs";
 	my ($rs, $stdout, $stderr);
 
 	for ($self->dmnFolders($data)){
-		$rs |= iMSCP::Dir->new( dirname => $_->[0])->make({
+		$rs |= Selity::Dir->new( dirname => $_->[0])->make({
 			user	=> $_->[1],
 			group	=> $_->[2],
 			mode	=> $_->[3]
@@ -917,7 +917,7 @@ sub addFiles{
 	}
 
 	unless ($newHtdocs){
-		my $sourceDir	= "$main::imscpConfig{GUI_ROOT_DIR}/data/domain_default_page";
+		my $sourceDir	= "$main::selityConfig{GUI_ROOT_DIR}/data/domain_default_page";
 		my $dstDir		= "$hDir/htdocs/";
 		my $fileSource =
 		my $destFile	= "$hDir/htdocs/index.html";
@@ -940,7 +940,7 @@ sub addFiles{
 		);
 	}
 
-	my $sourceDir	= "$main::imscpConfig{GUI_ROOT_DIR}/data/domain_disable_page";
+	my $sourceDir	= "$main::selityConfig{GUI_ROOT_DIR}/data/domain_disable_page";
 	my $dstDir		= "$hDir/domain_disable_page";
 	my $fileSource =
 	my $destFile	= "$hDir/domain_disable_page/index.html";
@@ -1008,7 +1008,7 @@ sub delDmn{
 		"$self->{wrkDir}/$data->{DMN_NAME}.conf",
 		"$self->{wrkDir}/$data->{DMN_NAME}_ssl.conf",
 	){
-		$rs |= iMSCP::File->new(filename => $_)->delFile() if -f $_;
+		$rs |= Selity::File->new(filename => $_)->delFile() if -f $_;
 	}
 
 	my $hDir		= $data->{HOME_DIR};
@@ -1017,7 +1017,7 @@ sub delDmn{
 		"$self::apacheConfig{PHP_STARTER_DIR}/$data->{DMN_NAME}",
 		"$hDir",
 	){
-		$rs |= iMSCP::Dir->new(dirname => $_)->remove() if -d $_;
+		$rs |= Selity::Dir->new(dirname => $_)->remove() if -d $_;
 	}
 
 	$self->{restart}	= 'yes';
@@ -1028,7 +1028,7 @@ sub delDmn{
 
 sub disableDmn{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -1048,7 +1048,7 @@ sub disableDmn{
 
 	$self->{data} = $data;
 
-	iMSCP::File->new(
+	Selity::File->new(
 		filename => "$self->{cfgDir}/$data->{DMN_NAME}.conf"
 	)->copyFile(
 		"$self->{bkpDir}/$data->{DMN_NAME}.conf". time
@@ -1110,7 +1110,7 @@ sub disableSub{
 
 sub addHtuser{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -1120,8 +1120,8 @@ sub addHtuser{
 	debug("Data: ". (Dumper $data));
 
 	my $fileName	= $self::apacheConfig{HTACCESS_USERS_FILE_NAME};
-	my $filePath	= "$main::imscpConfig{USER_HOME_DIR}/$data->{HTUSER_DMN}/$fileName";
-	my $fileH		= iMSCP::File->new(filename => $filePath);
+	my $filePath	= "$main::selityConfig{USER_HOME_DIR}/$data->{HTUSER_DMN}/$fileName";
+	my $fileH		= Selity::File->new(filename => $filePath);
 	my $fileContent	= $fileH->get() if -f $filePath;
 	$fileContent	= '' if !$fileContent;
 
@@ -1131,8 +1131,8 @@ sub addHtuser{
 	$rs |=	$fileH->save();
 	$rs |=	$fileH->mode(0644);
 	$rs |=	$fileH->owner(
-				$main::imscpConfig{'ROOT_USER'},
-				$main::imscpConfig{'ROOT_GROUP'}
+				$main::selityConfig{'ROOT_USER'},
+				$main::selityConfig{'ROOT_GROUP'}
 			);
 
 	$rs;
@@ -1140,7 +1140,7 @@ sub addHtuser{
 
 sub delHtuser{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -1150,8 +1150,8 @@ sub delHtuser{
 	debug("Data: ". (Dumper $data));
 
 	my $fileName	= $self::apacheConfig{HTACCESS_USERS_FILE_NAME};
-	my $filePath	= "$main::imscpConfig{USER_HOME_DIR}/$data->{HTUSER_DMN}/$fileName";
-	my $fileH		= iMSCP::File->new(filename => $filePath);
+	my $filePath	= "$main::selityConfig{USER_HOME_DIR}/$data->{HTUSER_DMN}/$fileName";
+	my $fileH		= Selity::File->new(filename => $filePath);
 	my $fileContent	= $fileH->get() if -f $filePath;
 	$fileContent	= '' if !$fileContent;
 
@@ -1160,8 +1160,8 @@ sub delHtuser{
 	$rs |=	$fileH->save();
 	$rs |=	$fileH->mode(0644);
 	$rs |=	$fileH->owner(
-				$main::imscpConfig{'ROOT_USER'},
-				$main::imscpConfig{'ROOT_GROUP'}
+				$main::selityConfig{'ROOT_USER'},
+				$main::selityConfig{'ROOT_GROUP'}
 			);
 
 	$rs;
@@ -1169,7 +1169,7 @@ sub delHtuser{
 
 sub addHtgroup{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -1179,8 +1179,8 @@ sub addHtgroup{
 	debug("Data: ". (Dumper $data));
 
 	my $fileName	= $self::apacheConfig{HTACCESS_GROUPS_FILE_NAME};
-	my $filePath	= "$main::imscpConfig{USER_HOME_DIR}/$data->{HTGROUP_DMN}/$fileName";
-	my $fileH		= iMSCP::File->new(filename => $filePath);
+	my $filePath	= "$main::selityConfig{USER_HOME_DIR}/$data->{HTGROUP_DMN}/$fileName";
+	my $fileH		= Selity::File->new(filename => $filePath);
 	my $fileContent	= $fileH->get() if -f $filePath;
 	$fileContent	= '' if !$fileContent;
 
@@ -1190,8 +1190,8 @@ sub addHtgroup{
 	$rs |=	$fileH->save();
 	$rs |=	$fileH->mode(0644);
 	$rs |=	$fileH->owner(
-				$main::imscpConfig{'ROOT_USER'},
-				$main::imscpConfig{'ROOT_GROUP'}
+				$main::selityConfig{'ROOT_USER'},
+				$main::selityConfig{'ROOT_GROUP'}
 			);
 
 	$rs;
@@ -1199,7 +1199,7 @@ sub addHtgroup{
 
 sub delHtgroup{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -1209,8 +1209,8 @@ sub delHtgroup{
 	debug("Data: ". (Dumper $data));
 
 	my $fileName	= $self::apacheConfig{HTACCESS_GROUPS_FILE_NAME};
-	my $filePath	= "$main::imscpConfig{USER_HOME_DIR}/$data->{HTGROUP_DMN}/$fileName";
-	my $fileH		= iMSCP::File->new(filename => $filePath);
+	my $filePath	= "$main::selityConfig{USER_HOME_DIR}/$data->{HTGROUP_DMN}/$fileName";
+	my $fileH		= Selity::File->new(filename => $filePath);
 	my $fileContent	= $fileH->get() if -f $filePath;
 	$fileContent	= '' if !$fileContent;
 
@@ -1219,8 +1219,8 @@ sub delHtgroup{
 	$rs |=	$fileH->save();
 	$rs |=	$fileH->mode(0644);
 	$rs |=	$fileH->owner(
-				$main::imscpConfig{'ROOT_USER'},
-				$main::imscpConfig{'ROOT_GROUP'}
+				$main::selityConfig{'ROOT_USER'},
+				$main::selityConfig{'ROOT_GROUP'}
 			);
 
 	$rs;
@@ -1228,8 +1228,8 @@ sub delHtgroup{
 
 sub addHtaccess{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -1241,7 +1241,7 @@ sub addHtaccess{
 	my $fileUser	= "$data->{HOME_PATH}/$self::apacheConfig{HTACCESS_USERS_FILE_NAME}";
 	my $fileGroup	= "$data->{HOME_PATH}/$self::apacheConfig{HTACCESS_GROUPS_FILE_NAME}";
 	my $filePath	= "$data->{AUTH_PATH}/.htaccess";
-	my $fileH		= iMSCP::File->new(filename => $filePath);
+	my $fileH		= Selity::File->new(filename => $filePath);
 	my $fileContent	= $fileH->get() if -f $filePath;
 	$fileContent	= '' if !$fileContent;
 
@@ -1272,8 +1272,8 @@ sub addHtaccess{
 
 sub delHtaccess{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -1285,7 +1285,7 @@ sub delHtaccess{
 	my $fileUser	= "$data->{HOME_PATH}/$self::apacheConfig{HTACCESS_USERS_FILE_NAME}";
 	my $fileGroup	= "$data->{HOME_PATH}/$self::apacheConfig{HTACCESS_GROUPS_FILE_NAME}";
 	my $filePath	= "$data->{AUTH_PATH}/.htaccess";
-	my $fileH		= iMSCP::File->new(filename => $filePath);
+	my $fileH		= Selity::File->new(filename => $filePath);
 	my $fileContent	= $fileH->get() if -f $filePath;
 	$fileContent	= '' if !$fileContent;
 
@@ -1311,8 +1311,8 @@ sub delHtaccess{
 
 sub addIps{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -1326,7 +1326,7 @@ sub addIps{
 		return 1;
 	}
 
-	$rs |= iMSCP::File->new(
+	$rs |= Selity::File->new(
 		filename => "$self->{cfgDir}/00_nameserver.conf"
 	)->copyFile(
 		"$self->{bkpDir}/00_nameserver.conf.". time
@@ -1340,7 +1340,7 @@ sub addIps{
 		"$self->{cfgDir}/00_nameserver.conf"
 	);
 
-	my $file = iMSCP::File->new(filename => $filename);
+	my $file = Selity::File->new(filename => $filename);
 	my $content = $file->get();
 	$content =~ s/NameVirtualHost[^\n]+\n//gi;
 
@@ -1352,7 +1352,7 @@ sub addIps{
 		$content.= "NameVirtualHost $_:80\n"
 	}
 
-	$file = iMSCP::File->new(filename => "$self->{wrkDir}/00_nameserver.conf");
+	$file = Selity::File->new(filename => "$self->{wrkDir}/00_nameserver.conf");
 	$file->set($content);
 	$file->save() and return 1;
 
@@ -1369,8 +1369,8 @@ sub addIps{
 
 sub getTraffic{
 
-	use iMSCP::Execute;
-	use iMSCP::Dir;
+	use Selity::Execute;
+	use Selity::Dir;
 
 	my $self	= shift;
 	my $who		= shift;
@@ -1381,17 +1381,17 @@ sub getTraffic{
 	unless($self->{logDb}){
 		$self->{logDb} = 1;
 
-		$rs = execute("$main::imscpConfig{CMD_PS} -o pid,args -C 'imscp-apache-logger'", \$stdout, \$stderr);
+		$rs = execute("$main::selityConfig{CMD_PS} -o pid,args -C 'selity-apache-logger'", \$stdout, \$stderr);
 		error($stderr) if $stderr;
 
-		my $rv = iMSCP::Dir->new(dirname => $trfDir)->moveDir("$trfDir.old") if -d $trfDir;
+		my $rv = Selity::Dir->new(dirname => $trfDir)->moveDir("$trfDir.old") if -d $trfDir;
 		if($rv){
 			delete $self->{logDb};
 			return 0;
 		}
 
 		if($rs || !$stdout){
-			error('imscp-apache-logger is not running') unless $stderr;
+			error('selity-apache-logger is not running') unless $stderr;
 		} else {
 			while($stdout =~ m/^\s{0,}(\d+)(?!.*error)/mg){
 				$rs = execute("kill -s HUP $1", \$stdout, \$stderr);
@@ -1402,8 +1402,8 @@ sub getTraffic{
 	}
 
 	if(-d "$trfDir.old" && -f "$trfDir.old/$who-traf.log"){
-		use iMSCP::File;
-		my $content = iMSCP::File->new(filename => "$trfDir.old/$who-traf.log")->get();
+		use Selity::File;
+		my $content = Selity::File->new(filename => "$trfDir.old/$who-traf.log")->get();
 		if($content){
 			my @lines = split("\n", $content);
 			$traff += $_ foreach @lines;
@@ -1436,8 +1436,8 @@ sub del_old_logs{
 
 sub del_tmp{
 
-	use iMSCP::Dir;
-	use iMSCP::File;
+	use Selity::Dir;
+	use Selity::File;
 	use POSIX;
 
 	my $rs = 0;
@@ -1449,7 +1449,7 @@ sub del_tmp{
 			error("$self::apacheConfig{PHP_STARTER_DIR}/master/php5/php.ini!");
 			$rs |= 1;
 		} else {
-			my $hFile = iMSCP::File->new(filename => "$self::apacheConfig{PHP_STARTER_DIR}/master/php5/php.ini");
+			my $hFile = Selity::File->new(filename => "$self::apacheConfig{PHP_STARTER_DIR}/master/php5/php.ini");
 			my $file = $hFile->get();
 			unless ($file){
 				error("Can not read $self::apacheConfig{PHP_STARTER_DIR}/master/php5/php.ini!");
@@ -1459,7 +1459,7 @@ sub del_tmp{
 				$file =~ m/^\s*session.gc_maxlifetime\s*=\s*([0-9]+).*$/mgi;
 				$max = floor($1/60) if $1 && $max < floor($1/60);
 				$max = 24 unless $max;
-				my $cmd = "[ -d /var/www/imscp/gui/data/sessions/ ] && find /var/www/imscp/gui/data/sessions/ -type f -cmin +$max -delete";
+				my $cmd = "[ -d /var/www/selity/gui/data/sessions/ ] && find /var/www/selity/gui/data/sessions/ -type f -cmin +$max -delete";
 				$rs |= execute($cmd, \$stdout, \$stderr);
 				debug($stdout) if $stdout;
 				error($stderr) if $stderr;
@@ -1469,7 +1469,7 @@ sub del_tmp{
 	}
 
 	# Customers sessions gc
-	my $hDMN = iMSCP::Dir->new(dirname => "$main::imscpConfig{USER_HOME_DIR}");
+	my $hDMN = Selity::Dir->new(dirname => "$main::selityConfig{USER_HOME_DIR}");
 	return 1 if $hDMN->get();
 
 	my @domains	= $hDMN->getDirs();
@@ -1477,7 +1477,7 @@ sub del_tmp{
 	for (@domains){
 		my $dmn = $_;
 		if(-d "$self::apacheConfig{PHP_STARTER_DIR}/$_"){
-			my $hPHPINI	= iMSCP::Dir->new(dirname => "$self::apacheConfig{PHP_STARTER_DIR}/$dmn");
+			my $hPHPINI	= Selity::Dir->new(dirname => "$self::apacheConfig{PHP_STARTER_DIR}/$dmn");
 			if ($hPHPINI->get()){
 				error("Can't read php.ini list for $dmn");
 				$rs |= 1;
@@ -1491,7 +1491,7 @@ sub del_tmp{
 					$rs |= 1;
 					next;
 				}
-				my $hFile	= iMSCP::File->new(filename => "$self::apacheConfig{PHP_STARTER_DIR}/$dmn/$_/php.ini");
+				my $hFile	= Selity::File->new(filename => "$self::apacheConfig{PHP_STARTER_DIR}/$dmn/$_/php.ini");
 				my $file	= $hFile->get();
 				unless ($file){
 					error("Can not read $self::apacheConfig{PHP_STARTER_DIR}/$dmn/$_/php.ini!");
@@ -1502,7 +1502,7 @@ sub del_tmp{
 				$max = floor($1/60) if $1 && $max < floor($1/60);
 			}
 			$max = 24 unless $max;
-			my $cmd = "nice -n 19 find $main::imscpConfig{USER_HOME_DIR}/$dmn -type f -path '*/phptmp/sess_*' -cmin +$max -exec rm -v {} \\;";
+			my $cmd = "nice -n 19 find $main::selityConfig{USER_HOME_DIR}/$dmn -type f -path '*/phptmp/sess_*' -cmin +$max -exec rm -v {} \\;";
 			$rs |= execute($cmd, \$stdout, \$stderr);
 			debug($stdout) if $stdout;
 			error($stderr) if $stderr;
@@ -1515,7 +1515,7 @@ sub del_tmp{
 
 END{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 
 	my $endCode	= $?;
 	my $self	= Servers::httpd::apache_fcgi->new();
@@ -1532,7 +1532,7 @@ END{
 
 	}
 
-	$rs |= iMSCP::Dir->new(dirname => "$trfDir.old")->remove() if -d "$trfDir.old";
+	$rs |= Selity::Dir->new(dirname => "$trfDir.old")->remove() if -d "$trfDir.old";
 
 	$? = $endCode || $rs;
 }

@@ -28,7 +28,7 @@ package Servers::named::bind::uninstaller;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 
 
 use vars qw/@ISA/;
@@ -40,13 +40,13 @@ sub _init{
 
 	my $self		= shift;
 
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/bind";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/bind";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/bind.data";
 
-	tie %self::bindConfig, 'iMSCP::Config','fileName' => $conf;
+	tie %self::bindConfig, 'Selity::Config','fileName' => $conf;
 
 	0;
 }
@@ -64,7 +64,7 @@ sub uninstall{
 sub restoreConfFile{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $rs		= 0;
@@ -74,7 +74,7 @@ sub restoreConfFile{
 	) {
 		my ($filename, $directories, $suffix) = fileparse($_);
 		if(-f "$self->{bkpDir}/$filename$suffix.system"){
-			$rs	|=	iMSCP::File->new(
+			$rs	|=	Selity::File->new(
 						filename => "$self->{bkpDir}/$filename$suffix.system"
 					)->copyFile(
 						$_

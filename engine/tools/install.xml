@@ -28,11 +28,11 @@ program. If not, see <http://www.gnu.org/licenses/>
 
 	<copy_config />
 
-	<copy>${SYSTEM_ENGINE_ROOT}/tools/imscp-*</copy>
+	<copy>${SYSTEM_ENGINE_ROOT}/tools/selity-*</copy>
 
 	<create_file />
 
-	<chown_file owner="root" group="root">${SYSTEM_ENGINE_ROOT}/tools/imscp-*</chown_file>
+	<chown_file owner="root" group="root">${SYSTEM_ENGINE_ROOT}/tools/selity-*</chown_file>
 
-	<chmod_file mode="0700">${SYSTEM_ENGINE_ROOT}/tools/imscp-*</chmod_file>
+	<chmod_file mode="0700">${SYSTEM_ENGINE_ROOT}/tools/selity-*</chmod_file>
 </install>

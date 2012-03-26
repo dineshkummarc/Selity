@@ -28,9 +28,9 @@ package Modules::User;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::Execute;
-use iMSCP::Database;
+use Selity::Debug;
+use Selity::Execute;
+use Selity::Database;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -61,7 +61,7 @@ sub loadData{
 			`domain_admin_id` = ?
 		";
 
-	my $database = iMSCP::Database->factory();
+	my $database = Selity::Database->factory();
 	my $rdata = $database->doQuery('domain_admin_id', $sql, $self->{usrId});
 
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
@@ -100,7 +100,7 @@ sub process{
 	}
 
 	if(scalar @sql){
-		$rdata = iMSCP::Database->factory()->doQuery('delete', @sql);
+		$rdata = Selity::Database->factory()->doQuery('delete', @sql);
 		error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 	}
 
@@ -111,7 +111,7 @@ sub add{
 
 	use Modules::SystemGroup;
 	use Modules::SystemUser;
-	use iMSCP::Rights;
+	use Selity::Rights;
 	use Servers::httpd;
 
 	my $self = shift;
@@ -123,15 +123,15 @@ sub add{
 
 	my $groupName	=
 	my $userName	=
-			$main::imscpConfig{SYSTEM_USER_PREFIX}.
-			($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
+			$main::selityConfig{SYSTEM_USER_PREFIX}.
+			($main::selityConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
 
 	$rs = Modules::SystemGroup->new()->addSystemGroup($groupName);
 	return $rs if $rs;
 
 	my $user = Modules::SystemUser->new();
-	$user->{comment}	= "iMSCP virtual user";
-	$user->{home}		= "$main::imscpConfig{'USER_HOME_DIR'}/$self->{domain_name}";
+	$user->{comment}	= "Selity virtual user";
+	$user->{home}		= "$main::selityConfig{'USER_HOME_DIR'}/$self->{domain_name}";
 	$user->{group}		= $groupName;
 	$user->{shell} 		= '/bin/false';
 	$rs = $user->addSystemUser($userName);
@@ -144,11 +144,11 @@ sub add{
 		:
 		'-1'
 	);
-	my $rootUser	= $main::imscpConfig{ROOT_USER};
-	my $rootGroup	= $main::imscpConfig{ROOT_GROUP};
+	my $rootUser	= $main::selityConfig{ROOT_USER};
+	my $rootGroup	= $main::selityConfig{ROOT_GROUP};
 
-	$rs |= iMSCP::Dir->new(
-		dirname => "$main::imscpConfig{'USER_HOME_DIR'}/$self->{domain_name}"
+	$rs |= Selity::Dir->new(
+		dirname => "$main::selityConfig{'USER_HOME_DIR'}/$self->{domain_name}"
 	)->make({
 			mode	=> 0750,
 			user	=> $userName,
@@ -157,16 +157,16 @@ sub add{
 
 	$rs |= $self->oldEngineCompatibility();
 
-	$rs |= iMSCP::Dir->new(
-		dirname => "$main::imscpConfig{'USER_HOME_DIR'}/$self->{domain_name}/logs"
+	$rs |= Selity::Dir->new(
+		dirname => "$main::selityConfig{'USER_HOME_DIR'}/$self->{domain_name}/logs"
 	)->make({
 			mode	=> 0750,
 			user	=> $userName,
 			group	=> $groupName
 	});
 
-	$rs |= iMSCP::Dir->new(
-		dirname => "$main::imscpConfig{'USER_HOME_DIR'}/$self->{domain_name}/backups"
+	$rs |= Selity::Dir->new(
+		dirname => "$main::selityConfig{'USER_HOME_DIR'}/$self->{domain_name}/backups"
 	)->make({
 			mode	=> 0755,
 			user	=> $rootUser,
@@ -183,7 +183,7 @@ sub delete{
 
 	use Modules::SystemGroup;
 	use Modules::SystemUser;
-	use iMSCP::Rights;
+	use Selity::Rights;
 
 	my $self = shift;
 	my $rs = 0;
@@ -195,8 +195,8 @@ sub delete{
 	$rs = $self->runAllSteps();
 
 	my $userName	=
-			$main::imscpConfig{SYSTEM_USER_PREFIX}.
-			($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
+			$main::selityConfig{SYSTEM_USER_PREFIX}.
+			($main::selityConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
 
 	my $user = Modules::SystemUser->new();
 	$user->{force} = 'yes';
@@ -211,20 +211,20 @@ sub oldEngineCompatibility{
 	use Modules::SystemGroup;
 	use Modules::SystemUser;
 	use Servers::httpd;
-	use iMSCP::Rights;
+	use Selity::Rights;
 
 	my $self		= shift;
 	my $rs			= 0;
 	my $userName	=
 	my $groupName	=
-			$main::imscpConfig{SYSTEM_USER_PREFIX}.
-			($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
+			$main::selityConfig{SYSTEM_USER_PREFIX}.
+			($main::selityConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
 
 	my $uid			= scalar getpwnam($userName);
 	my $gid			= scalar getgrnam($groupName);
 
 	my @sql = ("UPDATE `domain` SET `domain_uid` = ?, `domain_gid` = ? WHERE `domain_name` = ?", $uid, $gid, $self->{domain_name});
-	my $rdata = iMSCP::Database->factory()->doQuery('update', @sql);
+	my $rdata = Selity::Database->factory()->doQuery('update', @sql);
 	error("$rdata") if(ref $rdata ne 'HASH');
 
 	@sql = (
@@ -234,18 +234,18 @@ sub oldEngineCompatibility{
 			`uid` = ?,
 			`gid` = ?
 		WHERE
-			`homedir` LIKE '$main::imscpConfig{USER_HOME_DIR}/$self->{domain_name}/%'
+			`homedir` LIKE '$main::selityConfig{USER_HOME_DIR}/$self->{domain_name}/%'
 		OR
-			`homedir` = '$main::imscpConfig{USER_HOME_DIR}/$self->{domain_name}'
+			`homedir` = '$main::selityConfig{USER_HOME_DIR}/$self->{domain_name}'
 		",
 		$uid,
 		$gid
 	);
-	$rdata = iMSCP::Database->factory()->doQuery('update', @sql);
+	$rdata = Selity::Database->factory()->doQuery('update', @sql);
 	error("$rdata") if(ref $rdata ne 'HASH');
 
 	@sql = ("UPDATE `ftp_group` SET `gid` = ? WHERE `groupname` = ?", $uid, $self->{domain_name});
-	$rdata = iMSCP::Database->factory()->doQuery('update', @sql);
+	$rdata = Selity::Database->factory()->doQuery('update', @sql);
 	error("$rdata") if(ref $rdata ne 'HASH');
 
 	my $httpdGroup = (
@@ -256,10 +256,10 @@ sub oldEngineCompatibility{
 		$groupName
 	);
 
-	my $hDir = "$main::imscpConfig{USER_HOME_DIR}/$self->{domain_name}";
+	my $hDir = "$main::selityConfig{USER_HOME_DIR}/$self->{domain_name}";
 	my ($stdout, $stderr);
 
-	my $cmd	= "$main::imscpConfig{'CMD_CHOWN'} -R $userName:$httpdGroup $hDir";
+	my $cmd	= "$main::selityConfig{'CMD_CHOWN'} -R $userName:$httpdGroup $hDir";
 	$rs		|= execute($cmd, \$stdout, \$stderr);
 	debug("$stdout") if $stdout;
 	error("$stderr") if $stderr;
@@ -267,7 +267,7 @@ sub oldEngineCompatibility{
 	$rs |= setRights(
 		"$hDir/domain_disable_page",
 		{
-			user		=> $main::imscpConfig{ROOT_USER},
+			user		=> $main::selityConfig{ROOT_USER},
 			group		=> $httpdGroup,
 			filemode	=> '0640',
 			dirmode		=> '0710',
@@ -278,8 +278,8 @@ sub oldEngineCompatibility{
 	$rs |= setRights(
 		"$hDir/backups",
 		{
-			user		=> $main::imscpConfig{ROOT_USER},
-			group		=> $main::imscpConfig{ROOT_GROUP},
+			user		=> $main::selityConfig{ROOT_USER},
+			group		=> $main::selityConfig{ROOT_GROUP},
 			filemode	=> '0640',
 			dirmode		=> '0750',
 			recursive	=> 'yes'
@@ -294,29 +294,29 @@ sub buildHTTPDData{
 	my $self	= shift;
 	my $groupName	=
 	my $userName	=
-			$main::imscpConfig{SYSTEM_USER_PREFIX}.
-			($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
-	my $hDir 		= "$main::imscpConfig{USER_HOME_DIR}/$self->{domain_name}";
+			$main::selityConfig{SYSTEM_USER_PREFIX}.
+			($main::selityConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
+	my $hDir 		= "$main::selityConfig{USER_HOME_DIR}/$self->{domain_name}";
 	$hDir			=~ s~/+~/~g;
 
 	my $sql = "SELECT * FROM `config` WHERE `name` LIKE 'PHPINI%'";
-	my $rdata = iMSCP::Database->factory()->doQuery('name', $sql);
+	my $rdata = Selity::Database->factory()->doQuery('name', $sql);
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 	$sql			= "SELECT * FROM `php_ini` WHERE `domain_id` = ?";
-	my $phpiniData	= iMSCP::Database->factory()->doQuery('domain_id', $sql, $self->{domain_id});
+	my $phpiniData	= Selity::Database->factory()->doQuery('domain_id', $sql, $self->{domain_id});
 	error("$phpiniData") and return 1 if(ref $phpiniData ne 'HASH');
 
 	$self->{httpd} = {
 		DMN_NAME					=> $self->{domain_name},
 		DOMAIN_NAME					=> $self->{domain_name},
 		HOME_DIR					=> $hDir,
-		PEAR_DIR					=> $main::imscpConfig{PEAR_DIR},
-		PHP_TIMEZONE				=> $main::imscpConfig{PHP_TIMEZONE},
+		PEAR_DIR					=> $main::selityConfig{PEAR_DIR},
+		PHP_TIMEZONE				=> $main::selityConfig{PHP_TIMEZONE},
 		USER						=> $userName,
 		GROUP						=> $groupName,
-		BASE_SERVER_VHOST_PREFIX	=> $main::imscpConfig{BASE_SERVER_VHOST_PREFIX},
-		BASE_SERVER_VHOST			=> $main::imscpConfig{BASE_SERVER_VHOST},
+		BASE_SERVER_VHOST_PREFIX	=> $main::selityConfig{BASE_SERVER_VHOST_PREFIX},
+		BASE_SERVER_VHOST			=> $main::selityConfig{BASE_SERVER_VHOST},
 		BWLIMIT						=> $self->{domain_traffic_limit},
 		DISABLE_FUNCTIONS			=> (exists $phpiniData->{$self->{domain_id}} ? $phpiniData->{$self->{domain_id}}->{disable_functions} : $rdata->{PHPINI_DISABLE_FUNCTIONS}->{value}),
 		MAX_EXECUTION_TIME			=> (exists $phpiniData->{$self->{domain_id}} ? $phpiniData->{$self->{domain_id}}->{max_execution_time} : $rdata->{PHPINI_MAX_EXECUTION_TIME}->{value}),

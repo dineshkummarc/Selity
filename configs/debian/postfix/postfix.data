@@ -28,7 +28,7 @@ POSTFIX_CONF_FILE = /etc/postfix/main.cf
 
 POSTFIX_MASTER_CONF_FILE = /etc/postfix/master.cf
 
-MTA_VIRTUAL_CONF_DIR = /etc/postfix/imscp
+MTA_VIRTUAL_CONF_DIR = /etc/postfix/selity
 
 CMD_MTA = /etc/init.d/postfix
 
@@ -38,15 +38,15 @@ MTA_VIRTUAL_MAIL_DIR = /var/mail/virtual
 
 MTA_LOCAL_ALIAS_HASH = /etc/aliases
 
-MTA_VIRTUAL_ALIAS_HASH = /etc/postfix/imscp/aliases
+MTA_VIRTUAL_ALIAS_HASH = /etc/postfix/selity/aliases
 
-MTA_VIRTUAL_DMN_HASH = /etc/postfix/imscp/domains
+MTA_VIRTUAL_DMN_HASH = /etc/postfix/selity/domains
 
-MTA_VIRTUAL_MAILBOX_HASH = /etc/postfix/imscp/mailboxes
+MTA_VIRTUAL_MAILBOX_HASH = /etc/postfix/selity/mailboxes
 
-MTA_TRANSPORT_HASH = /etc/postfix/imscp/transport
+MTA_TRANSPORT_HASH = /etc/postfix/selity/transport
 
-MTA_SENDER_ACCESS_HASH = /etc/postfix/imscp/sender-access
+MTA_SENDER_ACCESS_HASH = /etc/postfix/selity/sender-access
 
 MTA_MAILBOX_UID_NAME = vmail
 

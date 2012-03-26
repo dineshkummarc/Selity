@@ -32,19 +32,19 @@ use lib "$FindBin::Bin";
 use lib "$FindBin::Bin/PerlLib";
 use lib "$FindBin::Bin/PerlVendor";
 
-use iMSCP::Debug;
-use iMSCP::Boot;
-use iMSCP::Execute;
+use Selity::Debug;
+use Selity::Boot;
+use Selity::Execute;
 use Data::Dumper;
 use MIME::Base64;
 
-newDebug('imscp-rqst-mngr.log');
+newDebug('selity-rqst-mngr.log');
 
 sub start_up {
 
 	umask(027);
 
-	iMSCP::Boot->new()->init();
+	Selity::Boot->new()->init();
 	0;
 }
 
@@ -59,7 +59,7 @@ sub mngr_engine_process{
 	print("=======================\n");
 	print("Processing type $type.\n");
 
-	my $database = iMSCP::Database->factory();
+	my $database = Selity::Database->factory();
 	my $rdata = $database->doQuery('id', $sql);
 	if(ref $rdata ne 'HASH'){
 		error("$rdata");
@@ -400,7 +400,7 @@ sub engine {
 			`domain_id`
 	";
 
-	my $rdata = iMSCP::Database->factory()->doQuery('software_id', $sql);
+	my $rdata = Selity::Database->factory()->doQuery('software_id', $sql);
 	if(ref $rdata ne 'HASH'){
 		error("$rdata");
 		$rdata = {};
@@ -408,7 +408,7 @@ sub engine {
 	}
 	my $count =  scalar keys %$rdata;
 
-	newDebug('imscp_sw_mngr_engine') if $count;
+	newDebug('selity_sw_mngr_engine') if $count;
 	foreach (keys %$rdata) {
 		my ($stdout, $stderr);
 		my (
@@ -448,14 +448,14 @@ sub engine {
 		);
 
 		#Encoding data to push to another script
-		my $imscp_sw_mngr_pushstring = encode_base64("$sw_domain_id,$sw_software_id,$sw_path,$sw_software_prefix,$sw_database,$sw_database_user,$sw_database_tmp_pwd,$sw_install_username,$sw_install_password,$sw_install_email,$sw_software_status,$sw_software_depot,$sw_software_master_id,$sw_aliasdomain_id,$sw_subdomain_id,$sw_aliassubdomain_id");
+		my $selity_sw_mngr_pushstring = encode_base64("$sw_domain_id,$sw_software_id,$sw_path,$sw_software_prefix,$sw_database,$sw_database_user,$sw_database_tmp_pwd,$sw_install_username,$sw_install_password,$sw_install_email,$sw_software_status,$sw_software_depot,$sw_software_master_id,$sw_aliasdomain_id,$sw_subdomain_id,$sw_aliassubdomain_id");
 
-		debug("processing encoded pushtring: $imscp_sw_mngr_pushstring.");
-		$rs |= execute("perl $main::imscpConfig{ENGINE_ROOT_DIR}/imscp-sw-mngr \"$imscp_sw_mngr_pushstring\"", \$stdout, \$stderr);
+		debug("processing encoded pushtring: $selity_sw_mngr_pushstring.");
+		$rs |= execute("perl $main::selityConfig{ENGINE_ROOT_DIR}/selity-sw-mngr \"$selity_sw_mngr_pushstring\"", \$stdout, \$stderr);
 		debug("$stdout") if $stdout;
 		error("$stderr") if $stderr;
 
-		$rs |= execute("$main::imscpConfig{CMD_RM} -rf /tmp/sw-$sw_domain_id-$sw_software_id", \$stdout, \$stderr);
+		$rs |= execute("$main::selityConfig{CMD_RM} -rf /tmp/sw-$sw_domain_id-$sw_software_id", \$stdout, \$stderr);
 		debug("$stdout") if $stdout;
 		error("$stderr") if $stderr;
 	}
@@ -476,14 +476,14 @@ sub engine {
 		ORDER BY
 			`reseller_id`
 	";
-	$rdata = iMSCP::Database->factory()->doQuery('software_id', $sql);
+	$rdata = Selity::Database->factory()->doQuery('software_id', $sql);
 	if(ref $rdata ne 'HASH'){
 		error("$rdata");
 		return 1;
 	}
 
 	my $count =  scalar keys %$rdata;
-	newDebug('imscp_pkt_mngr_engine.log') if $count;
+	newDebug('selity_pkt_mngr_engine.log') if $count;
 
 	foreach (keys %$rdata) {
 		my ($stdout, $stderr);
@@ -503,14 +503,14 @@ sub engine {
 
 		#Encoding data to push to another script
 		debug("$sw_software_id,$sw_reseller_id,$sw_software_archive,$sw_software_status,$sw_software_depot");
-		my $imscp_pkt_mngr_pushstring = encode_base64("$sw_software_id,$sw_reseller_id,$sw_software_archive,$sw_software_status,$sw_software_depot");
+		my $selity_pkt_mngr_pushstring = encode_base64("$sw_software_id,$sw_reseller_id,$sw_software_archive,$sw_software_status,$sw_software_depot");
 
-		debug("processing encoded pushtring: $imscp_pkt_mngr_pushstring");
-		$rs |= execute("perl $main::imscpConfig{ENGINE_ROOT_DIR}/imscp-pkt-mngr \"$imscp_pkt_mngr_pushstring\"", \$stdout, \$stderr);
+		debug("processing encoded pushtring: $selity_pkt_mngr_pushstring");
+		$rs |= execute("perl $main::selityConfig{ENGINE_ROOT_DIR}/selity-pkt-mngr \"$selity_pkt_mngr_pushstring\"", \$stdout, \$stderr);
 		debug("$stdout") if $stdout;
 		error("$stderr") if $stderr;
 
-		$rs |= execute("$main::imscpConfig{CMD_RM} -rf /tmp/sw-$sw_software_archive-$sw_software_id", \$stdout, \$stderr);
+		$rs |= execute("$main::selityConfig{CMD_RM} -rf /tmp/sw-$sw_software_archive-$sw_software_id", \$stdout, \$stderr);
 		debug("$stdout") if $stdout;
 		error("$stderr") if $stderr;
 	}

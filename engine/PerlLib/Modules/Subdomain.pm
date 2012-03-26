@@ -28,7 +28,7 @@ package Modules::Subdomain;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -76,7 +76,7 @@ sub loadData{
 			`sub`.`subdomain_id` = ?
 	";
 
-	my $rdata = iMSCP::Database->factory()->doQuery('subdomain_id', $sql, $self->{subId}, $self->{subId});
+	my $rdata = Selity::Database->factory()->doQuery('subdomain_id', $sql, $self->{subId}, $self->{subId});
 
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 	error("No subdomain has id = $self->{subId}") and return 1 unless(exists $rdata->{$self->{subId}});
@@ -130,7 +130,7 @@ sub process{
 		);
 	}
 
-	my $rdata = iMSCP::Database->factory()->doQuery('delete', @sql);
+	my $rdata = Selity::Database->factory()->doQuery('delete', @sql);
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 	$rs;
@@ -139,19 +139,19 @@ sub process{
 sub delete{
 
 	use File::Temp;
-	use iMSCP::Database;
-	use iMSCP::Servers;
-	use iMSCP::Addons;
-	use iMSCP::Execute;
-	use iMSCP::Dir;
+	use Selity::Database;
+	use Selity::Servers;
+	use Selity::Addons;
+	use Selity::Execute;
+	use Selity::Dir;
 	use Servers::httpd;
 
 	my $self		= shift;
 	my $rs			= 0;
 	my $userName	=
 	my $groupName	=
-			$main::imscpConfig{SYSTEM_USER_PREFIX}.
-			($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
+			$main::selityConfig{SYSTEM_USER_PREFIX}.
+			($main::selityConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
 	my $httpdGroup	= (
 			Servers::httpd->factory()->can('getRunningGroup')
 			?
@@ -186,7 +186,7 @@ sub delete{
 		$self->{domain_id}
 	);
 
-	my $rdata = iMSCP::Database->factory()->doQuery('id', @sql);
+	my $rdata = Selity::Database->factory()->doQuery('id', @sql);
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 	my %mountPoints;
@@ -208,12 +208,12 @@ sub delete{
 	my $dir = File::Temp->newdir(CLEANUP => 1);
 	my @savedDirs;
 	foreach(keys %mountPoints){
-		my $sourceDir 	= "$main::imscpConfig{'USER_HOME_DIR'}/$self->{user_home}/".$mountPoints{$_};
+		my $sourceDir 	= "$main::selityConfig{'USER_HOME_DIR'}/$self->{user_home}/".$mountPoints{$_};
 		$sourceDir		=~ s~/+~/~g;
 		my $destDir 	= "$dir/".$mountPoints{$_};
 		$destDir		=~ s~/+~/~g;
-		#$rs |= iMSCP::Dir->new(dirname => $destDir)->make();
-		$rs |= iMSCP::Dir->new(dirname => $destDir)->make({user => $userName, group => $httpdGroup, mode => 0710});
+		#$rs |= Selity::Dir->new(dirname => $destDir)->make();
+		$rs |= Selity::Dir->new(dirname => $destDir)->make({user => $userName, group => $httpdGroup, mode => 0710});
 		$rs |= execute("cp -pRTfv $sourceDir $destDir", \$stdout, \$stderr);
 		debug("$stdout") if $stdout;
 		error("$stderr") if $stderr;
@@ -229,11 +229,11 @@ sub delete{
 	$rs 			= $self->runAllSteps();
 
 	foreach (@savedDirs){
-		my $destDir 	= "$main::imscpConfig{'USER_HOME_DIR'}/$self->{user_home}/$_";
+		my $destDir 	= "$main::selityConfig{'USER_HOME_DIR'}/$self->{user_home}/$_";
 		$destDir		=~ s~/+~/~g;
 		my $sourceDir	= "$dir/$_";
 		$sourceDir		=~ s~/+~/~g;
-		$rs |= iMSCP::Dir->new(dirname => $destDir)->make({user => $userName, group => $httpdGroup, mode => 0710});
+		$rs |= Selity::Dir->new(dirname => $destDir)->make({user => $userName, group => $httpdGroup, mode => 0710});
 		$rs |= execute("cp -pRTfv $sourceDir $destDir ", \$stdout, \$stderr);
 		debug("$stdout") if $stdout;
 		error("$stderr") if $stderr;
@@ -251,21 +251,21 @@ sub buildHTTPDData{
 	my $self	= shift;
 	my $groupName	=
 	my $userName	=
-			$main::imscpConfig{SYSTEM_USER_PREFIX}.
-			($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
-	my $hDir 		= "$main::imscpConfig{'USER_HOME_DIR'}/$self->{user_home}/$self->{subdomain_mount}";
+			$main::selityConfig{SYSTEM_USER_PREFIX}.
+			($main::selityConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
+	my $hDir 		= "$main::selityConfig{'USER_HOME_DIR'}/$self->{user_home}/$self->{subdomain_mount}";
 	$hDir			=~ s~/+~/~g;
 
 	my $sql = "SELECT * FROM `config` WHERE `name` LIKE 'PHPINI%'";
-	my $rdata = iMSCP::Database->factory()->doQuery('name', $sql);
+	my $rdata = Selity::Database->factory()->doQuery('name', $sql);
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 	$sql			= "SELECT * FROM `php_ini` WHERE `domain_id` = ?";
-	my $phpiniData	= iMSCP::Database->factory()->doQuery('domain_id', $sql, $self->{domain_id});
+	my $phpiniData	= Selity::Database->factory()->doQuery('domain_id', $sql, $self->{domain_id});
 	error("$phpiniData") and return 1 if(ref $phpiniData ne 'HASH');
 
 	$sql			= "SELECT * FROM `ssl_certs` WHERE `id` = ? AND `type` = ? AND `status` = ?";
-	my $certData	= iMSCP::Database->factory()->doQuery('id', $sql, $self->{subdomain_id}, 'sub', 'ok');
+	my $certData	= Selity::Database->factory()->doQuery('id', $sql, $self->{subdomain_id}, 'sub', 'ok');
 	error("$certData") and return 1 if(ref $certData ne 'HASH');
 
 	my $haveCert = exists $certData->{$self->{subdomain_id}} && !$self->testCert($self->{subdomain_name}.'.'.$self->{user_home});
@@ -276,13 +276,13 @@ sub buildHTTPDData{
 		ROOT_DMN_NAME				=> $self->{user_home},
 		PARENT_DMN_NAME				=> $self->{user_home},
 		DMN_IP						=> $self->{ip_number},
-		WWW_DIR						=> $main::imscpConfig{'USER_HOME_DIR'},
+		WWW_DIR						=> $main::selityConfig{'USER_HOME_DIR'},
 		HOME_DIR					=> $hDir,
-		PEAR_DIR					=> $main::imscpConfig{'PEAR_DIR'},
-		PHP_TIMEZONE				=> $main::imscpConfig{'PHP_TIMEZONE'},
-		PHP_VERSION					=> $main::imscpConfig{'PHP_VERSION'},
-		BASE_SERVER_VHOST_PREFIX	=> $main::imscpConfig{'BASE_SERVER_VHOST_PREFIX'},
-		BASE_SERVER_VHOST			=> $main::imscpConfig{'BASE_SERVER_VHOST'},
+		PEAR_DIR					=> $main::selityConfig{'PEAR_DIR'},
+		PHP_TIMEZONE				=> $main::selityConfig{'PHP_TIMEZONE'},
+		PHP_VERSION					=> $main::selityConfig{'PHP_VERSION'},
+		BASE_SERVER_VHOST_PREFIX	=> $main::selityConfig{'BASE_SERVER_VHOST_PREFIX'},
+		BASE_SERVER_VHOST			=> $main::selityConfig{'BASE_SERVER_VHOST'},
 		USER						=> $userName,
 		GROUP						=> $groupName,
 		have_php					=> $self->{domain_php},
@@ -333,8 +333,8 @@ sub buildNAMEDData{
 
 	my $groupName	=
 	my $userName	=
-			$main::imscpConfig{SYSTEM_USER_PREFIX}.
-			($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
+			$main::selityConfig{SYSTEM_USER_PREFIX}.
+			($main::selityConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
 
 	$self->{named} = {
 		DMN_NAME		=> $self->{subdomain_name}.'.'.$self->{user_home},
@@ -353,7 +353,7 @@ sub buildFTPDData{
 	my $rs 		= 0;
 	my ($stdout, $stderr);
 	return 0 if($self->{subdomain_mount} eq '/');
-	my $hDir 		= "$main::imscpConfig{'USER_HOME_DIR'}/$self->{user_home}/$self->{subdomain_mount}";
+	my $hDir 		= "$main::selityConfig{'USER_HOME_DIR'}/$self->{user_home}/$self->{subdomain_mount}";
 	my $file_name	= "$self->{user_home}/$self->{subdomain_mount}";
 	$file_name		=~ s~/+~\.~g;
 	$file_name		=~ s~\.$~~g;

@@ -28,8 +28,8 @@ package Modules::Ips;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::Execute;
+use Selity::Debug;
+use Selity::Execute;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -58,7 +58,7 @@ sub process{
 		WHERE `alias_status` NOT IN ('delete', 'ordered')
 	";
 
-	my $rdata = iMSCP::Database->factory()->doQuery('ip_number', $sql);
+	my $rdata = Selity::Database->factory()->doQuery('ip_number', $sql);
 
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
@@ -88,7 +88,7 @@ sub process{
 		WHERE `type` = 'sub'
 	";
 
-	my $sslIPData = iMSCP::Database->factory()->doQuery('ip_number', $sql);
+	my $sslIPData = Selity::Database->factory()->doQuery('ip_number', $sql);
 
 	error("$sslIPData") and return 1 if(ref $sslIPData ne 'HASH');
 

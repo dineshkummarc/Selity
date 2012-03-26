@@ -24,11 +24,11 @@ program. If not, see <http://www.gnu.org/licenses/>
 -->
 
 <install>
-	<folders export="INST_PREF">/tmp/imscp</folders>
+	<folders export="INST_PREF">/tmp/selity</folders>
 	<folders export="ROOT_CONF">${INST_PREF}/etc</folders>
-	<folders export="SYSTEM_ROOT">${INST_PREF}/var/www/imscp</folders>
-	<folders export="SYSTEM_CONF">${INST_PREF}/etc/imscp</folders>
-	<folders export="SYSTEM_LOG">${INST_PREF}/var/log/imscp</folders>
+	<folders export="SYSTEM_ROOT">${INST_PREF}/var/www/selity</folders>
+	<folders export="SYSTEM_CONF">${INST_PREF}/etc/selity</folders>
+	<folders export="SYSTEM_LOG">${INST_PREF}/var/log/selity</folders>
 	<folders export="SYSTEM_VIRTUAL">${INST_PREF}/var/www/virtual</folders>
 	<folders export="SYSTEM_MAIL_VIRTUAL">${INST_PREF}/var/mail/virtual</folders>
 </install>

@@ -29,8 +29,8 @@ program. If not, see <http://www.gnu.org/licenses/>
 	<copy_config />
 
 	<copy mode="0700" owner="root" group="root">${MAIL_LOG_CONVERT_PATH}/maillogconvert.pl</copy>
-	<copy mode="0700" owner="root" group="root">${SYSTEM_ENGINE_ROOT}/traffic/imscp-srv-traff</copy>
-	<copy mode="0700" owner="root" group="root">${SYSTEM_ENGINE_ROOT}/traffic/imscp-vrl-traff</copy>
+	<copy mode="0700" owner="root" group="root">${SYSTEM_ENGINE_ROOT}/traffic/selity-srv-traff</copy>
+	<copy mode="0700" owner="root" group="root">${SYSTEM_ENGINE_ROOT}/traffic/selity-vrl-traff</copy>
 
 	<create_file />
 

@@ -32,20 +32,20 @@ use lib "$FindBin::Bin/..";
 use lib "$FindBin::Bin/../PerlLib";
 use lib "$FindBin::Bin/../PerlVendor";
 
-use iMSCP::Debug;
-use iMSCP::Boot;
+use Selity::Debug;
+use Selity::Boot;
 use Mail::Address;
 use MIME::Entity;
 use Email::Simple;
 use Data::Dumper;
 
-newDebug('imscp-arpl-msgr/imscp-arpl-msgr.log');
+newDebug('selity-arpl-msgr/selity-arpl-msgr.log');
 
 
 sub arpl_start_up {
 
 	umask(027);
-	iMSCP::Boot->new()->init({nolock => 'yes', norequirements => 'yes'});
+	Selity::Boot->new()->init({nolock => 'yes', norequirements => 'yes'});
 
 	0;
 }
@@ -53,7 +53,7 @@ sub arpl_start_up {
 sub arpl_engine {
 
 	my $from = $ARGV[0];
-	$from =~ s/imscp-arpl\.//gim;
+	$from =~ s/selity-arpl\.//gim;
 
 	my @msg = <STDIN>;
 
@@ -64,7 +64,7 @@ sub arpl_engine {
 			ADDTIME(`time`, '24:00:00') < NOW()
 	";
 
-	my $rdata = iMSCP::Database->factory()->doQuery('delete', $sql);
+	my $rdata = Selity::Database->factory()->doQuery('delete', $sql);
 	error("$rdata") if(ref $rdata ne 'HASH');
 
 	my $mail	= Email::Simple->new(join('', @msg));
@@ -98,7 +98,7 @@ sub arpl_engine {
 				ADDTIME(`time`, '24:00:00') > NOW()
 	";
 
-	$rdata = iMSCP::Database->factory()->doQuery('time', $sql, $from, $to);
+	$rdata = Selity::Database->factory()->doQuery('time', $sql, $from, $to);
 	error("$rdata") if(ref $rdata ne 'HASH');
 
 	return 0 if(scalar keys %{$rdata});
@@ -114,7 +114,7 @@ sub arpl_engine {
 			`mail_auto_respond` = 1
 	";
 
-	$rdata = iMSCP::Database->factory()->doQuery('text', $sql, $from);
+	$rdata = Selity::Database->factory()->doQuery('text', $sql, $from);
 	if(ref $rdata ne 'HASH'){
 		error("$rdata");
 		return 1;
@@ -131,7 +131,7 @@ sub arpl_engine {
 		Subject => "[Autoreply] ".$mail->header('Subject'),
 		Type => "multipart/mixed; charset=utf-8",
 		'X-Autoresponse-From' => $from,
-		'X-Mailer' => "i-MSCP $main::imscpConfig{'Version'} Autoreply Manager"
+		'X-Mailer' => "i-MSCP $main::selityConfig{'Version'} Autoreply Manager"
 	);
 
 	$out->attach(
@@ -153,7 +153,7 @@ sub arpl_engine {
 
 	# Log the autoreply
 	$sql = "INSERT INTO `autoreplies_log` (`time`, `from`, `to`) VALUES (NOW(), ?, ?)";
-	$rdata = iMSCP::Database->factory()->doQuery('insert', $sql, $from, $to);
+	$rdata = Selity::Database->factory()->doQuery('insert', $sql, $from, $to);
 	if(ref $rdata ne 'HASH'){
 		error("$rdata");
 		return 1;

@@ -28,9 +28,9 @@ package Servers::po::dovecot::uninstaller;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::File;
-use iMSCP::Execute;
+use Selity::Debug;
+use Selity::File;
+use Selity::Execute;
 
 use vars qw/@ISA/;
 
@@ -40,13 +40,13 @@ use Common::SingletonClass;
 sub _init{
 
 	my $self		= shift;
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/dovecot";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/dovecot";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/dovecot.data";
 
-	tie %self::dovecotConfig, 'iMSCP::Config','fileName' => $conf;
+	tie %self::dovecotConfig, 'Selity::Config','fileName' => $conf;
 
 	0;
 }
@@ -72,7 +72,7 @@ sub restoreConfFile{
 		'dovecot.conf',
 		'dovecot-sql.conf'
 	)) {
-		$rs	|=	iMSCP::File->new(
+		$rs	|=	Selity::File->new(
 					filename => "$self->{bkpDir}/$_.system"
 				)->copyFile(
 					"$self::dovecotConfig{'DOVECOT_CONF_DIR'}/$_"
@@ -85,12 +85,12 @@ sub restoreConfFile{
 	my $mta	= Servers::mta->factory();
 
 	for ('dovecot-sql.conf', 'dovecot-dict-sql.conf') {
-		$file = iMSCP::File->new(filename => "$self::dovecotConfig{'DOVECOT_CONF_DIR'}/$_");
+		$file = Selity::File->new(filename => "$self::dovecotConfig{'DOVECOT_CONF_DIR'}/$_");
 		$rs |= $file->mode(0640);
-		$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $mta->{'MTA_MAILBOX_GID_NAME'});
+		$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $mta->{'MTA_MAILBOX_GID_NAME'});
 	}
 
-	$file	= iMSCP::File->new(filename => "$self::dovecotConfig{'DOVECOT_CONF_DIR'}/dovecot.conf");
+	$file	= Selity::File->new(filename => "$self::dovecotConfig{'DOVECOT_CONF_DIR'}/dovecot.conf");
 	$rs |= $file->mode(0644);
 
 	$rs;
@@ -103,7 +103,7 @@ sub removeSQL{
 
 	if($self::dovecotConfig{'DATABASE_USER'}) {
 
-		my $database = iMSCP::Database->new()->factory();
+		my $database = Selity::Database->new()->factory();
 
 		$database->doQuery( 'delete', "DROP USER ?@?", $self::dovecotConfig{'DATABASE_USER'}, 'localhost');
 		$database->doQuery( 'delete', "DROP USER ?@?", $self::dovecotConfig{'DATABASE_USER'}, '%');

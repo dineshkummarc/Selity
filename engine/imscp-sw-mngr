@@ -27,7 +27,7 @@
 
 use FindBin;
 use lib "$FindBin::Bin/";
-require 'imscp_common_code.pl';
+require 'selity_common_code.pl';
 
 use strict;
 use XML::Parser;
@@ -45,8 +45,8 @@ sub sw_mngr_start_up {
 	#return $rs if ($rs != 0);
 
 	# Let's clear Execution Logs, if any.
-	if (-e $main::imscp_sw_mngr_el) {
-		$rs = del_file($main::imscp_sw_mngr_el);
+	if (-e $main::selity_sw_mngr_el) {
+		$rs = del_file($main::selity_sw_mngr_el);
 		return $rs if ($rs != 0);
 	}
 	# config check;
@@ -143,9 +143,9 @@ sub sw_add_data {
 	$rs = sys_command_rs("$main::cfg{'CMD_CHOWN'} -R $uid:$gid $sw_dest_path/*");
 
 	#Encoding data to push to another script
-	my $imscp_software_install_pushstring = encode_base64("install,$sw_software_db,$sw_software_prefix,$sw_database,$sw_database_user,$sw_database_tmp_pwd,$sw_install_username,$sw_install_password,$sw_install_email,$domain_name,$sw_dest_path,$sw_path");
+	my $selity_software_install_pushstring = encode_base64("install,$sw_software_db,$sw_software_prefix,$sw_database,$sw_database_user,$sw_database_tmp_pwd,$sw_install_username,$sw_install_password,$sw_install_email,$domain_name,$sw_dest_path,$sw_path");
 
-	$rs = sys_command_rs("perl $sw_tmp_path/$sw_software_installfile \"$imscp_software_install_pushstring\"");
+	$rs = sys_command_rs("perl $sw_tmp_path/$sw_software_installfile \"$selity_software_install_pushstring\"");
 	$rs = sys_command_rs("$main::cfg{'CMD_CHOWN'} -R $uid:$gid $sw_dest_path/");
 	$rs = sys_command_rs("$main::cfg{'CMD_RM'} -rf $sw_tmp_path");
 	return $rs if ($rs != 0);
@@ -220,9 +220,9 @@ sub sw_del_data {
 		return $rs if ($rs != 0);
 
 		#Encoding data to push to another script
-		my $imscp_software_uninstall_pushstring = encode_base64("uninstall,$sw_software_db,$sw_software_prefix,$sw_database,$sw_database_user,$sw_database_tmp_pwd,$sw_install_username,$sw_install_password,$sw_install_email,$domain_name,$sw_dest_path,$sw_path");
+		my $selity_software_uninstall_pushstring = encode_base64("uninstall,$sw_software_db,$sw_software_prefix,$sw_database,$sw_database_user,$sw_database_tmp_pwd,$sw_install_username,$sw_install_password,$sw_install_email,$domain_name,$sw_dest_path,$sw_path");
 
-		$rs = sys_command_rs("perl $sw_tmp_path/$sw_software_installfile \"$imscp_software_uninstall_pushstring\"");
+		$rs = sys_command_rs("perl $sw_tmp_path/$sw_software_installfile \"$selity_software_uninstall_pushstring\"");
 		$rs = sys_command_rs("$main::cfg{'CMD_RM'} -rf $sw_tmp_path");
 		return $rs if ($rs != 0);
 
@@ -382,7 +382,7 @@ $rs = sw_mngr_start_up();
 
 if ($rs != 0) {
 
-    dump_el(\@main::el, $main::imscp_sw_mngr_el);
+    dump_el(\@main::el, $main::selity_sw_mngr_el);
 
     sw_mngr_shut_down();
 
@@ -394,7 +394,7 @@ $rs = sw_mngr_engine();
 
 if ($rs != 0) {
 
-    dump_el(\@main::el, $main::imscp_sw_mngr_el);
+    dump_el(\@main::el, $main::selity_sw_mngr_el);
 
     sw_mngr_shut_down();
 
@@ -406,7 +406,7 @@ $rs = sw_mngr_shut_down();
 
 if ($rs != 0) {
 
-    dump_el(\@main::el, $main::imscp_sw_mngr_el);
+    dump_el(\@main::el, $main::selity_sw_mngr_el);
 
     exit 1;
 

@@ -22,11 +22,11 @@
 
 #include <sys/time.h>
 
-#define LOG_DIR "/var/log/imscp"
+#define LOG_DIR "/var/log/selity"
 
-#define STDOUT_LOG "imscp_daemon-stdout.log"
+#define STDOUT_LOG "selity_daemon-stdout.log"
 
-#define STDERR_LOG "imscp_daemon-stderr.log"
+#define STDERR_LOG "selity_daemon-stderr.log"
 
 extern char *message(int message_number);
 

@@ -28,7 +28,7 @@ package Servers::po::dovecot;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -39,13 +39,13 @@ use Common::SingletonClass;
 sub _init{
 
 	my $self		= shift;
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/dovecot";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/dovecot";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/dovecot.data";
 
-	tie %self::dovecotConfig, 'iMSCP::Config','fileName' => $conf;
+	tie %self::dovecotConfig, 'Selity::Config','fileName' => $conf;
 
 	0;
 }
@@ -94,7 +94,7 @@ sub restart{
 	my $self = shift;
 	my ($rs, $stdout, $stderr);
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	# Reload config
 	$rs = execute("$self::dovecotConfig{'CMD_DOVECOT'} restart", \$stdout, \$stderr);
@@ -108,29 +108,29 @@ sub restart{
 
 sub getTraffic{
 
-	use iMSCP::Execute;
-	use iMSCP::File;
-	use iMSCP::Config;
+	use Selity::Execute;
+	use Selity::File;
+	use Selity::Config;
 	use Tie::File;
 
 	my $self		= shift;
 	my $who			= shift;
 	my $dbName		= "$self->{wrkDir}/log.db";
-	my $logFile		= "$main::imscpConfig{TRAFF_LOG_DIR}/mail.log";
-	my $wrkLogFile	= "$main::imscpConfig{LOG_DIR}/mail.po.log";
+	my $logFile		= "$main::selityConfig{TRAFF_LOG_DIR}/mail.log";
+	my $wrkLogFile	= "$main::selityConfig{LOG_DIR}/mail.po.log";
 	my ($rv, $rs, $stdout, $stderr);
 
 	##only if files was not aleady parsed this session
 	unless($self->{logDb}){
 		#use a small conf file to memorize last line readed and his content
-		tie %{$self->{logDb}}, 'iMSCP::Config','fileName' => $dbName, noerrors => 1;
+		tie %{$self->{logDb}}, 'Selity::Config','fileName' => $dbName, noerrors => 1;
 		##first use? we zero line and content
 		$self->{logDb}->{line}		= 0 unless $self->{logDb}->{line};
 		$self->{logDb}->{content}	= '' unless $self->{logDb}->{content};
 		my $lastLineNo	= $self->{logDb}->{line};
 		my $lastLine	= $self->{logDb}->{content};
 		##copy log file
-		$rs = iMSCP::File->new(filename => $logFile)->copyFile($wrkLogFile) if -f $logFile;
+		$rs = Selity::File->new(filename => $logFile)->copyFile($wrkLogFile) if -f $logFile;
 		#retunt 0 traffic if we fail
 		return 0 if $rs;
 		#link log file to array
@@ -147,7 +147,7 @@ sub getTraffic{
 		}
 
 		# Read log file
-		my $content = iMSCP::File->new(filename => $wrkLogFile)->get() || '';
+		my $content = Selity::File->new(filename => $wrkLogFile)->get() || '';
 
 		# IMAP
 		#Oct 15 13:50:31 daniel dovecot: imap(ndmn@test1.eu.bogus): Disconnected: Logged out bytes=235/1032
@@ -176,11 +176,11 @@ END{
 
 	my $endCode	= $?;
 	my $self	= Servers::po::dovecot->new();
-	my $wrkLogFile	= "$main::imscpConfig{LOG_DIR}/mail.po.log";
+	my $wrkLogFile	= "$main::selityConfig{LOG_DIR}/mail.po.log";
 	my $rs		= 0;
 
 	$rs |= $self->restart() if $self->{restart} && $self->{restart} eq 'yes';
-	$rs |= iMSCP::File->new(filename => $wrkLogFile)->delFile() if -f $wrkLogFile;
+	$rs |= Selity::File->new(filename => $wrkLogFile)->delFile() if -f $wrkLogFile;
 
 	$? = $endCode || $rs;
 }

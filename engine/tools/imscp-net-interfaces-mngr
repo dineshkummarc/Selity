@@ -32,10 +32,10 @@ use lib "$FindBin::Bin/..";
 use lib "$FindBin::Bin/../PerlLib";
 use lib "$FindBin::Bin/../PerlVendor";
 
-use iMSCP::Debug;
-use iMSCP::Boot;
+use Selity::Debug;
+use Selity::Boot;
 
-newDebug('imscp-net-interfaces-mngr.log');
+newDebug('selity-net-interfaces-mngr.log');
 
 my $rs = undef;
 our $proceed = $ARGV[0];
@@ -43,22 +43,22 @@ our $proceed = $ARGV[0];
 sub net_interfaces_mngr_start_up {
 
 	umask(027);
-	iMSCP::Boot->new()->init({nolock => 'yes'});
+	Selity::Boot->new()->init({nolock => 'yes'});
 
 	0;
 }
 
 sub virtual_netcard_add{
 
-	use iMSCP::IP;
-	use iMSCP::Mail;
-	use iMSCP::Database;
-	use iMSCP::Execute;
+	use Selity::IP;
+	use Selity::Mail;
+	use Selity::Database;
+	use Selity::Execute;
 
 	my ($rs, $stdout, $stderr);
-	my $database = iMSCP::Database->new()->factory();
+	my $database = Selity::Database->new()->factory();
 
-	my $ips = iMSCP::IP->new();
+	my $ips = Selity::IP->new();
 
 	$rs = $database->doQuery(
 		'ip_id',
@@ -72,7 +72,7 @@ sub virtual_netcard_add{
 	);
 	if (ref $rs ne 'HASH'){
 		error("$rs");
-		iMSCP::Mail->new()->errmsg($rs);
+		Selity::Mail->new()->errmsg($rs);
 	} else {
 		foreach(values %$rs){
 			#if ip is attached to a network card?
@@ -86,7 +86,7 @@ sub virtual_netcard_add{
 						#"and let i-MSCP handle it"
 					#;
 					#warning("$msg");
-					#iMSCP::Mail->new()->warnMsg($msg);
+					#Selity::Mail->new()->warnMsg($msg);
 				#}
 			} else {
 				#ip is not attached so we will attached to virtual card
@@ -94,15 +94,15 @@ sub virtual_netcard_add{
 				if($ips->existsNetCard($_->{ip_card})){
 					$rs = $ips->attachIpToNetCard($_->{ip_card}, $_->{ip_number});
 					error("Can not add $_->{ip_number} to $_->{ip_card}") if $rs;
-					#iMSCP::Mail->new()->errmsg($stderr)if $stderr;
+					#Selity::Mail->new()->errmsg($stderr)if $stderr;
 				} else {
 					my $msg =
 						"Card $_->{ip_card} do not exists. Please fix this in ".
-						"$main::imscpConfig{BASE_SERVER_VHOST_PREFIX}".
-						"$main::imscpConfig{BASE_SERVER_VHOST}/admin/ip_manage.php"
+						"$main::selityConfig{BASE_SERVER_VHOST_PREFIX}".
+						"$main::selityConfig{BASE_SERVER_VHOST}/admin/ip_manage.php"
 					;
 					error("$msg");
-					iMSCP::Mail->new()->errmsg($msg);
+					Selity::Mail->new()->errmsg($msg);
 				}
 			}
 		}
@@ -114,7 +114,7 @@ sub virtual_netcard_add{
 				$rs = execute("ifconfig $_ up", \$stdout, \$stderr);
 				debug("$stdout")if $stdout;
 				error("$stderr")if $stderr;
-				iMSCP::Mail->new()->errmsg($stderr)if $stderr;
+				Selity::Mail->new()->errmsg($stderr)if $stderr;
 			}
 		}
 	}
@@ -125,15 +125,15 @@ sub virtual_netcard_remove{
 
 	my $ref = undef;
 
-	use iMSCP::IP;
-	use iMSCP::Mail;
-	use iMSCP::Database;
-	use iMSCP::Execute;
+	use Selity::IP;
+	use Selity::Mail;
+	use Selity::Database;
+	use Selity::Execute;
 
 	my ($rs, $stdout, $stderr);
-	my $database = iMSCP::Database->new()->factory();
+	my $database = Selity::Database->new()->factory();
 
-	my $ips = iMSCP::IP->new();
+	my $ips = Selity::IP->new();
 	$ips->loadIPs();
 
 	$rs = $database->doQuery(
@@ -145,12 +145,12 @@ sub virtual_netcard_remove{
 		FROM
 			`server_ips`
 		WHERE
-			`ip_number` != '$main::imscpConfig{'BASE_SERVER_IP'}'
+			`ip_number` != '$main::selityConfig{'BASE_SERVER_IP'}'
 		"
 	);
 	if (ref $rs ne 'HASH'){
 		error("$rs");
-		iMSCP::Mail->new()->errmsg($rs);
+		Selity::Mail->new()->errmsg($rs);
 	} else {
 		foreach(values %$rs){
 			my $vcard = $ips->addedToVCard($_->{ip_number});
@@ -158,7 +158,7 @@ sub virtual_netcard_remove{
 				#We bring down only virtual network cards
 				$rs = $ips->detachIpFromNetCard($_->{ip_number});
 				error("Can not detach $_->{ip_number}") if $rs;
-				#iMSCP::Mail->new()->errmsg($stderr)if $stderr;
+				#Selity::Mail->new()->errmsg($stderr)if $stderr;
 			}
 		}
 	}
@@ -184,11 +184,11 @@ sub net_interfaces_mngr_engine {
 	} else {
 		my $msg = "Must be called with 'Start', 'Restart' or 'Stop' argument";
 		error("$msg");
-		iMSCP::Mail->new()->errmsg($msg);
+		Selity::Mail->new()->errmsg($msg);
 		exit 1;
 	}
 
-	my $database = iMSCP::Database->new(db => $main::imscpConfig{'DATABASE_TYPE'})->factory();
+	my $database = Selity::Database->new(db => $main::selityConfig{'DATABASE_TYPE'})->factory();
 	$rs = $database->doQuery(
 		'dummy',
 		"
@@ -200,7 +200,7 @@ sub net_interfaces_mngr_engine {
 	);
 	if (ref $rs ne 'HASH'){
 		error("$rs")if $rs;
-		iMSCP::Mail->new()->errmsg($rs)if $rs;
+		Selity::Mail->new()->errmsg($rs)if $rs;
 	}
 
 	$rs = $database->doQuery(
@@ -214,7 +214,7 @@ sub net_interfaces_mngr_engine {
 	);
 	if (ref $rs ne 'HASH'){
 		error("$rs")if $rs;
-		iMSCP::Mail->new()->errmsg($rs)if $rs;
+		Selity::Mail->new()->errmsg($rs)if $rs;
 	}
 
 	0;

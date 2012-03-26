@@ -28,7 +28,7 @@ package Modules::Domain;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -70,7 +70,7 @@ sub loadData{
 			`domain_id` = ?
 	";
 
-	my $rdata = iMSCP::Database->factory()->doQuery('domain_id', $sql, $self->{dmnId});
+	my $rdata = Selity::Database->factory()->doQuery('domain_id', $sql, $self->{dmnId});
 
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 	error("No domain has id = $self->{dmnId}") and return 1 unless(exists $rdata->{$self->{dmnId}});
@@ -128,7 +128,7 @@ sub process{
 		);
 	}
 
-	my $rdata = iMSCP::Database->factory()->doQuery('delete', @sql);
+	my $rdata = Selity::Database->factory()->doQuery('delete', @sql);
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 	$rs;
@@ -136,21 +136,21 @@ sub process{
 
 sub restore{
 
-	use iMSCP::Execute;
-	use iMSCP::Dir;
-	use iMSCP::Database;
-	use iMSCP::Rights;
+	use Selity::Execute;
+	use Selity::Dir;
+	use Selity::Database;
+	use Selity::Rights;
 	use Servers::httpd;
 
 	my $self		= shift;
 	$self->{mode}	= 'restore';
 	my ($rs, $stdout, $stderr);
 
-	my $dmn_dir		= "$main::imscpConfig{'USER_HOME_DIR'}/$self->{domain_name}";
+	my $dmn_dir		= "$main::selityConfig{'USER_HOME_DIR'}/$self->{domain_name}";
 	my $dmn_bk_dir	= "$dmn_dir/backups";
 	my $cmd;
 
-	my $dir	= iMSCP::Dir->new(dirname => $dmn_bk_dir);
+	my $dir	= Selity::Dir->new(dirname => $dmn_bk_dir);
 	return 1 if $dir->get();
 
 	my @bkpFiles	= $dir->getFiles();
@@ -172,7 +172,7 @@ sub restore{
 					`sql_database`.`sqld_name` = ?
 				;
 			";
-			my $rdata = iMSCP::Database->factory()->doQuery('sqld_name', $sql, $self->{domain_id}, $1);
+			my $rdata = Selity::Database->factory()->doQuery('sqld_name', $sql, $self->{domain_id}, $1);
 
 			error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 			error("No owned database has name = $1") and return 1 unless(exists $rdata->{$1});
@@ -185,16 +185,16 @@ sub restore{
 					$_ = $_;
 
 				if($2 eq 'bz2') {
-					$cmd = qq!$main::imscpConfig{'CMD_BZCAT'} -d "$dmn_bk_dir/$_"!;
+					$cmd = qq!$main::selityConfig{'CMD_BZCAT'} -d "$dmn_bk_dir/$_"!;
 				} elsif($2 eq 'gz') {
-					$cmd = qq!$main::imscpConfig{'CMD_GZCAT'} -d "$dmn_bk_dir/$_"!;
+					$cmd = qq!$main::selityConfig{'CMD_GZCAT'} -d "$dmn_bk_dir/$_"!;
 				} elsif($2 eq 'lzma') {
-					$cmd = qq!$main::imscpConfig{'CMD_LZMA'} -dc "$dmn_bk_dir/$_"!;
+					$cmd = qq!$main::selityConfig{'CMD_LZMA'} -dc "$dmn_bk_dir/$_"!;
 				} elsif($2 eq 'xz') {
-					$cmd = qq!$main::imscpConfig{'CMD_XZ'} -dc "$dmn_bk_dir/$_"!;
+					$cmd = qq!$main::selityConfig{'CMD_XZ'} -dc "$dmn_bk_dir/$_"!;
 				}
 
-				$cmd .= qq! | $main::imscpConfig{'CMD_MYSQL'} --user="$dbuser"! .
+				$cmd .= qq! | $main::selityConfig{'CMD_MYSQL'} --user="$dbuser"! .
 					qq! --password="$dbpass" --database="$dbname"!;
 
 				$rs = execute($cmd, \$stdout, \$stderr);
@@ -212,7 +212,7 @@ sub restore{
 				$type = 'gzip';
 			}
 
-			my $cmd = "$main::imscpConfig{'CMD_TAR'} -x -p --$type -C '$dmn_dir' -f $dmn_bk_dir/$_";
+			my $cmd = "$main::selityConfig{'CMD_TAR'} -x -p --$type -C '$dmn_dir' -f $dmn_bk_dir/$_";
 			$rs = execute($cmd, \$stdout, \$stderr);
 			debug("$stdout") if $stdout;
 			error("$stderr") if $stderr;
@@ -228,7 +228,7 @@ sub restore{
 			'0'
 		);
 
-	$cmd	= "$main::imscpConfig{'CMD_CHOWN'} -R $self->{domain_uid}:$httpdGroup $dmn_dir";
+	$cmd	= "$main::selityConfig{'CMD_CHOWN'} -R $self->{domain_uid}:$httpdGroup $dmn_dir";
 	$rs		|= execute($cmd, \$stdout, \$stderr);
 	debug("$stdout") if $stdout;
 	error("$stderr") if $stderr;
@@ -236,7 +236,7 @@ sub restore{
 	$rs |= setRights(
 		"$dmn_dir/domain_disable_page",
 		{
-			user		=> $main::imscpConfig{ROOT_USER},
+			user		=> $main::selityConfig{ROOT_USER},
 			group		=> $httpdGroup,
 			filemode	=> '0640',
 			dirmode		=> '0750',
@@ -247,8 +247,8 @@ sub restore{
 	$rs |= setRights(
 		"$dmn_dir/backups",
 		{
-			user		=> $main::imscpConfig{ROOT_USER},
-			group		=> $main::imscpConfig{ROOT_GROUP},
+			user		=> $main::selityConfig{ROOT_USER},
+			group		=> $main::selityConfig{ROOT_GROUP},
 			filemode	=> '0640',
 			dirmode		=> '0750',
 			recursive	=> 'yes'
@@ -263,24 +263,24 @@ sub buildHTTPDData{
 	my $self	= shift;
 	my $groupName	=
 	my $userName	=
-			$main::imscpConfig{SYSTEM_USER_PREFIX}.
-			($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
-	my $hDir 		= "$main::imscpConfig{'USER_HOME_DIR'}/$self->{domain_name}";
+			$main::selityConfig{SYSTEM_USER_PREFIX}.
+			($main::selityConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
+	my $hDir 		= "$main::selityConfig{'USER_HOME_DIR'}/$self->{domain_name}";
 	$hDir			=~ s~/+~/~g;
 	my $pDir 		= $hDir;
 
 	my $sql = "SELECT * FROM `config` WHERE `name` LIKE 'PHPINI%'";
-	my $rdata = iMSCP::Database->factory()->doQuery('name', $sql);
+	my $rdata = Selity::Database->factory()->doQuery('name', $sql);
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 	debug(Dumper($rdata).'');
 
 	$sql			= "SELECT * FROM `php_ini` WHERE `domain_id` = ?";
-	my $phpiniData	= iMSCP::Database->factory()->doQuery('domain_id', $sql, $self->{domain_id});
+	my $phpiniData	= Selity::Database->factory()->doQuery('domain_id', $sql, $self->{domain_id});
 	error("$phpiniData") and return 1 if(ref $phpiniData ne 'HASH');
 	debug(Dumper($phpiniData).'');
 
 	$sql			= "SELECT * FROM `ssl_certs` WHERE `id` = ? AND `type` = ? AND `status` = ?";
-	my $certData	= iMSCP::Database->factory()->doQuery('id', $sql, $self->{domain_id}, 'dmn', 'ok');
+	my $certData	= Selity::Database->factory()->doQuery('id', $sql, $self->{domain_id}, 'dmn', 'ok');
 	error("$certData") and return 1 if(ref $certData ne 'HASH');
 
 	my $haveCert = exists $certData->{$self->{domain_id}} && !$self->testCert($self->{domain_name});
@@ -291,14 +291,14 @@ sub buildHTTPDData{
 		ROOT_DMN_NAME				=> $self->{domain_name},
 		PARENT_DMN_NAME				=> $self->{domain_name},
 		DMN_IP						=> $self->{ip_number},
-		WWW_DIR						=> $main::imscpConfig{'USER_HOME_DIR'},
+		WWW_DIR						=> $main::selityConfig{'USER_HOME_DIR'},
 		HOME_DIR					=> $hDir,
 		PARENT_DIR					=> $pDir,
-		PEAR_DIR					=> $main::imscpConfig{'PEAR_DIR'},
-		PHP_TIMEZONE				=> $main::imscpConfig{'PHP_TIMEZONE'},
-		PHP_VERSION					=> $main::imscpConfig{'PHP_VERSION'},
-		BASE_SERVER_VHOST_PREFIX	=> $main::imscpConfig{'BASE_SERVER_VHOST_PREFIX'},
-		BASE_SERVER_VHOST			=> $main::imscpConfig{'BASE_SERVER_VHOST'},
+		PEAR_DIR					=> $main::selityConfig{'PEAR_DIR'},
+		PHP_TIMEZONE				=> $main::selityConfig{'PHP_TIMEZONE'},
+		PHP_VERSION					=> $main::selityConfig{'PHP_VERSION'},
+		BASE_SERVER_VHOST_PREFIX	=> $main::selityConfig{'BASE_SERVER_VHOST_PREFIX'},
+		BASE_SERVER_VHOST			=> $main::selityConfig{'BASE_SERVER_VHOST'},
 		USER						=> $userName,
 		GROUP						=> $groupName,
 		have_php					=> $self->{domain_php},
@@ -346,7 +346,7 @@ sub buildMTAData{
 
 sub buildNAMEDData{
 
-	use iMSCP::Database;
+	use Selity::Database;
 
 	my $self	= shift;
 
@@ -362,7 +362,7 @@ sub buildNAMEDData{
 				`domain_dns`.`domain_id` = ?
 		";
 
-		my $rdata = iMSCP::Database->factory()->doQuery('domain_dns_id', $sql, 0, $self->{domain_id});
+		my $rdata = Selity::Database->factory()->doQuery('domain_dns_id', $sql, 0, $self->{domain_id});
 		error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 		$self->{named}->{DMN_CUSTOM}->{$_} = $rdata->{$_} for keys %$rdata;
@@ -379,15 +379,15 @@ sub buildNAMEDData{
 					`domain_id` = ?
 			";
 
-			my $rdata = iMSCP::Database->factory()->doQuery('update', $sql, 'change', 'ok', $self->{domain_id});
+			my $rdata = Selity::Database->factory()->doQuery('update', $sql, 'change', 'ok', $self->{domain_id});
 			error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 		}
 	}
 
 	my $groupName	=
 	my $userName	=
-			$main::imscpConfig{SYSTEM_USER_PREFIX}.
-			($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
+			$main::selityConfig{SYSTEM_USER_PREFIX}.
+			($main::selityConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
 
 	$self->{named}->{DMN_NAME}	= $self->{domain_name};
 	$self->{named}->{DMN_IP}	= $self->{ip_number};
@@ -403,10 +403,10 @@ sub buildADDONData{
 
 	my $groupName	=
 	my $userName	=
-						$main::imscpConfig{SYSTEM_USER_PREFIX}.
-						($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
+						$main::selityConfig{SYSTEM_USER_PREFIX}.
+						($main::selityConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
 
-	my $hDir 		= "$main::imscpConfig{'USER_HOME_DIR'}/$self->{domain_name}";
+	my $hDir 		= "$main::selityConfig{'USER_HOME_DIR'}/$self->{domain_name}";
 	$hDir			=~ s~/+~/~g;
 
 

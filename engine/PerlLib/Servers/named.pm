@@ -28,7 +28,7 @@ package Servers::named;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 
 use vars qw/@ISA/;
 @ISA = ('Common::SimpleClass');
@@ -36,7 +36,7 @@ use Common::SimpleClass;
 
 sub factory{
 	my $self	= shift;
-	my $server	= shift || $main::imscpConfig{NAMED_SERVER};
+	my $server	= shift || $main::selityConfig{NAMED_SERVER};
 	my ($file, $class);
 
 	if(lc($server) =~ /^no$/ ){

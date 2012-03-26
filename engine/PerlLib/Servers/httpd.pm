@@ -28,7 +28,7 @@ package Servers::httpd;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 
 use FindBin;
 
@@ -39,7 +39,7 @@ use Common::SimpleClass;
 
 sub factory{
 	my $self	= shift;
-	my $server	= shift || $main::imscpConfig{HTTPD_SERVER};
+	my $server	= shift || $main::selityConfig{HTTPD_SERVER};
 	my ($file, $class);
 
 	if(lc($server) =~ /^no$/ ){

@@ -28,7 +28,7 @@ package Modules::Mail;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -59,7 +59,7 @@ sub loadData{
 		WHERE
 			`t1`.`mail_id` = ?
 	';
-	my $rdata = iMSCP::Database->factory()->doQuery('mail_id', $sql, $self->{mailId});
+	my $rdata = Selity::Database->factory()->doQuery('mail_id', $sql, $self->{mailId});
 
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 	error("No mail has id = $self->{mailId}") and return 1 unless(exists $rdata->{$self->{mailId}});
@@ -106,7 +106,7 @@ sub process{
 		);
 	}
 
-	my $rdata = iMSCP::Database->factory()->doQuery('misc', @sql);
+	my $rdata = Selity::Database->factory()->doQuery('misc', @sql);
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 	$rs;
@@ -139,7 +139,7 @@ sub buildMTAData{
 
 	if($self->{mail_type} =~ m/_catchall/ && $self->{status} eq 'delete'){
 		my $sql = "SELECT `mail_addr` FROM `mail_users` WHERE `mail_addr` LIKE '\%$self->{mail_addr}' AND `mail_type` LIKE '\%mail'";
-		my $rdata = iMSCP::Database->factory()->doQuery('mail_addr', $sql);
+		my $rdata = Selity::Database->factory()->doQuery('mail_addr', $sql);
 		error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 		@{$self->{mta}->{MAIL_ON_CATCHALL}} = keys %{$rdata};
 	}

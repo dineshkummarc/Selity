@@ -28,7 +28,7 @@ package Modules::Certificates;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -48,7 +48,7 @@ sub loadData{
 
 	my $sql = " SELECT * FROM `ssl_certs` WHERE `cert_id` = ?";
 
-	my $certData = iMSCP::Database->factory()->doQuery('cert_id', $sql, $self->{cert_id});
+	my $certData = Selity::Database->factory()->doQuery('cert_id', $sql, $self->{cert_id});
 
 	error("$certData") and return 1 if(ref $certData ne 'HASH');
 	error("No record in table cert_ssl has id = $self->{cert_id}") and return 1 unless(exists $certData->{$self->{cert_id}});
@@ -65,7 +65,7 @@ sub loadData{
 		$sql = 'SELECT CONCAT(`subdomain_alias_name`, \'.\', `alias_name`) AS `name`, `subdomain_alias_id` AS `id` FROM `subdomain_alias` LEFT JOIN `domain_aliasses` USING(`alias_id`) WHERE `subdomain_alias_id` = ?';
 	}
 
-	my $rdata = iMSCP::Database->factory()->doQuery('id', $sql, $self->{id});
+	my $rdata = Selity::Database->factory()->doQuery('id', $sql, $self->{id});
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 	error("No record in table $self->{type} has id = $self->{id}") and return 1 unless(exists $rdata->{$self->{id}});
 
@@ -77,7 +77,7 @@ sub loadData{
 			"Orphan entry: ".Dumper($rdata->{$self->{cert_id}}),
 			$self->{cert_id}
 		);
-		my $rdata = iMSCP::Database->factory()->doQuery('update', @sql);
+		my $rdata = Selity::Database->factory()->doQuery('update', @sql);
 		return 1;
 	}
 
@@ -116,7 +116,7 @@ sub process{
 		}
 	}
 
-	my $rdata = iMSCP::Database->factory()->doQuery('something', @sql);
+	my $rdata = Selity::Database->factory()->doQuery('something', @sql);
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 	$rs;
@@ -125,17 +125,17 @@ sub process{
 sub add{
 
 	use File::Temp;
-	use iMSCP::File;
-	use iMSCP::Dir;
+	use Selity::File;
+	use Selity::Dir;
 	use Modules::openssl;
 
 	my $self		= shift;
 	my $rs			= 0;
-	my $rootUser	= $main::imscpConfig{ROOT_USER};
-	my $rootGroup	= $main::imscpConfig{ROOT_GROUP};
-	my $certPath	= "$main::imscpConfig{GUI_ROOT_DIR}/data/certs";
+	my $rootUser	= $main::selityConfig{ROOT_USER};
+	my $rootGroup	= $main::selityConfig{ROOT_GROUP};
+	my $certPath	= "$main::selityConfig{GUI_ROOT_DIR}/data/certs";
 
-	iMSCP::Dir->new(dirname => $certPath)->make({
+	Selity::Dir->new(dirname => $certPath)->make({
 			mode => 0750,
 			owner => $rootUser,
 			group => $rootGroup
@@ -146,7 +146,7 @@ sub add{
 		UNLINK => 1,
 		OPEN => 0
 	);
-	my $file = iMSCP::File->new(filename => $certFH->filename);
+	my $file = Selity::File->new(filename => $certFH->filename);
 	$file->set($self->{cert});
 	$rs |= $file->save();
 	Modules::openssl->new()->{cert_path} = $certFH->filename;
@@ -156,7 +156,7 @@ sub add{
 		UNLINK => 1,
 		OPEN => 0
 	);
-	$file = iMSCP::File->new(filename => $keyFH->filename);
+	$file = Selity::File->new(filename => $keyFH->filename);
 	$file->set($self->{key});
 	$rs |= $file->save();
 	Modules::openssl->new()->{key_path} = $keyFH->filename;
@@ -169,7 +169,7 @@ sub add{
 			OPEN => 0
 		);
 
-		$file = iMSCP::File->new(filename => $caFH->filename);
+		$file = Selity::File->new(filename => $caFH->filename);
 		$file->set($self->{ca_cert});
 		$rs |= $file->save();
 		Modules::openssl->new()->{intermediate_cert_path} = $caFH->filename;
@@ -177,7 +177,7 @@ sub add{
 		Modules::openssl->new()->{intermediate_cert_path} = '';
 	}
 
-	Modules::openssl->new()->{openssl_path} = $main::imscpConfig{'CMD_OPENSSL'};
+	Modules::openssl->new()->{openssl_path} = $main::selityConfig{'CMD_OPENSSL'};
 
 	Modules::openssl->new()->{key_pass} = $self->{password};
 	$rs |= Modules::openssl->new()->ssl_check_all();
@@ -194,23 +194,23 @@ sub add{
 
 sub delete{
 
-	use iMSCP::File;
-	use iMSCP::Dir;
+	use Selity::File;
+	use Selity::Dir;
 
 	my $self		= shift;
 	my $rs			= 0;
-	my $rootUser	= $main::imscpConfig{ROOT_USER};
-	my $rootGroup	= $main::imscpConfig{ROOT_GROUP};
-	my $certPath	= "$main::imscpConfig{GUI_ROOT_DIR}/data/certs";
+	my $rootUser	= $main::selityConfig{ROOT_USER};
+	my $rootGroup	= $main::selityConfig{ROOT_GROUP};
+	my $certPath	= "$main::selityConfig{GUI_ROOT_DIR}/data/certs";
 	my $cert		= "$certPath/$self->{name}.pem";
 
-	iMSCP::Dir->new(dirname => $certPath)->make({
+	Selity::Dir->new(dirname => $certPath)->make({
 			mode => 0750,
 			owner => $rootUser,
 			group => $rootGroup
 	});
 
-	$rs |= iMSCP::File->new(filename => $cert)->delFile($cert) if -f $cert;
+	$rs |= Selity::File->new(filename => $cert)->delFile($cert) if -f $cert;
 
 	$rs;
 }

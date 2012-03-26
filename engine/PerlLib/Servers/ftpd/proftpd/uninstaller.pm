@@ -28,10 +28,10 @@ package Servers::ftpd::proftpd::uninstaller;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::Execute;
-use iMSCP::File;
-use iMSCP::Templator;
+use Selity::Debug;
+use Selity::Execute;
+use Selity::File;
+use Selity::Templator;
 
 use vars qw/@ISA/;
 
@@ -42,13 +42,13 @@ sub _init{
 
 	my $self		= shift;
 
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/proftpd";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/proftpd";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/proftpd.data";
 
-	tie %self::proftpdConfig, 'iMSCP::Config','fileName' => $conf;
+	tie %self::proftpdConfig, 'Selity::Config','fileName' => $conf;
 
 	0;
 }
@@ -67,14 +67,14 @@ sub uninstall{
 
 sub removeDirs{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 
 	my $self	= shift;
 	my $rs		= 0;
 
-	for($self::proftpdConfig{FTPD_CONF_DIR}, "$main::imscpConfig{TRAFF_LOG_DIR}/proftpd"){
+	for($self::proftpdConfig{FTPD_CONF_DIR}, "$main::selityConfig{TRAFF_LOG_DIR}/proftpd"){
 
-		$rs |= iMSCP::Dir->new(
+		$rs |= Selity::Dir->new(
 			dirname => $_
 		)->remove() if -d $_;
 	}
@@ -87,7 +87,7 @@ sub removeDB{
 	my $self		= shift;
 	my $rs			= 0;
 	my $err			= 0;
-	my $database	= iMSCP::Database->new()->factory();
+	my $database	= Selity::Database->new()->factory();
 
 	if($self::proftpdConfig{DATABASE_USER}){
 
@@ -118,7 +118,7 @@ sub removeDB{
 sub restoreConfFile{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $rs		= 0;
@@ -128,7 +128,7 @@ sub restoreConfFile{
 	) {
 		my ($filename, $directories, $suffix) = fileparse($_);
 		if(-f "$self->{bkpDir}/$filename$suffix.system"){
-			$rs	|=	iMSCP::File->new(
+			$rs	|=	Selity::File->new(
 						filename => "$self->{bkpDir}/$filename$suffix.system"
 					)->copyFile(
 						$_

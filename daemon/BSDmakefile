@@ -30,7 +30,7 @@
 # @link			http://i-mscp.net i-MSCP Home Site
 # @license		http://www.gnu.org/licenses/ GPL v2
 
-EXEC = imscp_daemon
+EXEC = selity_daemon
 
 CC = gcc -ansi -Wstrict-prototypes -pedantic $(CFLAGS)
 

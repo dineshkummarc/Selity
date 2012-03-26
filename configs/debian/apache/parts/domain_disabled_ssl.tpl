@@ -24,7 +24,7 @@
 	RedirectMatch permanent ^/ftp[\/]?$		{BASE_SERVER_VHOST_PREFIX}{BASE_SERVER_VHOST}/ftp/
 	RedirectMatch permanent ^/pma[\/]?$		{BASE_SERVER_VHOST_PREFIX}{BASE_SERVER_VHOST}/pma/
 	RedirectMatch permanent ^/webmail[\/]?$	{BASE_SERVER_VHOST_PREFIX}{BASE_SERVER_VHOST}/webmail/
-	RedirectMatch permanent ^/imscp[\/]?$	{BASE_SERVER_VHOST_PREFIX}{BASE_SERVER_VHOST}/
+	RedirectMatch permanent ^/selity[\/]?$	{BASE_SERVER_VHOST_PREFIX}{BASE_SERVER_VHOST}/
 
 	<IfModule mod_cband.c>
 		CBandUser {USER}

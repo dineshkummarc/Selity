@@ -110,7 +110,7 @@ localhost:10025 inet  n -       n       -      -        smtpd
   -o strict_rfc821_envelopes=yes
 
 # i-MSCP autoresponder
-imscp-arpl unix  -      n       n       -       -       pipe
+selity-arpl unix  -      n       n       -       -       pipe
   flags=O user={ARPL_USER}:{ARPL_GROUP} argv={ARPL_PATH} $recipient
 
 # po setup begin

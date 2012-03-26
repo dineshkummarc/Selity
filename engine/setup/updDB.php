@@ -45,11 +45,11 @@ if(strpos($guiRootDir, 'GUI_ROOT_DIR') !== false) {
 set_include_path('.' . PATH_SEPARATOR . $guiRootDir . '/library');
 
 // Include core library
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 try {
-	// Gets an iMSCP_Update_Database instance
-	$databaseUpdate = iMSCP_Update_Database::getInstance();
+	// Gets an Selity_Update_Database instance
+	$databaseUpdate = Selity_Update_Database::getInstance();
 
 	if(!$databaseUpdate->applyUpdates()) {
 		print "\n[ERROR]: " . $databaseUpdate->getError() . "\n\n";

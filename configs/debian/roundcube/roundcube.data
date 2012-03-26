@@ -24,7 +24,7 @@
 
 ROUNDCUBE_CONF_DIR = tools/webmail/config
 
-ROUNDCUBE_PWCHANGER_DIR = tools/webmail/plugins/imscp_pw_changer
+ROUNDCUBE_PWCHANGER_DIR = tools/webmail/plugins/selity_pw_changer
 
 DATABASE_USER =
 
@@ -32,4 +32,4 @@ DATABASE_PASSWORD =
 
 DES_KEY =
 
-PLUGINS = 'imscp_pw_changer'
+PLUGINS = 'selity_pw_changer'

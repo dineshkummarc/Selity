@@ -45,7 +45,7 @@ APACHE_MODS_DIR = /etc/apache2/mods-available
 
 APACHE_SITES_DIR = /etc/apache2/sites-available
 
-APACHE_CUSTOM_SITES_CONFIG_DIR = /etc/apache2/imscp
+APACHE_CUSTOM_SITES_CONFIG_DIR = /etc/apache2/selity
 
 APACHE_USER = www-data
 

@@ -32,14 +32,14 @@ use FindBin;
 use lib "$FindBin::Bin/..";
 use lib "$FindBin::Bin/../PerlLib";
 
-use iMSCP::Debug;
-use iMSCP::Boot;
-use iMSCP::Execute;
-use iMSCP::Mail;
-use iMSCP::Dir;
+use Selity::Debug;
+use Selity::Boot;
+use Selity::Execute;
+use Selity::Mail;
+use Selity::Dir;
 use Data::Dumper;
 
-newDebug('imscp-backup-all.log');
+newDebug('selity-backup-all.log');
 
 our $command = {
 				bzip2	=> {extension => 'bz2',		command => 'CMD_BZIP'},
@@ -51,7 +51,7 @@ our $command = {
 sub backup_start_up {
 
 	umask(027);
-	iMSCP::Boot->new()->init({nolock => 'yes'});
+	Selity::Boot->new()->init({nolock => 'yes'});
 
 	0;
 }
@@ -61,8 +61,8 @@ sub backup{
 	my $rs = 0;
 	my ($stdout, $stderr);
 
-	unless ($main::imscpConfig{ZIP} =~ /^(bzip2|gzip|lzma|xz)$/i) {
-		my $msg = "Backup algorithm not supported: $main::imscpConfig{ZIP}!";
+	unless ($main::selityConfig{ZIP} =~ /^(bzip2|gzip|lzma|xz)$/i) {
+		my $msg = "Backup algorithm not supported: $main::selityConfig{ZIP}!";
 		error($msg);
 		return 1;
 	}
@@ -80,7 +80,7 @@ sub backup{
 		AND
 			t1.allowbackup != 'no'
 	";
-	my $rdata = iMSCP::Database->new()->factory()->doQuery('domain_name', $sql);
+	my $rdata = Selity::Database->new()->factory()->doQuery('domain_name', $sql);
 
 	if (ref $rdata ne 'HASH'){
 		error("$rdata");
@@ -88,37 +88,37 @@ sub backup{
 	} else {
 
 		foreach (keys %$rdata) {
-			iMSCP::Boot->new()->lock();
+			Selity::Boot->new()->lock();
 			if ($rdata->{$_}->{allowbackup} !~ m/^no$/i) {
 
-				my $hDir		= $main::imscpConfig{USER_HOME_DIR}."/$_";
+				my $hDir		= $main::selityConfig{USER_HOME_DIR}."/$_";
 				my $bkpDir		= "$hDir/backups";
 
-				my $rv |= iMSCP::Dir->new( dirname => $bkpDir)->make({
-					user	=> $main::imscpConfig{ROOT_USER},
-					group	=> $main::imscpConfig{ROOT_GROUP},
+				my $rv |= Selity::Dir->new( dirname => $bkpDir)->make({
+					user	=> $main::selityConfig{ROOT_USER},
+					group	=> $main::selityConfig{ROOT_GROUP},
 					mode	=> 0755
 				});
 				$rs |= $rv;
 				if($rv){
-					iMSCP::Boot->new()->unlock();
+					Selity::Boot->new()->unlock();
 					next ;
 				}
 
-				$rs |= execute("$main::imscpConfig{'CMD_RM'} -rf $bkpDir/*", \$stdout, \$stderr);
+				$rs |= execute("$main::selityConfig{'CMD_RM'} -rf $bkpDir/*", \$stdout, \$stderr);
 				debug($stdout) if $stdout;
 				error($stderr) if $stderr;
 
 				use POSIX qw(strftime);
-				my $ext		= $command->{lc($main::imscpConfig{ZIP})}->{extension};
+				my $ext		= $command->{lc($main::selityConfig{ZIP})}->{extension};
 				my $date	= strftime "%Y.%m.%d-%H:%M", localtime;
 
 				if ($rdata->{$_}->{allowbackup} =~ m/full|dmn/i) {
 
 					my @cmd = (
-						lc($main::imscpConfig{CMD_TAR}),
+						lc($main::selityConfig{CMD_TAR}),
 						"--create --directory=$hDir",
-						"--".lc($main::imscpConfig{ZIP}),
+						"--".lc($main::selityConfig{ZIP}),
 						"--file=$bkpDir/$_-backup-$date.tar.$ext",
 						"--exclude=logs",
 						"--exclude=phptmp",
@@ -131,35 +131,35 @@ sub backup{
 					debug($stdout) if $stdout;
 					error($stderr) if $stderr;
 
-					my $file = iMSCP::File->new(filename => "$bkpDir/$_-backup-$date.tar.$ext");
+					my $file = Selity::File->new(filename => "$bkpDir/$_-backup-$date.tar.$ext");
 					$rs |= $file->mode(0644);
-					$rs |= $file->owner($main::imscpConfig{ROOT_USER}, $main::imscpConfig{ROOT_GROUP});
+					$rs |= $file->owner($main::selityConfig{ROOT_USER}, $main::selityConfig{ROOT_GROUP});
 				}
 
 				if (
 					$rdata->{$_}->{allowbackup} =~ m/full|sql/i
 					&&
-					iMSCP::Database->new()->factory()->can('dumpdb')
+					Selity::Database->new()->factory()->can('dumpdb')
 				) {
 
 					$sql		= "SELECT `sqld_id`, `sqld_name` FROM `sql_database` WHERE `domain_id` = ?";
-					my $dbData	= iMSCP::Database->new()->factory()->doQuery('sqld_name', $sql, $rdata->{$_}->{domain_id});
+					my $dbData	= Selity::Database->new()->factory()->doQuery('sqld_name', $sql, $rdata->{$_}->{domain_id});
 
 					if (ref $dbData ne 'HASH'){
 						error("$dbData");
 						$rs |= 1;
-						iMSCP::Boot->new()->unlock();
+						Selity::Boot->new()->unlock();
 						next;
 					}
 
 					foreach (keys %$dbData) {
 
-						my $cmd = $main::imscpConfig{$command->{$main::imscpConfig{ZIP}}->{command}}." --force \'$bkpDir/$_.sql\'";
-						$rs |= iMSCP::Database->new()->factory()->dumpdb($_, "$bkpDir/$_.sql");
+						my $cmd = $main::selityConfig{$command->{$main::selityConfig{ZIP}}->{command}}." --force \'$bkpDir/$_.sql\'";
+						$rs |= Selity::Database->new()->factory()->dumpdb($_, "$bkpDir/$_.sql");
 
-						my $file = iMSCP::File->new(filename => "$bkpDir/$_.sql");
+						my $file = Selity::File->new(filename => "$bkpDir/$_.sql");
 						$rs |= $file->mode(0644);
-						$rs |= $file->owner($main::imscpConfig{ROOT_USER}, $main::imscpConfig{ROOT_GROUP});
+						$rs |= $file->owner($main::selityConfig{ROOT_USER}, $main::selityConfig{ROOT_GROUP});
 
 						$rs |= execute($cmd, \$stdout, \$stderr);
 						debug("$stdout") if $stdout;
@@ -168,7 +168,7 @@ sub backup{
 					}
 				}
 			}
-			iMSCP::Boot->new()->unlock();
+			Selity::Boot->new()->unlock();
 		}
 	}
 
@@ -176,7 +176,7 @@ sub backup{
 	my @errors		= getMessageByType('ERROR');
 	my @all			= (@warnings, @errors);
 
-	iMSCP::Mail->new()->errmsg("@all") if(scalar @all > 0 );
+	Selity::Mail->new()->errmsg("@all") if(scalar @all > 0 );
 
 	$rs;
 }

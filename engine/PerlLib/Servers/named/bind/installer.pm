@@ -28,7 +28,7 @@ package Servers::named::bind::installer;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 
 
 use vars qw/@ISA/;
@@ -40,22 +40,22 @@ sub _init{
 
 	my $self		= shift;
 
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/bind";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/bind";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/bind.data";
 	my $oldConf		= "$self->{cfgDir}/bind.old.data";
 
-	tie %self::bindConfig, 'iMSCP::Config','fileName' => $conf;
-	tie %self::bindOldConfig, 'iMSCP::Config','fileName' => $oldConf, noerrors => 1 if -f $oldConf;
+	tie %self::bindConfig, 'Selity::Config','fileName' => $conf;
+	tie %self::bindOldConfig, 'Selity::Config','fileName' => $oldConf, noerrors => 1 if -f $oldConf;
 
 	0;
 }
 
 sub buildConf{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self		= shift;
 	my ($rs, $rdata, $cfgTpl, $cfg, $err);
@@ -64,7 +64,7 @@ sub buildConf{
 
 	# Loading the system main configuration file named.conf.system if it exists
 	if(-f "$self->{bkpDir}/named.conf.system") {
-		$cfg = iMSCP::File->new(filename => "$self->{bkpDir}/named.conf.system")->get();
+		$cfg = Selity::File->new(filename => "$self->{bkpDir}/named.conf.system")->get();
 		return 1 if(!$cfg);
 
 		# Adjusting the configuration if needed
@@ -75,8 +75,8 @@ sub buildConf{
 		$cfg = '';
 	}
 
-	# Loading the template from /etc/imscp/bind/named.conf
-	$cfgTpl = iMSCP::File->new(filename => "$self->{cfgDir}/named.conf")->get();
+	# Loading the template from /etc/selity/bind/named.conf
+	$cfgTpl = Selity::File->new(filename => "$self->{cfgDir}/named.conf")->get();
 	return 1 if(!$cfgTpl);
 
 	# Building new file
@@ -85,10 +85,10 @@ sub buildConf{
 	## Storage and installation of new file
 
 	# Storing new file in the working directory
-	my $file = iMSCP::File->new(filename => "$self->{wrkDir}/named.conf");
+	my $file = Selity::File->new(filename => "$self->{wrkDir}/named.conf");
 	$file->set($cfg) and return 1;
 	$file->save() and return 1;
-	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+	$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 	$file->mode(0644) and return 1;
 
 	# Install the new file in the production directory
@@ -125,8 +125,8 @@ sub addMasterZone{
 	my $named	= Servers::named->factory();
 
 	my $rs = $named->addDmn({
-		DMN_NAME	=> $main::imscpConfig{BASE_SERVER_VHOST},
-		DMN_IP		=> $main::imscpConfig{BASE_SERVER_IP},
+		DMN_NAME	=> $main::selityConfig{BASE_SERVER_VHOST},
+		DMN_IP		=> $main::selityConfig{BASE_SERVER_IP},
 		MX			=> ''
 	});
 	return $rs if $rs;
@@ -135,10 +135,10 @@ sub addMasterZone{
 }
 sub askMode{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 
 	my $self	= shift;
-	my $ip		= iMSCP::IP->new();
+	my $ip		= Selity::IP->new();
 	my @ips		= ();
 
 	$self::bindConfig{'BIND_MODE'} = $self::bindOldConfig{'BIND_MODE'}
@@ -173,7 +173,7 @@ sub askMode{
 	}
 
 	my $out;
-	while (! ($out = iMSCP::Dialog->factory()->radiolist("Select bind mode", 'master', 'slave'))){}
+	while (! ($out = Selity::Dialog->factory()->radiolist("Select bind mode", 'master', 'slave'))){}
 	$self::bindConfig{'BIND_MODE'} = $out;
 
 	$self->askOtherDNS();
@@ -184,28 +184,28 @@ sub askMode{
 sub askOtherDNS{
 
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 
 	my $self = shift;
 	my $out;
 
 	if($self::bindConfig{'BIND_MODE'} eq 'master'){
-		while (! ($out = iMSCP::Dialog->factory()->radiolist("Enable secondary DNS server address IP?", 'no', 'yes'))){}
+		while (! ($out = Selity::Dialog->factory()->radiolist("Enable secondary DNS server address IP?", 'no', 'yes'))){}
 		if($out eq 'no'){
 			$self::bindConfig{'SECONDARY_DNS'} = 'no';
 			return 0;
 		}
 	}
 
-	use iMSCP::IP;
-	my $ip = iMSCP::IP->new();
+	use Selity::IP;
+	my $ip = Selity::IP->new();
 
 	my $mode = $self::bindConfig{'BIND_MODE'} eq 'primary' ? 'secondary' : 'primary';
 
 	my @ips = ();
 
 	do{
-		$out = iMSCP::Dialog->factory()->inputbox(
+		$out = Selity::Dialog->factory()->inputbox(
 			"Please enter $mode DNS server address IP. Leave blank for end"
 		);
 		push(@ips, $out) if $ip->isValidIp($out) && $out ne '127.0.0.1';
@@ -231,7 +231,7 @@ sub bkpConfFile{
 	my $timestamp	= time;
 
 	if(-f $cfgFile){
-		my $file	= iMSCP::File->new( filename => $cfgFile );
+		my $file	= Selity::File->new( filename => $cfgFile );
 		my ($filename, $directories, $suffix) = fileparse($cfgFile);
 		if(!-f "$self->{bkpDir}/$filename$suffix.system") {
 			$file->copyFile("$self->{bkpDir}/$filename$suffix.system") and return 1;
@@ -245,11 +245,11 @@ sub bkpConfFile{
 
 sub saveConf{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $rs		= 0;
-	my $file	= iMSCP::File->new(filename => "$self->{cfgDir}/bind.data");
+	my $file	= Selity::File->new(filename => "$self->{cfgDir}/bind.data");
 
 	$self::bindConfig{'PRIMARY_DNS'} = $self::bindOldConfig{'PRIMARY_DNS'}
 		if $self::bindOldConfig{'PRIMARY_DNS'} && $self::bindConfig{'PRIMARY_DNS'} ne $self::bindOldConfig{'PRIMARY_DNS'};
@@ -260,13 +260,13 @@ sub saveConf{
 	my $cfg		= $file->get() or return 1;
 
 	$rs |= $file->mode(0644);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
-	$file = iMSCP::File->new(filename => "$self->{cfgDir}/bind.old.data");
+	$file = Selity::File->new(filename => "$self->{cfgDir}/bind.old.data");
 	$rs |= $file->set($cfg);
 	$rs |= $file->save();
 	$rs |= $file->mode(0644);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	$rs;
 }

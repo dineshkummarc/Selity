@@ -28,7 +28,7 @@ package Servers::noserver;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 
 use vars qw/@ISA $AUTOLOAD/;
 @ISA = ('Common::SingletonClass');

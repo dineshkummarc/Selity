@@ -32,11 +32,11 @@ use lib "$FindBin::Bin/../PerlLib";
 
 umask(027);
 
-use iMSCP::Debug;
-use iMSCP::Boot;
-use iMSCP::Dialog;
+use Selity::Debug;
+use Selity::Boot;
+use Selity::Dialog;
 
-newDebug('imscp-uninstall.log');
+newDebug('selity-uninstall.log');
 
 ################################################################################
 # Starting update process
@@ -45,7 +45,7 @@ newDebug('imscp-uninstall.log');
 #
 sub uninstall_start_up {
 
-	iMSCP::Boot->new()->init();
+	Selity::Boot->new()->init();
 
 	#enter silent mode
 	silent(1);
@@ -62,14 +62,14 @@ sub uninstall_start_up {
 #
 sub user_dialog {
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 
-	iMSCP::Dialog->factory()->set('yes-label','CONTINUE');
-	iMSCP::Dialog->factory()->set('no-label','EXIT');
-	iMSCP::Dialog->factory()->set('defaultno', '');
-	if (iMSCP::Dialog->factory()->yesno(
+	Selity::Dialog->factory()->set('yes-label','CONTINUE');
+	Selity::Dialog->factory()->set('no-label','EXIT');
+	Selity::Dialog->factory()->set('defaultno', '');
+	if (Selity::Dialog->factory()->yesno(
 					"\n
-						Welcome to \\Z1i-MSCP version $main::imscpConfig{'Version'}\\Zn Un-Install Dialog.
+						Welcome to \\Z1i-MSCP version $main::selityConfig{'Version'}\\Zn Un-Install Dialog.
 
 						This program will uninstall i-MSCP system from your server.
 
@@ -84,7 +84,7 @@ sub user_dialog {
 
 					)
 	){
-		iMSCP::Dialog->factory()->msgbox(
+		Selity::Dialog->factory()->msgbox(
 					"\n
 					\\Z1[NOTICE]\\Zn
 
@@ -102,7 +102,7 @@ sub user_dialog {
 #
 sub uninstall_shut_down {
 
-	iMSCP::Dialog->factory()->msgbox(
+	Selity::Dialog->factory()->msgbox(
 					"\n
 					\\Z1Congratulations!!!\\Zn
 
@@ -117,14 +117,14 @@ sub uninstall_shut_down {
 
 sub uninstall_engine {
 
-	use iMSCP::Stepper;
+	use Selity::Stepper;
 	## Starting user dialog
 
 	my @steps = (
 
 		[\&uninstall_customers, 'Remove customers: '],
 		[\&uninstallServers, 'i-MSCP server uninstall task: '],
-		[\&uninstall_imscpd, 'i-MSCP daemons uninstall task: '],
+		[\&uninstall_selityd, 'i-MSCP daemons uninstall task: '],
 		[\&uninstall_crontab, 'i-MSCP crontab uninstall task: '],
 		[\&uninstall_logrotate, 'i-MSCP logrotate uninstall task: '],
 		[\&uninstall_sql, 'i-MSCP sql uninstall task: '],
@@ -137,7 +137,7 @@ sub uninstall_engine {
 		$rs |= step($_->[0], $_->[1], scalar @steps, $step);
 		$step++;
 	}
-	iMSCP::Dialog->factory()->endGauge() if iMSCP::Dialog->factory()->needGauge();
+	Selity::Dialog->factory()->endGauge() if Selity::Dialog->factory()->needGauge();
 
 	$rs;
 }
@@ -145,7 +145,7 @@ sub uninstall_engine {
 
 sub uninstall_customers {
 
-	use iMSCP::Boot;
+	use Selity::Boot;
 
 	my $tables = {
 		domain => 'domain_status', domain_aliasses => 'alias_status',
@@ -156,7 +156,7 @@ sub uninstall_customers {
 	# Set status as 'change'
 	my $rs		= 0;
 	my $error;
-	my $database = iMSCP::Database->new()->factory();
+	my $database = Selity::Database->new()->factory();
 
 	while (my ($table, $field) = each %$tables) {
 		$error = $database->doQuery('dummy',
@@ -171,27 +171,27 @@ sub uninstall_customers {
 		$rs = 1 if (ref $error ne 'HASH');
 	}
 
-	iMSCP::Boot->new()->unlock();
+	Selity::Boot->new()->unlock();
 
 	my ($stdout, $stderr);
-	$rs |= execute("perl $main::imscpConfig{'ENGINE_ROOT_DIR'}/imscp-rqst-mngr", \$stdout, \$stderr);
+	$rs |= execute("perl $main::selityConfig{'ENGINE_ROOT_DIR'}/selity-rqst-mngr", \$stdout, \$stderr);
 	debug("$stdout") if $stdout;
 	error("$stderr") if $stderr;
 	error("Error while rebuilding customers configuration files") if(!$stderr && $rs);
-	iMSCP::Boot->new()->lock();
+	Selity::Boot->new()->lock();
 
 	$rs;
 }
 
 sub uninstallServers{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 	use FindBin;
-	use iMSCP::Stepper;
+	use Selity::Stepper;
 
 	my ($rs, $file, $class, $server, $msg);
 
-	my $dir	= iMSCP::Dir->new(dirname => "$main::imscpConfig{'ENGINE_ROOT_DIR'}/PerlLib/Servers");
+	my $dir	= Selity::Dir->new(dirname => "$main::selityConfig{'ENGINE_ROOT_DIR'}/PerlLib/Servers");
 	$rs		= $dir->get();
 	return $rs if $rs;
 
@@ -206,7 +206,7 @@ sub uninstallServers{
 		$class	= "Servers::$_";
 		require $file;
 		$server	= $class->factory();
-		$msg = "Performing uninstall tasks for ".uc($_)." server". ($main::imscpConfig{uc($_)."_SERVER"} ? ": ".$main::imscpConfig{uc($_)."_SERVER"} : '');
+		$msg = "Performing uninstall tasks for ".uc($_)." server". ($main::selityConfig{uc($_)."_SERVER"} ? ": ".$main::selityConfig{uc($_)."_SERVER"} : '');
 		$rs |= step(sub{ $server->uninstall() }, $msg, scalar @servers, $step) if($server->can('uninstall'));
 		$step++;
 	}
@@ -219,7 +219,7 @@ sub uninstallServers{
 sub uninstall_system_users{
 
 	use Modules::SystemGroup;
-	Modules::SystemGroup->new()->delSystemGroup($main::imscpConfig{MASTER_GROUP});
+	Modules::SystemGroup->new()->delSystemGroup($main::selityConfig{MASTER_GROUP});
 
 }
 
@@ -227,17 +227,17 @@ sub uninstall_system_dirs{
 
 	my $rs = 0;
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 
 	chdir("/");
 
 	for (
-		$main::imscpConfig{'CONF_DIR'},
-		$main::imscpConfig{'USER_HOME_DIR'},
-		$main::imscpConfig{'LOG_DIR'},
-		$main::imscpConfig{'ROOT_DIR'}
+		$main::selityConfig{'CONF_DIR'},
+		$main::selityConfig{'USER_HOME_DIR'},
+		$main::selityConfig{'LOG_DIR'},
+		$main::selityConfig{'ROOT_DIR'}
 	) {
-		$rs |= iMSCP::Dir->new(dirname => $_)->remove();
+		$rs |= Selity::Dir->new(dirname => $_)->remove();
 	}
 
 	$rs;
@@ -246,7 +246,7 @@ sub uninstall_system_dirs{
 
 sub uninstall_sql{
 
-	my $database = iMSCP::Database->factory();
+	my $database = Selity::Database->factory();
 	my $rs = 0;
 	my $err;
 
@@ -281,7 +281,7 @@ sub uninstall_sql{
 		$rs = 1;
 	}
 
-	$database->doQuery('delete', "DROP DATABASE $main::imscpConfig{DATABASE_NAME}");
+	$database->doQuery('delete', "DROP DATABASE $main::selityConfig{DATABASE_NAME}");
 
 	$rs;
 }
@@ -290,9 +290,9 @@ sub uninstall_crontab{
 
 	my $rs = 0;
 
-	use iMSCP::File;
+	use Selity::File;
 
-	$rs |= iMSCP::File->new(filename =>'/etc/cron.d/imscp')->delFile() if -f '/etc/cron.d/imscp';
+	$rs |= Selity::File->new(filename =>'/etc/cron.d/selity')->delFile() if -f '/etc/cron.d/selity';
 
 	$rs;
 }
@@ -301,23 +301,23 @@ sub uninstall_logrotate{
 
 	my $rs = 0;
 
-	use iMSCP::File;
+	use Selity::File;
 
-	$rs |= iMSCP::File->new(filename =>'/etc/logrotate.d/imscp')->delFile() if -f '/etc/logrotate.d/imscp';
+	$rs |= Selity::File->new(filename =>'/etc/logrotate.d/selity')->delFile() if -f '/etc/logrotate.d/selity';
 
 	$rs;
 
 }
 
-sub uninstall_imscpd{
+sub uninstall_selityd{
 
 	my $rs = 0;
 	my ($stdout, $stderr);
 
-	use iMSCP::File;
-	use iMSCP::Execute;
+	use Selity::File;
+	use Selity::Execute;
 
-	for ($main::imscpConfig{'CMD_IMSCPN'}, $main::imscpConfig{'CMD_IMSCPD'}) {
+	for ($main::selityConfig{'CMD_SELITYN'}, $main::selityConfig{'CMD_SELITYD'}) {
 		# Do not process if the service is disabled
 		next if(/^no$/i);
 
@@ -329,7 +329,7 @@ sub uninstall_imscpd{
 		debug("$stdout") if $stdout;
 		error("$stderr") if $rs;
 
-		$rs |= iMSCP::File->new(filename => $filename)->delFile();
+		$rs |= Selity::File->new(filename => $filename)->delFile();
 	}
 
 	$rs;

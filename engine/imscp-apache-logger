@@ -31,7 +31,7 @@
 
 ################################################################################
 ## Script description:                                                        ##
-##  imscp-apache-logger - i-MSCP apache logfiles handling                     ##
+##  selity-apache-logger - i-MSCP apache logfiles handling                     ##
 ##                                                                            ##
 ## I. CustomLog handler:                                                      ##
 ##                                                                            ##
@@ -86,7 +86,7 @@ use sigtrap 'handler' => \&signalHandler, 'normal-signals';
 
 my %opt = (
 	loggingType => 'access', # Default logging type
-	logDir => '/var/log/imscp' # Default directory for script events log
+	logDir => '/var/log/selity' # Default directory for script events log
 );
 
 Getopt::Long::Configure(qw(no_ignore_case));
@@ -108,10 +108,10 @@ GetOptions(\%opt, 'loggingType|t=s', 'logDir|l=s');
 sub getConf {
 	my $file;
 
-	if(-e '/usr/local/etc/imscp/imscp.conf'){
-		$file = '/usr/local/etc/imscp/imscp.conf';
-	} elsif(-e '/etc/imscp/imscp.conf') {
-		$file = '/etc/imscp/imscp.conf';
+	if(-e '/usr/local/etc/selity/selity.conf'){
+		$file = '/usr/local/etc/selity/selity.conf';
+	} elsif(-e '/etc/selity/selity.conf') {
+		$file = '/etc/selity/selity.conf';
 	} else {
 		return -1;
 	}
@@ -242,7 +242,7 @@ sub eventLog {
 	if(-d $opt{'logDir'}) {
 		if($priority ne 'debug' && $priority ne 'info' && $priority ne 'notice') {
 			*STDERR = cacheout '>>',
-				"$opt{'logDir'}/imscp-apache-logger.stderr";
+				"$opt{'logDir'}/selity-apache-logger.stderr";
 			STDERR->autoflush(1);
 
 			print STDERR "[$date] [$priority] $message\n";
@@ -250,7 +250,7 @@ sub eventLog {
 			return 0;
 		} else {
 			*STDOUT = cacheout '>>',
-				"$opt{'logDir'}/imscp-apache-logger.stdout";
+				"$opt{'logDir'}/selity-apache-logger.stdout";
 			STDOUT->autoflush(1);
 
 			print STDOUT "[$date] [$priority] $message\n";
@@ -301,7 +301,7 @@ eventLog('notice', "Starting i-MSCP Apache logger (pid $$)");
 if(getConf() != 0) {
 	eventLog(
 		'err',
-		"Unable to load i-MSCP configuration from the imscp.conf file."
+		"Unable to load i-MSCP configuration from the selity.conf file."
 	);
 
 } else {

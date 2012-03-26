@@ -26,7 +26,7 @@
 #####################################################################################
 # File description:
 #
-# This file contains all subroutines used by the imscp-autoinstal script.
+# This file contains all subroutines used by the selity-autoinstal script.
 #
 
 use strict;
@@ -44,7 +44,7 @@ use warnings;
 sub preInstall {
 	debug('Starting...');
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	my ($rs, $stdout, $stderr);
 
@@ -78,9 +78,9 @@ sub installDependencies {
 	debug('Starting...');
 
 	my $autoinstallFile = "$FindBin::Bin/library/" .
-		lc(iMSCP::SO->new()->{Distribution}) .'_autoinstall.pm';
+		lc(Selity::SO->new()->{Distribution}) .'_autoinstall.pm';
 
-	my $class = 'library::' . lc(iMSCP::SO->new()->{Distribution}) . '_autoinstall';
+	my $class = 'library::' . lc(Selity::SO->new()->{Distribution}) . '_autoinstall';
 
 	if(-f $autoinstallFile){
 		require $autoinstallFile ;
@@ -101,7 +101,7 @@ sub installDependencies {
 sub testRequirements {
 	debug('Starting...');
 
-	iMSCP::Requirements->new()->test('all');
+	Selity::Requirements->new()->test('all');
 
 	debug('Ending...');
 	0;
@@ -119,11 +119,11 @@ sub testRequirements {
 sub processConfFile {
 	debug('Starting...');
 
-	use iMSCP::SO;
+	use Selity::SO;
 
 	my $confFile = shift;
 
-	$confFile = "$FindBin::Bin/library/" . lc(iMSCP::SO->new()->{Distribution}) .
+	$confFile = "$FindBin::Bin/library/" . lc(Selity::SO->new()->{Distribution}) .
 		'-variable.xml' unless $confFile;
 
 	unless(-f $confFile) {
@@ -200,10 +200,10 @@ sub processConfFile {
 sub processSpecificConfFile {
 	debug('Starting...');
 
-	use iMSCP::Dir;
-	use iMSCP::SO;
+	use Selity::Dir;
+	use Selity::SO;
 
-	my $SO = iMSCP::SO->new();
+	my $SO = Selity::SO->new();
 	my $specificPath = "$FindBin::Bin/configs/" . lc($SO->{Distribution});
 	my $commonPath = "$FindBin::Bin/configs/debian";
 	my $path = -d $specificPath ? $specificPath : $commonPath;
@@ -219,7 +219,7 @@ sub processSpecificConfFile {
 	my $rs = processConfFile($file);
 	return $rs if $rs;
 
-	my $dir = iMSCP::Dir->new();
+	my $dir = Selity::Dir->new();
 
 	# /configs/debian
 	$dir->{dirname} = $commonPath;
@@ -256,7 +256,7 @@ sub processSpecificConfFile {
 # Build the i-MSCP daemon by running make.
 #
 # @return void
-sub buildImscpDaemon {
+sub buildSelityDaemon {
 	debug('Starting...');
 
 	unless(chdir "$FindBin::Bin/daemon"){
@@ -267,19 +267,19 @@ sub buildImscpDaemon {
 	my ($rs, $stdout, $stderr);
 	my $return = 0;
 
-	$rs = execute("make clean imscp_daemon", \$stdout, \$stderr);
+	$rs = execute("make clean selity_daemon", \$stdout, \$stderr);
 	debug("$stdout") if $stdout;
 	error("$stderr") if $stderr;
 	error("Can not build daemon") if $rs;
 	$return |= $rs;
 
 	unless($rs) {
-		my $dir = iMSCP::Dir->new();
+		my $dir = Selity::Dir->new();
 		$dir->{dirname} = "$main::SYSTEM_ROOT/daemon";
 		$dir->make() and return 1;
 
-		my $file = iMSCP::File->new();
-		$file->{filename} = 'imscp_daemon';
+		my $file = Selity::File->new();
+		$file->{filename} = 'selity_daemon';
 		$file->copyFile("$main::SYSTEM_ROOT/daemon");
 	} else {
 		error("Fail build daemon");
@@ -311,7 +311,7 @@ sub installEngine {
 	my $rs = processConfFile("$FindBin::Bin/engine/install.xml");
 	return $rs if $rs;
 
-	my $dir = iMSCP::Dir->new();
+	my $dir = Selity::Dir->new();
 
 	$dir->{dirname} = "$FindBin::Bin/engine";
 
@@ -367,7 +367,7 @@ sub installGui {
 sub InstallDistMaintainerScripts {
 	debug('Starting...');
 
-	my $SO = iMSCP::SO->new();
+	my $SO = Selity::SO->new();
 	my $dist = lc($SO->{Distribution});
 
 	foreach(
@@ -375,7 +375,7 @@ sub InstallDistMaintainerScripts {
 		"$FindBin::Bin/maintscripts/postinst.$dist"
 	){
 		next if (! -f $_);
-		my $file = iMSCP::File->new();
+		my $file = Selity::File->new();
 		$file->{filename} = $_;
 		$file->mode(0750) and return 1;
 		$file->owner(0, 0) and return 1;
@@ -385,7 +385,7 @@ sub InstallDistMaintainerScripts {
 	if(-f "$FindBin::Bin/maintscripts/preinst.$SO->{Distribution}" ||
 		-f "$FindBin::Bin/maintscripts/postinst.$SO->{Distribution}"
 	) {
-		my $file = iMSCP::File->new();
+		my $file = Selity::File->new();
 		$file->{filename} = "$FindBin::Bin/maintscripts/maintainer-helper.sh";
 		$file->mode(0750) and return 1;
 		$file->owner(0, 0) and return 1;
@@ -440,14 +440,14 @@ sub cleanUpTmp {
 # Process i-MSCP backup.
 #
 # @return int 0 on success, other on failure
-sub doImscpBackup {
+sub doSelityBackup {
 	debug('Starting...');
 
 	my ($rs, $stdout, $stderr);
 
-	if(-x "$main::defaultConf{'ROOT_DIR'}/engine/backup/imscp-backup-imscp noreport") {
+	if(-x "$main::defaultConf{'ROOT_DIR'}/engine/backup/selity-backup-selity noreport") {
 		$rs = execute(
-			"$main::defaultConf{'ROOT_DIR'}/engine/backup/imscp-backup-imscp",
+			"$main::defaultConf{'ROOT_DIR'}/engine/backup/selity-backup-selity",
 			\$stdout, \$stderr
 		);
 
@@ -455,7 +455,7 @@ sub doImscpBackup {
 		warning("$stderr") if $stderr;
 		error('Could not create backups') if $rs;
 
-		$rs = iMSCP::Dialog->factory()->yesno(
+		$rs = Selity::Dialog->factory()->yesno(
 			"\n\n\\Z1Unable to create backups\\Zn\n\n".
 			'This is not a fatal error, setup may continue, but '.
 			"you will not have a backup (unless you have previously builded one)\n\n".
@@ -476,7 +476,7 @@ sub saveGuiWorkingData {
 	my ($rs, $stdout, $stderr);
 	my $tmp = qualify_to_ref('INST_PREF', 'main');
 
-	# For imscp versions >= 1.0.4
+	# For selity versions >= 1.0.4
 	if(-d "$main::defaultConf{'ROOT_DIR'}/gui/data") {
 		# Save i-MSCP GUI data
 		$rs = execute(
@@ -561,14 +561,14 @@ sub saveGuiWorkingData {
 sub installTmp {
 	debug('Starting...');
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	my ($rs, $stdout, $stderr);
 	my $tmp = qualify_to_ref('INST_PREF', 'main');
 
 	# i-MSCP daemon must be stopped before changing any file on the files system
-	if(-f "/etc/init.d/imscp_daemon" && -f "$main::defaultConf{'ROOT_DIR'}/daemon/imscp_daemon") {
-		$rs = execute("/etc/init.d/imscp_daemon stop", \$stdout, \$stderr);
+	if(-f "/etc/init.d/selity_daemon" && -f "$main::defaultConf{'ROOT_DIR'}/daemon/selity_daemon") {
+		$rs = execute("/etc/init.d/selity_daemon stop", \$stdout, \$stderr);
 		debug("$stdout") if $stdout;
 		error("$stderr") if $stderr;
 		return $rs if $rs;
@@ -675,9 +675,9 @@ sub _processFolder {
 
 	my $data = shift;
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 
-	my $dir  = iMSCP::Dir->new();
+	my $dir  = Selity::Dir->new();
 	$dir->{dirname} = $data->{content};
 	debug("Create $dir->{dirname}");
 
@@ -702,11 +702,11 @@ sub _copyConfig {
 	debug('Starting...');
 
 	use Cwd;
-	use iMSCP::SO;
-	use iMSCP::Execute;
-	use iMSCP::File;
+	use Selity::SO;
+	use Selity::Execute;
+	use Selity::File;
 
-	my $SO = iMSCP::SO->new();
+	my $SO = Selity::SO->new();
 
 	my $data = shift;
 
@@ -733,7 +733,7 @@ sub _copyConfig {
 	if($data->{user} || $data->{group} || $data->{mode}) {
 		my $filename = -e "$path/$name" ? "$path/$name" : $path;
 
-		my $file = iMSCP::File->new(filename => $filename);
+		my $file = Selity::File->new(filename => $filename);
 		$file->mode(oct($data->{mode})) and return 1 if $data->{mode};
 
 		$file->owner(
@@ -752,8 +752,8 @@ sub _copyConfig {
 sub _copy {
 	debug('Starting...');
 
-	use iMSCP::Execute;
-	use iMSCP::File;
+	use Selity::Execute;
+	use Selity::File;
 
 	my $data = shift;
 	my @parts = split '/', $data->{content};
@@ -772,7 +772,7 @@ sub _copy {
 
 		my $filename = -e "$path/$name" ? "$path/$name" : $path;
 
-		my $file = iMSCP::File->new(filename => $filename);
+		my $file = Selity::File->new(filename => $filename);
 		$file->mode(oct($data->{mode})) and return 1 if $data->{mode};
 		$file->owner(
 			$data->{user} ? $data->{user} : -1,
@@ -792,11 +792,11 @@ sub _copy {
 sub _createFile {
 	debug('Starting...');
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $data = shift;
 
-	my $rs = iMSCP::File->new(filename => $data->{content})->save();
+	my $rs = Selity::File->new(filename => $data->{content})->save();
 	return $rs if $rs;
 
 	debug('Ending...');
@@ -851,7 +851,7 @@ sub _chmodFile {
 sub _checkPkgManager {
 	debug('Starting...');
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	my ($rs, $stdout, $stderr);
 

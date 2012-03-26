@@ -28,8 +28,8 @@ package Modules::SystemUser;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::Execute;
+use Selity::Debug;
+use Selity::Execute;
 
 use vars qw/@ISA/;
 
@@ -52,14 +52,14 @@ sub addSystemUser{
 	}
 
 	my ($rs, $stdout, $stderr);
-	my $comment			= $self->{comment} ? "\"$self->{comment}\"" : '"iMSCPuser"';
-	my $home			= $self->{home} ? '"'.$self->{home}.'"' : "\"$main::imscpConfig{'USER_HOME_DIR'}/$userName\"";
+	my $comment			= $self->{comment} ? "\"$self->{comment}\"" : '"Selityuser"';
+	my $home			= $self->{home} ? '"'.$self->{home}.'"' : "\"$main::selityConfig{'USER_HOME_DIR'}/$userName\"";
 	my $skipGroup		= $self->{skipGroup} || $self->{group} ? '' : '-U';
 	my $group			= $self->{group} ? "-g \"$self->{group}\"" : '';
 	my $createHome		= $self->{skipCreateHome} ? '' : '-m';
 	my $systemUser		= $self->{system} ? '-r' : '';
 	my $copySkeleton	= $self->{system} || $self->{skipCreateHome} ? '' : '-k';
-	my $skeletonPath	= $self->{system} || $self->{skipCreateHome} ? '' : "\"$main::imscpConfig{'GUI_ROOT_DIR'}/data/user_home\"";
+	my $skeletonPath	= $self->{system} || $self->{skipCreateHome} ? '' : "\"$main::selityConfig{'GUI_ROOT_DIR'}/data/user_home\"";
 	my $shell			= $self->{shell} ? $self->{shell} : '/bin/false';
 
 
@@ -67,7 +67,7 @@ sub addSystemUser{
 
 	if(!getpwnam($userName)){
 		@cmd = (
-			$main::imscpConfig{'CMD_USERADD'},
+			$main::selityConfig{'CMD_USERADD'},
 			($^O =~ /bsd$/ ? "\"$userName\"" : ''),	#username bsd way
 			"-c", $comment,							#comment
 			'-d', $home,							#homedir
@@ -83,7 +83,7 @@ sub addSystemUser{
 	} else {
 		@cmd = (
 			'skill -KILL -vu ' . $userName . '; ',
-			$main::imscpConfig{'CMD_USERGROUP'},
+			$main::selityConfig{'CMD_USERGROUP'},
 			($^O =~ /bsd$/ ? "\"$userName\"" : ''),	#username bsd way
 			"-c", $comment,							#comment
 			'-d', $home,							#homedir
@@ -120,7 +120,7 @@ sub delSystemUser{
 	if(getpwnam($userName)){
 		my ($rs, $stdout, $stderr);
 		my  @cmd = (
-			"$main::imscpConfig{'CMD_USERDEL'}",
+			"$main::selityConfig{'CMD_USERDEL'}",
 			($^O =~ /bsd$/ ? "\"$userName\"" : ''),
 			'-r',
 			($self->{force} ? "-f" : ''),
@@ -165,7 +165,7 @@ sub addToGroup{
 			my $newGroups =  join(',', keys %{$self->{userGroups}}) .",$groupName";
 			my  @cmd = (
 				'skill -KILL -vu ' . $userName . '; ',
-				"$main::imscpConfig{'CMD_USERGROUP'}",
+				"$main::selityConfig{'CMD_USERGROUP'}",
 				($^O =~ /bsd$/ ? "\"$userName\"" : ''),	#bsd way
 				'-G', "\"$newGroups\"",
 				($^O !~ /bsd$/ ? "\"$userName\"" : ''),	#linux way
@@ -230,7 +230,7 @@ sub removeFromGroup{
 		my $newGroups =  join(',', keys %{$self->{userGroups}});
 		my  @cmd = (
 			'skill -KILL -vu ' . $userName . '; ',
-			"$main::imscpConfig{'CMD_USERGROUP'}",
+			"$main::selityConfig{'CMD_USERGROUP'}",
 			($^O =~ /bsd$/ ? "\"$userName\"" : ''),	#bsd way
 			'-G', "\"$newGroups\"",
 			($^O !~ /bsd$/ ? "\"$userName\"" : ''),	#linux way

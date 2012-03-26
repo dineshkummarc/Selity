@@ -28,11 +28,11 @@ program. If not, see <http://www.gnu.org/licenses/>
 
 	<copy_config />
 
-	<copy>${SYSTEM_ENGINE_ROOT}/messenger/imscp-*</copy>
+	<copy>${SYSTEM_ENGINE_ROOT}/messenger/selity-*</copy>
 
 	<create_file />
 
-	<chown_file owner="root" group="root">${SYSTEM_ENGINE_ROOT}/messenger/imscp-*</chown_file>
+	<chown_file owner="root" group="root">${SYSTEM_ENGINE_ROOT}/messenger/selity-*</chown_file>
 
-	<chmod_file mode="0700">${SYSTEM_ENGINE_ROOT}/messenger/imscp-*</chmod_file>
+	<chmod_file mode="0700">${SYSTEM_ENGINE_ROOT}/messenger/selity-*</chmod_file>
 </install>

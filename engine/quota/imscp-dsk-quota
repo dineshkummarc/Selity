@@ -20,7 +20,7 @@
 # @category		i-MSCP
 # @copyright	2010 - 2012 by i-MSCP | http://i-mscp.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @version		SVN: $Id: imscp-dsk-quota 5308 2011-09-25 15:46:35Z sci2tech $
+# @version		SVN: $Id: selity-dsk-quota 5308 2011-09-25 15:46:35Z sci2tech $
 # @link			http://i-mscp.net i-MSCP Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
@@ -31,19 +31,19 @@ use FindBin;
 use lib "$FindBin::Bin/..";
 use lib "$FindBin::Bin/../PerlLib";
 
-use iMSCP::Debug;
-use iMSCP::Boot;
-use iMSCP::Execute;
-use iMSCP::Mail;
+use Selity::Debug;
+use Selity::Boot;
+use Selity::Execute;
+use Selity::Mail;
 use Servers::mta;
 use Data::Dumper;
 
-newDebug('imscp-dsk-quota.log');
+newDebug('selity-dsk-quota.log');
 
 sub quota_start_up {
 
 	umask(027);
-	iMSCP::Boot->new()->init({nolock => 'yes'});
+	Selity::Boot->new()->init({nolock => 'yes'});
 
 	0;
 }
@@ -54,11 +54,11 @@ sub quota_files {
 
 
 	my $sql = "SELECT `domain_id`, `domain_name` FROM `domain` WHERE `domain_status` = ?";
-	$rdata = iMSCP::Database->new()->factory()->doQuery('domain_id', $sql, 'ok');
+	$rdata = Selity::Database->new()->factory()->doQuery('domain_id', $sql, 'ok');
 
 	if (ref $rdata ne 'HASH'){
 		error("$rdata");
-		iMSCP::Mail->new()->errmsg($rdata);
+		Selity::Mail->new()->errmsg($rdata);
 		$rs = 1;
 	} else {
 
@@ -73,13 +73,13 @@ sub quota_files {
 
 			if ($^O =~ /bsd$/) {
 				@cmd = (
-					$main::imscpConfig{CMD_DU}.' -I "backups/*" -I "logs/*.log" -d 0 '."$main::imscpConfig{USER_HOME_DIR}/$domain_name",
-					$main::imscpConfig{CMD_DU}.' -d 0 '."$mta->{'MTA_VIRTUAL_MAIL_DIR'}/$domain_name"
+					$main::selityConfig{CMD_DU}.' -I "backups/*" -I "logs/*.log" -d 0 '."$main::selityConfig{USER_HOME_DIR}/$domain_name",
+					$main::selityConfig{CMD_DU}.' -d 0 '."$mta->{'MTA_VIRTUAL_MAIL_DIR'}/$domain_name"
 				);
 			} else {
 				@cmd = (
-					"$main::imscpConfig{CMD_DU} --exclude='backups/*' --exclude='logs/*.log' -s -B1 $main::imscpConfig{USER_HOME_DIR}/$domain_name",
-					"$main::imscpConfig{CMD_DU} -s -B1 $mta->{'MTA_VIRTUAL_MAIL_DIR'}/$domain_name"
+					"$main::selityConfig{CMD_DU} --exclude='backups/*' --exclude='logs/*.log' -s -B1 $main::selityConfig{USER_HOME_DIR}/$domain_name",
+					"$main::selityConfig{CMD_DU} -s -B1 $mta->{'MTA_VIRTUAL_MAIL_DIR'}/$domain_name"
 				);
 			}
 			foreach(@cmd){
@@ -96,18 +96,18 @@ sub quota_files {
 
 			if ($size > 0) {
 				$sql = "UPDATE `domain` SET `domain_disk_usage` = ? WHERE `domain_id` = ?";
-				my $rsdata = iMSCP::Database->new()->factory()->doQuery('update', $sql, $size, $domain_id);
+				my $rsdata = Selity::Database->new()->factory()->doQuery('update', $sql, $size, $domain_id);
 				if (ref $rsdata ne 'HASH'){
 					error("$rsdata");
-					iMSCP::Mail->new()->errmsg($rsdata);
+					Selity::Mail->new()->errmsg($rsdata);
 					$rs = 1;
 				}
 
 				$sql = "UPDATE `quotatallies` SET `bytes_in_used` = ? WHERE `name` = ?";
-				$rsdata = iMSCP::Database->new()->factory()->doQuery('cnt', $sql, $size, $domain_name);
+				$rsdata = Selity::Database->new()->factory()->doQuery('cnt', $sql, $size, $domain_name);
 				if (ref $rsdata ne 'HASH'){
 					error("$rsdata");
-					iMSCP::Mail->new()->errmsg($rsdata);
+					Selity::Mail->new()->errmsg($rsdata);
 					$rs = 1;
 				}
 			}
@@ -122,20 +122,20 @@ sub quota_mysql {
 	my $rs = 0;
 
 	my $sql = "SHOW DATABASES";
-	my $databases = iMSCP::Database->new()->factory()->doQuery('Database', $sql);
+	my $databases = Selity::Database->new()->factory()->doQuery('Database', $sql);
 
 	if (ref $databases ne 'HASH'){
 		error("$databases");
-		iMSCP::Mail->new()->errmsg($databases);
+		Selity::Mail->new()->errmsg($databases);
 		return 1;
 	}
 
 	$sql = "SELECT `domain_id`, `domain_name`, `domain_disk_usage` FROM `domain` WHERE `domain_status` = ?";
-	my $rdata = iMSCP::Database->new()->factory()->doQuery('domain_id', $sql, 'ok');
+	my $rdata = Selity::Database->new()->factory()->doQuery('domain_id', $sql, 'ok');
 
 	if (ref $rdata ne 'HASH'){
 		error("$rdata");
-		iMSCP::Mail->new()->errmsg($rdata);
+		Selity::Mail->new()->errmsg($rdata);
 		$rs = 1;
 	} else {
 
@@ -145,12 +145,12 @@ sub quota_mysql {
 			my $domain_name	= $rdata->{$_}->{domain_name};
 			my $disk_usage	= $rdata->{$_}->{domain_disk_usage};
 			$sql			= "SELECT `sqld_id`, `sqld_name` FROM `sql_database` WHERE `domain_id` = ?";
-			my $userDBs		= iMSCP::Database->new()->factory()->doQuery('sqld_id', $sql, $domain_id);
+			my $userDBs		= Selity::Database->new()->factory()->doQuery('sqld_id', $sql, $domain_id);
 			my $size			= 0;
 
 			if (ref $userDBs ne 'HASH'){
 				error("$userDBs");
-				iMSCP::Mail->new()->errmsg($userDBs);
+				Selity::Mail->new()->errmsg($userDBs);
 				$rs = 1;
 			}
 
@@ -162,11 +162,11 @@ sub quota_mysql {
 				if(grep{$_ eq $sqldb_name} keys %$databases) {
 
 					$sql = "show table status from `$sqldb_name`";
-					my $tables = iMSCP::Database->new()->factory()->doQuery('Name ', $sql);
+					my $tables = Selity::Database->new()->factory()->doQuery('Name ', $sql);
 
 					if (ref $tables ne 'HASH'){
 						error("tables:$tables");
-						iMSCP::Mail->new()->errmsg($tables);
+						Selity::Mail->new()->errmsg($tables);
 						$rs = 1;
 					}
 					foreach(keys %$tables) {
@@ -177,7 +177,7 @@ sub quota_mysql {
 					}
 				} else {
 					error("Database '$sqldb_name' exists only in table 'sql_database'!!!");
-					iMSCP::Mail->new()->errmsg("Database '$sqldb_name' exists only in table 'sql_database'!!!");
+					Selity::Mail->new()->errmsg("Database '$sqldb_name' exists only in table 'sql_database'!!!");
 				}
 			}
 
@@ -186,18 +186,18 @@ sub quota_mysql {
 				$size += $disk_usage;
 
 				$sql = "UPDATE `domain` SET `domain_disk_usage` = ? WHERE `domain_id` = ?";
-				my $quota = iMSCP::Database->new()->factory()->doQuery('update ', $sql, $size, $domain_id);
+				my $quota = Selity::Database->new()->factory()->doQuery('update ', $sql, $size, $domain_id);
 				if (ref $quota ne 'HASH'){
 					error("$quota");
-					iMSCP::Mail->new()->errmsg($quota);
+					Selity::Mail->new()->errmsg($quota);
 					$rs = 1;
 				}
 
 				$sql = "UPDATE `quotatallies` SET `bytes_in_used` = ? WHERE `name` = ?";
-				$quota = iMSCP::Database->new()->factory()->doQuery('cnt', $sql, $size, $domain_name);
+				$quota = Selity::Database->new()->factory()->doQuery('cnt', $sql, $size, $domain_name);
 				if (ref $quota ne 'HASH'){
 					error("$quota");
-					iMSCP::Mail->new()->errmsg($quota);
+					Selity::Mail->new()->errmsg($quota);
 					$rs = 1;
 				}
 			}

@@ -28,7 +28,7 @@ package Servers::mta::postfix;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -39,13 +39,13 @@ use Common::SingletonClass;
 sub _init{
 	my $self	= shift;
 
-	$self->{cfgDir} = "$main::imscpConfig{'CONF_DIR'}/postfix";
+	$self->{cfgDir} = "$main::selityConfig{'CONF_DIR'}/postfix";
 	$self->{bkpDir} = "$self->{cfgDir}/backup";
 	$self->{wrkDir} = "$self->{cfgDir}/working";
 
 	$self->{commentChar} = '#';
 
-	tie %self::postfixConfig, 'iMSCP::Config','fileName' => "$self->{cfgDir}/postfix.data";
+	tie %self::postfixConfig, 'Selity::Config','fileName' => "$self->{cfgDir}/postfix.data";
 	$self->{$_} = $self::postfixConfig{$_} foreach(keys %self::postfixConfig);
 
 	0;
@@ -144,7 +144,7 @@ sub restart{
 	my $rs		= 0;
 	my ($stdout, $stderr);
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	# Reload config
 	$rs = execute("$self->{CMD_MTA} restart", \$stdout, \$stderr);
@@ -156,7 +156,7 @@ sub restart{
 
 sub postmap{
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	my $self	= shift;
 	my $postmap	= shift;
@@ -173,8 +173,8 @@ sub postmap{
 
 sub addDmn{
 
-	use iMSCP::File;
-	use iMSCP::Dir;
+	use Selity::File;
+	use Selity::Dir;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -189,14 +189,14 @@ sub addDmn{
 	my $entry = "$data->{DMN_NAME}\t\t\t$data->{TYPE}\n";
 
 	if(
-		iMSCP::File->new(
+		Selity::File->new(
 			filename => $self->{MTA_VIRTUAL_DMN_HASH}
 		)->copyFile( "$self->{bkpDir}/domains.".time )
 	){
 		$rs = 1;
 	}
 
-	my $file	= iMSCP::File->new( filename => "$self->{wrkDir}/domains");
+	my $file	= Selity::File->new( filename => "$self->{wrkDir}/domains");
 	my $content	= $file->get();
 
 	if(!$content){
@@ -212,13 +212,13 @@ sub addDmn{
 	$rs |=	$file->save();
 	$rs |=	$file->mode(0644);
 	$rs |=	$file->owner(
-				$main::imscpConfig{'ROOT_USER'},
-				$main::imscpConfig{'ROOT_GROUP'}
+				$main::selityConfig{'ROOT_USER'},
+				$main::selityConfig{'ROOT_GROUP'}
 			);
 	$rs |= $file->copyFile( $self->{MTA_VIRTUAL_DMN_HASH} );
 	$self->{postmap}->{$self->{MTA_VIRTUAL_DMN_HASH}} = $data->{DMN_NAME};
 
-	$rs =	iMSCP::Dir->new(
+	$rs =	Selity::Dir->new(
 				dirname => "$self->{MTA_VIRTUAL_MAIL_DIR}/$data->{DMN_NAME}"
 			)->make({
 				user	=> $self->{MTA_MAILBOX_UID_NAME},
@@ -231,8 +231,8 @@ sub addDmn{
 
 sub delDmn{
 
-	use iMSCP::File;
-	use iMSCP::Dir;
+	use Selity::File;
+	use Selity::Dir;
 
 	my $self = shift;
 	my $data = shift;
@@ -246,7 +246,7 @@ sub delDmn{
 
 	$rs |= $self->disableDmn($data);
 
-	$rs |= iMSCP::Dir->new(
+	$rs |= Selity::Dir->new(
 			dirname => "$self->{MTA_VIRTUAL_MAIL_DIR}/$data->{DMN_NAME}"
 		)->remove();
 
@@ -255,8 +255,8 @@ sub delDmn{
 
 sub disableDmn{
 
-	use iMSCP::File;
-	use iMSCP::Dir;
+	use Selity::File;
+	use Selity::Dir;
 
 	my $self = shift;
 	my $data = shift;
@@ -271,14 +271,14 @@ sub disableDmn{
 	my $entry = "$data->{DMN_NAME}\t\t\t$data->{TYPE}\n";
 
 	if(
-		iMSCP::File->new(
+		Selity::File->new(
 			filename => $self->{MTA_VIRTUAL_DMN_HASH}
 		)->copyFile( "$self->{bkpDir}/domains.".time )
 	){
 		$rs = 1;
 	}
 
-	my $file	= iMSCP::File->new( filename => "$self->{wrkDir}/domains");
+	my $file	= Selity::File->new( filename => "$self->{wrkDir}/domains");
 	my $content	= $file->get();
 
 	if(!$content){
@@ -294,8 +294,8 @@ sub disableDmn{
 	$rs |= $file->save();
 	$rs |= $file->mode(0644);
 	$rs |= $file->owner(
-				$main::imscpConfig{'ROOT_USER'},
-				$main::imscpConfig{'ROOT_GROUP'}
+				$main::selityConfig{'ROOT_USER'},
+				$main::selityConfig{'ROOT_GROUP'}
 			);
 	$rs |= $file->copyFile( $self->{MTA_VIRTUAL_DMN_HASH} );
 
@@ -322,7 +322,7 @@ sub disableSub{
 sub addMail{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -343,13 +343,13 @@ sub addMail{
 
 	for($self->{MTA_VIRTUAL_MAILBOX_HASH}, $self->{MTA_VIRTUAL_ALIAS_HASH}, $self->{MTA_TRANSPORT_HASH}){
 		if(-f $_){
-			my $file = iMSCP::File->new(filename => $_);
+			my $file = Selity::File->new(filename => $_);
 			my (
 				$filename,
 				$directories,
 				$suffix
 			) = fileparse($_);
-			$rs |=	iMSCP::File->new(
+			$rs |=	Selity::File->new(
 						filename => $_
 					)->copyFile(
 						"$self->{bkpDir}/$filename$suffix.".time
@@ -379,7 +379,7 @@ sub addMail{
 sub delMail{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -400,13 +400,13 @@ sub delMail{
 
 	for($self->{MTA_VIRTUAL_MAILBOX_HASH}, $self->{MTA_VIRTUAL_ALIAS_HASH}, $self->{MTA_TRANSPORT_HASH}){
 		if(-f $_){
-			my $file = iMSCP::File->new(filename => $_);
+			my $file = Selity::File->new(filename => $_);
 			my (
 				$filename,
 				$directories,
 				$suffix
 			) = fileparse($_);
-			$rs |=	iMSCP::File->new(
+			$rs |=	Selity::File->new(
 						filename => $_
 					)->copyFile(
 						"$self->{bkpDir}/$filename$suffix.".time
@@ -427,7 +427,7 @@ sub delMail{
 sub disableMail{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -448,13 +448,13 @@ sub disableMail{
 
 	for($self->{MTA_VIRTUAL_MAILBOX_HASH}, $self->{MTA_VIRTUAL_ALIAS_HASH}, $self->{MTA_TRANSPORT_HASH}){
 		if(-f $_){
-			my $file = iMSCP::File->new(filename => $_);
+			my $file = Selity::File->new(filename => $_);
 			my (
 				$filename,
 				$directories,
 				$suffix
 			) = fileparse($_);
-			$rs |=	iMSCP::File->new(
+			$rs |=	Selity::File->new(
 						filename => $_
 					)->copyFile(
 						"$self->{bkpDir}/$filename$suffix.".time
@@ -475,8 +475,8 @@ sub disableMail{
 sub delSaslData{
 
 	use File::Basename;
-	use iMSCP::Execute;
-	use iMSCP::File;
+	use Selity::Execute;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -487,7 +487,7 @@ sub delSaslData{
 	my $mailBox		= $data->{MAIL_ADDR};
 	$mailBox		=~ s/\./\\\./g;
 
-	my $sasldb = iMSCP::File->new(filename => $self->{ETC_SASLDB_FILE});
+	my $sasldb = Selity::File->new(filename => $self->{ETC_SASLDB_FILE});
 
 	$rs |=	$sasldb->save() unless(-f $self->{ETC_SASLDB_FILE});
 	$rs |=	$sasldb->mode(0660);
@@ -507,7 +507,7 @@ sub delSaslData{
 		error($stderr) if $stderr;
 
 		if($self->{ETC_SASLDB_FILE} ne $self->{MTA_SASLDB_FILE}){
-			$rs |= execute("$main::imscpConfig{'CMD_CP'} -pf $self->{ETC_SASLDB_FILE} $self->{MTA_SASLDB_FILE}", \$stdout, \$stderr);
+			$rs |= execute("$main::selityConfig{'CMD_CP'} -pf $self->{ETC_SASLDB_FILE} $self->{MTA_SASLDB_FILE}", \$stdout, \$stderr);
 			debug($stdout) if $stdout;
 			error($stderr) if $stderr;
 		}
@@ -519,8 +519,8 @@ sub delSaslData{
 sub addSaslData{
 
 	use File::Basename;
-	use iMSCP::Execute;
-	use iMSCP::File;
+	use Selity::Execute;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -531,7 +531,7 @@ sub addSaslData{
 	my $mailBox	= $data->{MAIL_ADDR};
 	$mailBox	=~ s/\./\\\./g;
 
-	my $sasldb = iMSCP::File->new(filename => $self->{ETC_SASLDB_FILE});
+	my $sasldb = Selity::File->new(filename => $self->{ETC_SASLDB_FILE});
 
 	$rs |=	$sasldb->save() unless(-f $self->{ETC_SASLDB_FILE});
 	$rs |=	$sasldb->mode(0660);
@@ -550,12 +550,12 @@ sub addSaslData{
 		error($stderr) if $stderr;
 	}
 
-	$rs |= execute("$main::imscpConfig{'CMD_ECHO'} \"$data->{MAIL_PASS}\" | $self->{CMD_SASLDB_PASSWD2} -p -c -f $self->{ETC_SASLDB_FILE} -u $data->{DMN_NAME} $data->{MAIL_ACC}", \$stdout, \$stderr);
+	$rs |= execute("$main::selityConfig{'CMD_ECHO'} \"$data->{MAIL_PASS}\" | $self->{CMD_SASLDB_PASSWD2} -p -c -f $self->{ETC_SASLDB_FILE} -u $data->{DMN_NAME} $data->{MAIL_ACC}", \$stdout, \$stderr);
 	debug($stdout) if $stdout;
 	error($stderr) if $stderr;
 
 	if($self->{ETC_SASLDB_FILE} ne $self->{MTA_SASLDB_FILE}){
-		$rs |= execute("$main::imscpConfig{'CMD_CP'} -pf $self->{ETC_SASLDB_FILE} $self->{MTA_SASLDB_FILE}", \$stdout, \$stderr);
+		$rs |= execute("$main::selityConfig{'CMD_CP'} -pf $self->{ETC_SASLDB_FILE} $self->{MTA_SASLDB_FILE}", \$stdout, \$stderr);
 		debug($stdout) if $stdout;
 		error($stderr) if $stderr;
 	}
@@ -566,7 +566,7 @@ sub addSaslData{
 sub delAutoRspnd{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -575,19 +575,19 @@ sub delAutoRspnd{
 	my $mTrsptHshFile	= $self->{MTA_TRANSPORT_HASH};
 	my ($filename, $directories, $suffix) = fileparse($mTrsptHshFile);
 	my $wrkFileName	= "$self->{wrkDir}/$filename$suffix";
-	my $wrkFile		= iMSCP::File->new(filename => $wrkFileName);
+	my $wrkFile		= Selity::File->new(filename => $wrkFileName);
 	my $wrkContent		= $wrkFile->get();
 	return 1 unless defined $wrkContent;
 
-	my $trnsprt		= "imscp-arpl.$data->{DMN_NAME}";
+	my $trnsprt		= "selity-arpl.$data->{DMN_NAME}";
 	$trnsprt		=~ s/\./\\\./g;
 	$wrkContent		=~ s/^$trnsprt\t[^\n]*\n//gmi;
 	$wrkFile->set($wrkContent);
 	return 1 if $wrkFile->save();
 	$rs |=	$wrkFile->mode(0644);
 	$rs |=	$wrkFile->owner(
-				$main::imscpConfig{ROOT_USER},
-				$main::imscpConfig{ROOT_GROUP}
+				$main::selityConfig{ROOT_USER},
+				$main::selityConfig{ROOT_GROUP}
 			);
 	$rs |= $wrkFile->copyFile($mTrsptHshFile);
 
@@ -599,7 +599,7 @@ sub delAutoRspnd{
 sub addAutoRspnd{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -608,20 +608,20 @@ sub addAutoRspnd{
 	my $mTrsptHshFile	= $self->{MTA_TRANSPORT_HASH};
 	my ($filename, $directories, $suffix) = fileparse($mTrsptHshFile);
 	my $wrkFileName		= "$self->{wrkDir}/$filename$suffix";
-	my $wrkFile			= iMSCP::File->new(filename => $wrkFileName);
+	my $wrkFile			= Selity::File->new(filename => $wrkFileName);
 	my $wrkContent		= $wrkFile->get();
 	return 1 unless defined $wrkContent;
 
-	my $trnsprt		= "imscp-arpl.$data->{DMN_NAME}";
+	my $trnsprt		= "selity-arpl.$data->{DMN_NAME}";
 	$trnsprt		=~ s/\./\\\./g;
 	$wrkContent		=~ s/^$trnsprt\t[^\n]*\n//gmi;
-	$wrkContent		.= "imscp-arpl.$data->{DMN_NAME}\timscp-arpl:\n";
+	$wrkContent		.= "selity-arpl.$data->{DMN_NAME}\tselity-arpl:\n";
 	$wrkFile->set($wrkContent);
 	return 1 if $wrkFile->save();
 	$rs |=	$wrkFile->mode(0644);
 	$rs |=	$wrkFile->owner(
-				$main::imscpConfig{ROOT_USER},
-				$main::imscpConfig{ROOT_GROUP}
+				$main::selityConfig{ROOT_USER},
+				$main::selityConfig{ROOT_GROUP}
 			);
 	$rs |= $wrkFile->copyFile($mTrsptHshFile);
 
@@ -633,7 +633,7 @@ sub addAutoRspnd{
 sub delMailForward{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -642,7 +642,7 @@ sub delMailForward{
 	my $mFWDHshFile	= $self->{MTA_VIRTUAL_ALIAS_HASH};
 	my ($filename, $directories, $suffix) = fileparse($mFWDHshFile);
 	my $wrkFileName	= "$self->{wrkDir}/$filename$suffix";
-	my $wrkFile		= iMSCP::File->new(filename => $wrkFileName);
+	my $wrkFile		= Selity::File->new(filename => $wrkFileName);
 	my $wrkContent	= $wrkFile->get();
 	return 1 unless defined $wrkContent;
 
@@ -655,8 +655,8 @@ sub delMailForward{
 		#for catch all we need a line like a@aa.aa\ta@aa.aa
 		my @line;
 		push(@line, $data->{MAIL_ADDR}) if ($data->{MAIL_HAVE_CATCH_ALL} eq 'yes' || $data->{MAIL_AUTO_RSPND}) && $data->{MAIL_TYPE} =~ m/_mail/;
-		#for catch all we need a line like a@aa.aa\t[...]a@imscp-arpl.aa.aa
-		push(@line, "$data->{MAIL_ACC}\@imscp-arpl.$data->{DMN_NAME}")if $data->{MAIL_AUTO_RSPND} && $data->{MAIL_TYPE} =~ m/_mail/;
+		#for catch all we need a line like a@aa.aa\t[...]a@selity-arpl.aa.aa
+		push(@line, "$data->{MAIL_ACC}\@selity-arpl.$data->{DMN_NAME}")if $data->{MAIL_AUTO_RSPND} && $data->{MAIL_TYPE} =~ m/_mail/;
 		$wrkContent .= "$data->{MAIL_ADDR}\t".join(',', @line)."\n" if scalar @line;
 	}
 
@@ -664,8 +664,8 @@ sub delMailForward{
 	return 1 if $wrkFile->save();
 	$rs |=	$wrkFile->mode(0644);
 	$rs |=	$wrkFile->owner(
-				$main::imscpConfig{ROOT_USER},
-				$main::imscpConfig{ROOT_GROUP}
+				$main::selityConfig{ROOT_USER},
+				$main::selityConfig{ROOT_GROUP}
 			);
 	$rs |= $wrkFile->copyFile($mFWDHshFile);
 
@@ -677,7 +677,7 @@ sub delMailForward{
 sub addMailForward{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -686,7 +686,7 @@ sub addMailForward{
 	my $mFWDHshFile	= $self->{MTA_VIRTUAL_ALIAS_HASH};
 	my ($filename, $directories, $suffix) = fileparse($mFWDHshFile);
 	my $wrkFileName	= "$self->{wrkDir}/$filename$suffix";
-	my $wrkFile		= iMSCP::File->new(filename => $wrkFileName);
+	my $wrkFile		= Selity::File->new(filename => $wrkFileName);
 	my $wrkContent	= $wrkFile->get();
 	return 1 unless defined $wrkContent;
 
@@ -698,16 +698,16 @@ sub addMailForward{
 	push(@line, $data->{MAIL_ADDR}) if $data->{MAIL_TYPE} =~ m/_mail/;
 
 	push(@line, $data->{MAIL_FORWARD});
-	#for catch all we need a line like a@aa.aa\t[...]a@imscp-arpl.aa.aa
-	push(@line, "$data->{MAIL_ACC}\@imscp-arpl.$data->{DMN_NAME}")if $data->{MAIL_AUTO_RSPND};
+	#for catch all we need a line like a@aa.aa\t[...]a@selity-arpl.aa.aa
+	push(@line, "$data->{MAIL_ACC}\@selity-arpl.$data->{DMN_NAME}")if $data->{MAIL_AUTO_RSPND};
 	$wrkContent .= "$data->{MAIL_ADDR}\t".join(',', @line)."\n" if scalar @line;
 
 	$wrkFile->set($wrkContent);
 	return 1 if $wrkFile->save();
 	$rs |=	$wrkFile->mode(0644);
 	$rs |=	$wrkFile->owner(
-				$main::imscpConfig{ROOT_USER},
-				$main::imscpConfig{ROOT_GROUP}
+				$main::selityConfig{ROOT_USER},
+				$main::selityConfig{ROOT_GROUP}
 			);
 	$rs |= $wrkFile->copyFile($mFWDHshFile);
 
@@ -718,7 +718,7 @@ sub addMailForward{
 
 sub delMailBox{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 
 	my $self = shift;
 	my $data = shift;
@@ -730,7 +730,7 @@ sub delMailBox{
 
 	my $mailDir = "$self->{MTA_VIRTUAL_MAIL_DIR}/$data->{DMN_NAME}/$data->{MAIL_ACC}";
 
-	$rs |=	iMSCP::Dir->new(dirname => $mailDir)->remove();
+	$rs |=	Selity::Dir->new(dirname => $mailDir)->remove();
 
 	$rs;
 }
@@ -738,7 +738,7 @@ sub delMailBox{
 sub disableMailBox{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -747,7 +747,7 @@ sub disableMailBox{
 	my $mBoxHashFile	= $self->{MTA_VIRTUAL_MAILBOX_HASH};
 	my ($filename, $directories, $suffix) = fileparse($mBoxHashFile);
 	my $wrkFileName	= "$self->{wrkDir}/$filename$suffix";
-	my $wrkFile		= iMSCP::File->new(filename => $wrkFileName);
+	my $wrkFile		= Selity::File->new(filename => $wrkFileName);
 	my $wrkContent	= $wrkFile->get();
 	return 1 unless defined $wrkContent;
 
@@ -758,8 +758,8 @@ sub disableMailBox{
 	return 1 if $wrkFile->save();
 	$rs |=	$wrkFile->mode(0644);
 	$rs |=	$wrkFile->owner(
-				$main::imscpConfig{ROOT_USER},
-				$main::imscpConfig{ROOT_GROUP}
+				$main::selityConfig{ROOT_USER},
+				$main::selityConfig{ROOT_GROUP}
 			);
 	$rs |= $wrkFile->copyFile($mBoxHashFile);
 
@@ -771,8 +771,8 @@ sub disableMailBox{
 sub addMailBox{
 
 	use File::Basename;
-	use iMSCP::File;
-	use iMSCP::Dir;
+	use Selity::File;
+	use Selity::Dir;
 
 	my $self = shift;
 	my $data = shift;
@@ -781,7 +781,7 @@ sub addMailBox{
 	my $mBoxHashFile	= $self->{MTA_VIRTUAL_MAILBOX_HASH};
 	my ($filename, $directories, $suffix) = fileparse($mBoxHashFile);
 	my $wrkFileName	= "$self->{wrkDir}/$filename$suffix";
-	my $wrkFile		= iMSCP::File->new(filename => $wrkFileName);
+	my $wrkFile		= Selity::File->new(filename => $wrkFileName);
 	my $wrkContent	= $wrkFile->get();
 	return 1 unless defined $wrkContent;
 
@@ -793,8 +793,8 @@ sub addMailBox{
 	return 1 if $wrkFile->save();
 	$rs |=	$wrkFile->mode(0644);
 	$rs |=	$wrkFile->owner(
-				$main::imscpConfig{ROOT_USER},
-				$main::imscpConfig{ROOT_GROUP}
+				$main::selityConfig{ROOT_USER},
+				$main::selityConfig{ROOT_GROUP}
 			);
 	$rs |= $wrkFile->copyFile($mBoxHashFile);
 
@@ -802,14 +802,14 @@ sub addMailBox{
 
 	my $mailDir = "$self->{MTA_VIRTUAL_MAIL_DIR}/$data->{DMN_NAME}/$data->{MAIL_ACC}";
 
-	$rs |=	iMSCP::Dir->new(dirname => $mailDir)->make({
+	$rs |=	Selity::Dir->new(dirname => $mailDir)->make({
 				user	=> $self->{MTA_MAILBOX_UID_NAME},
 				group	=> $self->{MTA_MAILBOX_GID_NAME},
 				mode	=> 0700
 			});
 
 	for ("$mailDir/cur", "$mailDir/tmp", "$mailDir/new"){
-		$rs |= iMSCP::Dir->new(dirname => $_)->make({
+		$rs |= Selity::Dir->new(dirname => $_)->make({
 			user	=> $self->{MTA_MAILBOX_UID_NAME},
 			group	=> $self->{MTA_MAILBOX_GID_NAME},
 			mode	=> 0700
@@ -822,7 +822,7 @@ sub addMailBox{
 sub addCatchAll{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -831,7 +831,7 @@ sub addCatchAll{
 	my $mFWDHshFile	= $self->{MTA_VIRTUAL_ALIAS_HASH};
 	my ($filename, $directories, $suffix) = fileparse($mFWDHshFile);
 	my $wrkFileName	= "$self->{wrkDir}/$filename$suffix";
-	my $wrkFile		= iMSCP::File->new(filename => $wrkFileName);
+	my $wrkFile		= Selity::File->new(filename => $wrkFileName);
 	my $wrkContent	= $wrkFile->get();
 	return 1 unless defined $wrkContent;
 
@@ -850,8 +850,8 @@ sub addCatchAll{
 	return 1 if $wrkFile->save();
 	$rs |=	$wrkFile->mode(0644);
 	$rs |=	$wrkFile->owner(
-				$main::imscpConfig{ROOT_USER},
-				$main::imscpConfig{ROOT_GROUP}
+				$main::selityConfig{ROOT_USER},
+				$main::selityConfig{ROOT_GROUP}
 			);
 	$rs |= $wrkFile->copyFile($mFWDHshFile);
 
@@ -863,7 +863,7 @@ sub addCatchAll{
 sub delCatchAll{
 
 	use File::Basename;
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self = shift;
 	my $data = shift;
@@ -872,7 +872,7 @@ sub delCatchAll{
 	my $mFWDHshFile	= $self->{MTA_VIRTUAL_ALIAS_HASH};
 	my ($filename, $directories, $suffix) = fileparse($mFWDHshFile);
 	my $wrkFileName	= "$self->{wrkDir}/$filename$suffix";
-	my $wrkFile		= iMSCP::File->new(filename => $wrkFileName);
+	my $wrkFile		= Selity::File->new(filename => $wrkFileName);
 	my $wrkContent	= $wrkFile->get();
 	return 1 unless defined $wrkContent;
 
@@ -889,8 +889,8 @@ sub delCatchAll{
 	return 1 if $wrkFile->save();
 	$rs |=	$wrkFile->mode(0644);
 	$rs |=	$wrkFile->owner(
-				$main::imscpConfig{ROOT_USER},
-				$main::imscpConfig{ROOT_GROUP}
+				$main::selityConfig{ROOT_USER},
+				$main::selityConfig{ROOT_GROUP}
 			);
 	$rs |= $wrkFile->copyFile($mFWDHshFile);
 
@@ -901,29 +901,29 @@ sub delCatchAll{
 
 sub getTraffic{
 
-	use iMSCP::Execute;
-	use iMSCP::File;
-	use iMSCP::Config;
+	use Selity::Execute;
+	use Selity::File;
+	use Selity::Config;
 	use Tie::File;
 
 	my $self		= shift;
 	my $who			= shift;
 	my $dbName		= "$self->{wrkDir}/log.db";
-	my $logFile		= "$main::imscpConfig{TRAFF_LOG_DIR}/mail.log";
-	my $wrkLogFile	= "$main::imscpConfig{LOG_DIR}/mail.smtp.log";
+	my $logFile		= "$main::selityConfig{TRAFF_LOG_DIR}/mail.log";
+	my $wrkLogFile	= "$main::selityConfig{LOG_DIR}/mail.smtp.log";
 	my ($rv, $rs, $stdout, $stderr);
 
 	##only if files was not aleady parsed this session
 	unless($self->{logDb}){
 		#use a small conf file to memorize last line readed and his content
-		tie %{$self->{logDb}}, 'iMSCP::Config','fileName' => $dbName, noerrors => 1;
+		tie %{$self->{logDb}}, 'Selity::Config','fileName' => $dbName, noerrors => 1;
 		##first use? we zero line and content
 		$self->{logDb}->{line} = 0 unless $self->{logDb}->{line};
 		$self->{logDb}->{content} = '' unless $self->{logDb}->{content};
 		my $lastLineNo	= $self->{logDb}->{line};
 		my $lastLine	= $self->{logDb}->{content};
 		##copy log file
-		$rs = iMSCP::File->new(filename => $logFile)->copyFile($wrkLogFile) if -f $logFile;
+		$rs = Selity::File->new(filename => $logFile)->copyFile($wrkLogFile) if -f $logFile;
 		#retunt 0 traffic if we fail
 		return 0 if $rs;
 		#link log file to array
@@ -938,13 +938,13 @@ sub getTraffic{
 			@content = @content[$lastLineNo + 1 .. $#content];
 			(tied @content)->flush;
 		}
-		$rs = execute("$main::imscpConfig{'CMD_GREP'} 'postfix' $wrkLogFile | $main::imscpConfig{'CMD_PFLOGSUM'} standard", \$stdout, \$stderr);
+		$rs = execute("$main::selityConfig{'CMD_GREP'} 'postfix' $wrkLogFile | $main::selityConfig{'CMD_PFLOGSUM'} standard", \$stdout, \$stderr);
 		error($stderr) if $stderr;
 		return 0 if $rs;
 		while($stdout =~ m/^[^\s]+\s[^\s]+\s[^\s\@]+\@([^\s]+)\s[^\s\@]+\@([^\s]+)\s([^\s]+)\s([^\s]+)\s[^\s]+\s[^\s]+\s[^\s]+\s(.*)$/mg){
 						 #  date    time    mailfrom @ domain   mailto   @ domain    relay_s   relay_r   SMTP  extinfo  code     size
 						 #                                1                  2         3         4                                 5
-			if($main::imscpConfig{MAIL_LOG_INC_AMAVIS}){
+			if($main::selityConfig{MAIL_LOG_INC_AMAVIS}){
 				if($5 ne '?' &&  !($3 =~ /localhost|127.0.0.1/ && $4 =~ /localhost|127.0.0.1/)){
 					$self->{traff}->{$1} += $5;
 					$self->{traff}->{$2} += $5;
@@ -962,11 +962,11 @@ sub getTraffic{
 
 END{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $endCode		= $?;
 	my $self		= Servers::mta::postfix->new();
-	my $wrkLogFile	= "$main::imscpConfig{LOG_DIR}/mail.smtp.log";
+	my $wrkLogFile	= "$main::selityConfig{LOG_DIR}/mail.smtp.log";
 	my $rs			= 0;
 
 	if($self->{restart} && $self->{restart} eq 'yes'){
@@ -975,7 +975,7 @@ END{
 		$rs |= $self->postmap($_) foreach(keys %{$self->{postmap}});
 	}
 
-	$rs |= iMSCP::File->new(filename => $wrkLogFile)->delFile() if -f $wrkLogFile;
+	$rs |= Selity::File->new(filename => $wrkLogFile)->delFile() if -f $wrkLogFile;
 
 	$? = $endCode || $rs;
 }

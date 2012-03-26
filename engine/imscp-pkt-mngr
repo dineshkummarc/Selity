@@ -20,7 +20,7 @@
 # i-MSCP a internet Multi Server Control Panel. All Rights Reserved
 #
 # @category i-MSCP
-# @copyright 2010-2012 by iMSCP | http://i-mscp.net
+# @copyright 2010-2012 by Selity | http://i-mscp.net
 # @author Sacha Bay <sascha.bay@i-mscp.net>
 # @link http://i-mscp.net i-MSCP Home Site
 # @license http://www.mozilla.org/MPL/ MPL 1.1
@@ -32,7 +32,7 @@
 
 use FindBin;
 use lib "$FindBin::Bin/";
-require 'imscp_common_code.pl';
+require 'selity_common_code.pl';
 
 use strict;
 use XML::Parser;
@@ -46,8 +46,8 @@ sub pkt_mngr_start_up {
 	my ($rs, $rdata) = (undef, undef);
 	push_el(\@main::el, 'pkt_mngr_start_up()', 'Starting package manager...');
 	# Let's clear Execution Logs, if any.
-	if (-e $main::imscp_pkt_mngr_el) {
-		$rs = del_file($main::imscp_pkt_mngr_el);
+	if (-e $main::selity_pkt_mngr_el) {
+		$rs = del_file($main::selity_pkt_mngr_el);
 		return $rs if ($rs != 0);
 	}
 	# config check;
@@ -386,7 +386,7 @@ $rs = pkt_mngr_start_up();
 
 if ($rs != 0) {
 
-    dump_el(\@main::el, $main::imscp_pkt_mngr_el);
+    dump_el(\@main::el, $main::selity_pkt_mngr_el);
 
     pkt_mngr_shut_down();
 
@@ -398,7 +398,7 @@ $rs = pkt_mngr_engine();
 
 if ($rs != 0) {
 
-    dump_el(\@main::el, $main::imscp_pkt_mngr_el);
+    dump_el(\@main::el, $main::selity_pkt_mngr_el);
 
     pkt_mngr_shut_down();
 
@@ -410,7 +410,7 @@ $rs = pkt_mngr_shut_down();
 
 if ($rs != 0) {
 
-    dump_el(\@main::el, $main::imscp_pkt_mngr_el);
+    dump_el(\@main::el, $main::selity_pkt_mngr_el);
 
     exit 1;
 }

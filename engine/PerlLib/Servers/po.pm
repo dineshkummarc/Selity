@@ -28,7 +28,7 @@ package Servers::po;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 
 use vars qw/@ISA/;
 @ISA = ('Common::SimpleClass');
@@ -36,7 +36,7 @@ use Common::SimpleClass;
 
 sub factory{
 	my $self	= shift;
-	my $server	= shift || $main::imscpConfig{PO_SERVER};
+	my $server	= shift || $main::selityConfig{PO_SERVER};
 	my ($file, $class);
 	if(lc($server) =~ /^no$/ ){
 		$file	= "Servers/noserver.pm";

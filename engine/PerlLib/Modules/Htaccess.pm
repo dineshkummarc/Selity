@@ -28,7 +28,7 @@ package Modules::Htaccess;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -102,7 +102,7 @@ sub loadData{
 			`t3`.`id` = ?
 	";
 
-	my $rdata = iMSCP::Database->factory()->doQuery('id', $sql, $self->{htaccessId}, $self->{htaccessId}, $self->{htaccessId});
+	my $rdata = Selity::Database->factory()->doQuery('id', $sql, $self->{htaccessId}, $self->{htaccessId}, $self->{htaccessId});
 
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 	error("No record in table htaccess has id = $self->{htaccessId}") and return 1 unless(exists $rdata->{$self->{htaccessId}});
@@ -115,7 +115,7 @@ sub loadData{
 			"Orphan entry: ".Dumper($rdata->{$self->{htaccessId}}),
 			$self->{htaccessId}
 		);
-		my $rdata = iMSCP::Database->factory()->doQuery('update', @sql);
+		my $rdata = Selity::Database->factory()->doQuery('update', @sql);
 		return 1;
 	}
 
@@ -154,7 +154,7 @@ sub process{
 		}
 	}
 
-	my $rdata = iMSCP::Database->factory()->doQuery('delete', @sql);
+	my $rdata = Selity::Database->factory()->doQuery('delete', @sql);
 	error("$rdata") and return 1 if(ref $rdata ne 'HASH');
 
 	$rs;
@@ -166,11 +166,11 @@ sub buildHTTPDData{
 
 	my $groupName	=
 	my $userName	=
-						$main::imscpConfig{SYSTEM_USER_PREFIX}.
-						($main::imscpConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
+						$main::selityConfig{SYSTEM_USER_PREFIX}.
+						($main::selityConfig{SYSTEM_USER_MIN_UID} + $self->{domain_admin_id});
 
-	my $hDir 		= "$main::imscpConfig{'USER_HOME_DIR'}/$self->{domain_name}";
-	my $pathDir 		= "$main::imscpConfig{'USER_HOME_DIR'}/$self->{domain_name}/$self->{path}";
+	my $hDir 		= "$main::selityConfig{'USER_HOME_DIR'}/$self->{domain_name}";
+	my $pathDir 		= "$main::selityConfig{'USER_HOME_DIR'}/$self->{domain_name}/$self->{path}";
 	$pathDir			=~ s~/+~/~g;
 	$hDir			=~ s~/+~/~g;
 

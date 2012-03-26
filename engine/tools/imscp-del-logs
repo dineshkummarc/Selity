@@ -31,19 +31,19 @@ use FindBin;
 use lib "$FindBin::Bin/..";
 use lib "$FindBin::Bin/../PerlLib";
 
-use iMSCP::Debug;
-use iMSCP::Boot;
-use iMSCP::Execute;
-use iMSCP::Mail;
+use Selity::Debug;
+use Selity::Boot;
+use Selity::Execute;
+use Selity::Mail;
 use Servers::httpd;
 use Data::Dumper;
 
-newDebug('imscp-del-logs.log');
+newDebug('selity-del-logs.log');
 
 sub logs_start_up {
 
 	umask(027);
-	iMSCP::Boot->new()->init({nolock => 'yes'});
+	Selity::Boot->new()->init({nolock => 'yes'});
 
 	0;
 }

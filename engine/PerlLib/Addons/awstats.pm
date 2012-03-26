@@ -29,7 +29,7 @@ package Addons::awstats;
 use strict;
 use warnings;
 use Data::Dumper;
-use iMSCP::Debug;
+use Selity::Debug;
 
 use vars qw/@ISA/;
 
@@ -40,7 +40,7 @@ sub _init{
 
 	my $self				= shift;
 
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/awstats";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/awstats";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 	$self->{tplDir}	= "$self->{cfgDir}/parts";
@@ -105,7 +105,7 @@ sub preaddSub{
 
 sub delAwstatsSection{
 
-	use iMSCP::Templator;
+	use Selity::Templator;
 	use Servers::httpd;
 
 	my $self = shift;
@@ -130,7 +130,7 @@ sub delAwstatsSection{
 
 sub awstatsSection{
 
-	use iMSCP::Templator;
+	use Selity::Templator;
 	use Servers::httpd;
 
 	my $self = shift;
@@ -140,10 +140,10 @@ sub awstatsSection{
 
 	if($filename =~ /domain-.*.tpl/){
 		my ($bTag, $eTag);
-		if($main::imscpConfig{AWSTATS_ACTIVE} ne 'yes'){
+		if($main::selityConfig{AWSTATS_ACTIVE} ne 'yes'){
 			$bTag = "# SECTION awstats support BEGIN.\n";
 			$eTag = "# SECTION awstats support END.\n";
-		} elsif($main::imscpConfig{AWSTATS_MODE} ne '1'){
+		} elsif($main::selityConfig{AWSTATS_MODE} ne '1'){
 			$bTag = "# SECTION awstats static BEGIN.\n";
 			$eTag = "# SECTION awstats static END.\n";
 		} else {
@@ -152,12 +152,12 @@ sub awstatsSection{
 		}
 		$data = replaceBloc($bTag, $eTag, '', $data, undef);
 		my $tags = {
-			AWSTATS_CACHE_DIR	=> $main::imscpConfig{AWSTATS_CACHE_DIR},
-			AWSTATS_CONFIG_DIR	=> $main::imscpConfig{AWSTATS_CONFIG_DIR},
-			AWSTATS_ENGINE_DIR	=> $main::imscpConfig{AWSTATS_ENGINE_DIR},
-			AWSTATS_WEB_DIR		=> $main::imscpConfig{AWSTATS_WEB_DIR},
-			AWSTATS_ROOT_DIR	=> $main::imscpConfig{AWSTATS_ROOT_DIR},
-			AWSTATS_GROUP_AUTH	=> $main::imscpConfig{AWSTATS_GROUP_AUTH}
+			AWSTATS_CACHE_DIR	=> $main::selityConfig{AWSTATS_CACHE_DIR},
+			AWSTATS_CONFIG_DIR	=> $main::selityConfig{AWSTATS_CONFIG_DIR},
+			AWSTATS_ENGINE_DIR	=> $main::selityConfig{AWSTATS_ENGINE_DIR},
+			AWSTATS_WEB_DIR		=> $main::selityConfig{AWSTATS_WEB_DIR},
+			AWSTATS_ROOT_DIR	=> $main::selityConfig{AWSTATS_ROOT_DIR},
+			AWSTATS_GROUP_AUTH	=> $main::selityConfig{AWSTATS_GROUP_AUTH}
 		};
 		$data = process($tags, $data);
 
@@ -191,25 +191,25 @@ sub addDmn{
 		return 1 unless $data->{$_};
 	}
 
-	$rs |= iMSCP::Dir->new(
+	$rs |= Selity::Dir->new(
 		dirname => "/$data->{HOME_DIR}/statistics"
 	)->make({
 			mode	=> 0755,
 			user	=> $data->{USER},
 			group	=> $data->{GROUP}
-	}) if $main::imscpConfig{AWSTATS_MODE};
+	}) if $main::selityConfig{AWSTATS_MODE};
 
-	if($main::imscpConfig{AWSTATS_ACTIVE} =~ m/yes/i){
+	if($main::selityConfig{AWSTATS_ACTIVE} =~ m/yes/i){
 		$rs |= $self->addAwstatsCfg($data);
-		$rs |= $self->addAwstatsCron($data) if $main::imscpConfig{AWSTATS_MODE};
+		$rs |= $self->addAwstatsCron($data) if $main::selityConfig{AWSTATS_MODE};
 	}
 	$rs;
 }
 
 sub addAwstatsCfg{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 	use Servers::httpd;
 
 	my $self	= shift;
@@ -218,14 +218,14 @@ sub addAwstatsCfg{
 
 	my $cfgFileName	= "awstats.$data->{DMN_NAME}.conf";
 
-	my $cfgFile	= "$main::imscpConfig{AWSTATS_CONFIG_DIR}/$cfgFileName";
-	my $tplFile	= "$self->{tplDir}/awstats.imscp_tpl.conf";
+	my $cfgFile	= "$main::selityConfig{AWSTATS_CONFIG_DIR}/$cfgFileName";
+	my $tplFile	= "$self->{tplDir}/awstats.selity_tpl.conf";
 	my $wrkFile	= "$self->{wrkDir}/$cfgFileName";
 
-	my $cfgFileContent	= iMSCP::File->new(filename => $tplFile)->get();
+	my $cfgFileContent	= Selity::File->new(filename => $tplFile)->get();
 
 	#Saving the current production file if it exists
-	$rs |=	iMSCP::File->new(
+	$rs |=	Selity::File->new(
 				filename => $cfgFile
 			)->copyFile(
 				"$self->{bkpDir}/$cfgFileName." . time
@@ -239,10 +239,10 @@ sub addAwstatsCfg{
 
 	my $tags = {
 		DOMAIN_NAME			=> $data->{DMN_NAME},
-		CMD_CAT				=> $main::imscpConfig{CMD_CAT},
-		AWSTATS_CACHE_DIR	=> $main::imscpConfig{AWSTATS_CACHE_DIR},
-		AWSTATS_ENGINE_DIR	=> $main::imscpConfig{AWSTATS_ENGINE_DIR},
-		AWSTATS_WEB_DIR		=> $main::imscpConfig{AWSTATS_WEB_DIR}
+		CMD_CAT				=> $main::selityConfig{CMD_CAT},
+		AWSTATS_CACHE_DIR	=> $main::selityConfig{AWSTATS_CACHE_DIR},
+		AWSTATS_ENGINE_DIR	=> $main::selityConfig{AWSTATS_ENGINE_DIR},
+		AWSTATS_WEB_DIR		=> $main::selityConfig{AWSTATS_WEB_DIR}
 	};
 	$cfgFileContent = process($tags, $cfgFileContent);
 
@@ -256,22 +256,22 @@ sub addAwstatsCfg{
 
 	## Store and install
 	# Store the file in the working directory
-	my $file = iMSCP::File->new(filename => $wrkFile);
+	my $file = Selity::File->new(filename => $wrkFile);
 	$rs |= $file->set($cfgFileContent);
 	$rs |= $file->save();
 	$rs |= $file->mode(0644);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	# Install the file in the production directory
-	$rs |= $file->copyFile($main::imscpConfig{AWSTATS_CONFIG_DIR});
+	$rs |= $file->copyFile($main::selityConfig{AWSTATS_CONFIG_DIR});
 
 	$rs;
 }
 
 sub addAwstatsCron{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 	use Servers::cron;
 
 	my $self	= shift;
@@ -286,9 +286,9 @@ sub addAwstatsCron{
 		MONTH	=> '*',
 		DWEEK	=> '*',
 		USER	=> $data->{USER},
-		C0MMAND	=>	"perl $main::imscpConfig{AWSTATS_ROOT_DIR}/awstats_buildstaticpages.pl ".
+		C0MMAND	=>	"perl $main::selityConfig{AWSTATS_ROOT_DIR}/awstats_buildstaticpages.pl ".
 					"-config=$data->{DMN_NAME} -update ".
-					"-awstatsprog=$main::imscpConfig{AWSTATS_ENGINE_DIR}/awstats.pl ".
+					"-awstatsprog=$main::selityConfig{AWSTATS_ENGINE_DIR}/awstats.pl ".
 					"-dir=$data->{HOME_DIR}/statistics/",
 		TASKID	=> "AWSTATS:$data->{DMN_NAME}"
 	});
@@ -316,10 +316,10 @@ sub delDmn{
 		return 1 unless $data->{$_};
 	}
 
-	my $cfgFileName = "$main::imscpConfig{AWSTATS_CONFIG_DIR}/awstats.$data->{DMN_NAME}.conf";
+	my $cfgFileName = "$main::selityConfig{AWSTATS_CONFIG_DIR}/awstats.$data->{DMN_NAME}.conf";
 	my $wrkFileName = "$self->{wrkDir}/awstats.$data->{DMN_NAME}.conf";
-	$rs |= iMSCP::File->new(filename => $cfgFileName)->delFile() if -f $cfgFileName;
-	$rs |= iMSCP::File->new(filename => $wrkFileName)->delFile() if -f $wrkFileName;
+	$rs |= Selity::File->new(filename => $cfgFileName)->delFile() if -f $cfgFileName;
+	$rs |= Selity::File->new(filename => $wrkFileName)->delFile() if -f $wrkFileName;
 	$rs |= $self->delAwstatsCron($data);
 
 	$rs;

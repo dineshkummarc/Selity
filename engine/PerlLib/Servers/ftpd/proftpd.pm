@@ -28,7 +28,7 @@ package Servers::ftpd::proftpd;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -39,14 +39,14 @@ use Common::SingletonClass;
 sub _init{
 	my $self	= shift;
 
-	$self->{cfgDir} = "$main::imscpConfig{'CONF_DIR'}/proftpd";
+	$self->{cfgDir} = "$main::selityConfig{'CONF_DIR'}/proftpd";
 	$self->{bkpDir} = "$self->{cfgDir}/backup";
 	$self->{wrkDir} = "$self->{cfgDir}/working";
 	$self->{tplDir} = "$self->{cfgDir}/parts";
 
 	$self->{commentChar} = '#';
 
-	tie %self::proftpdConfig, 'iMSCP::Config','fileName' => "$self->{cfgDir}/proftpd.data";
+	tie %self::proftpdConfig, 'Selity::Config','fileName' => "$self->{cfgDir}/proftpd.data";
 	$self->{$_} = $self::proftpdConfig{$_} foreach(keys %self::proftpdConfig);
 }
 
@@ -128,7 +128,7 @@ sub restart{
 	my $self = shift;
 	my ($rs, $stdout, $stderr);
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	# Reload config
 	$rs = execute("$self->{CMD_FTPD} restart", \$stdout, \$stderr);
@@ -142,8 +142,8 @@ sub restart{
 
 sub addDmn{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -162,12 +162,12 @@ sub addDmn{
 		return 1 unless $data->{$_};
 	}
 
-	iMSCP::File->new(
+	Selity::File->new(
 		filename => "$self::proftpdConfig{FTPD_CONF_DIR}/$data->{FILE_NAME}"
 	)->copyFile( "$self->{bkpDir}/$data->{FILE_NAME}.".time ) and $rs = 1
 	if -f "$self::proftpdConfig{FTPD_CONF_DIR}/$data->{FILE_NAME}";
 
-	my $file	= iMSCP::File->new( filename => "$self->{tplDir}/proftpd.conf.tpl");
+	my $file	= Selity::File->new( filename => "$self->{tplDir}/proftpd.conf.tpl");
 	my $content	= $file->get();
 
 	if(!$content){
@@ -176,15 +176,15 @@ sub addDmn{
 	}
 
 	$content	= process({PATH => $data->{PATH}}, $content);
-	$file	= iMSCP::File->new( filename => "$self->{wrkDir}/$data->{FILE_NAME}");
+	$file	= Selity::File->new( filename => "$self->{wrkDir}/$data->{FILE_NAME}");
 
 	$file->set($content);
 
 	$rs |=	$file->save();
 	$rs |=	$file->mode(0644);
 	$rs |=	$file->owner(
-				$main::imscpConfig{'ROOT_USER'},
-				$main::imscpConfig{'ROOT_GROUP'}
+				$main::selityConfig{'ROOT_USER'},
+				$main::selityConfig{'ROOT_GROUP'}
 			);
 	$rs |= $file->copyFile("$self::proftpdConfig{FTPD_CONF_DIR}/$data->{FILE_NAME}");
 
@@ -193,8 +193,8 @@ sub addDmn{
 
 sub delDmn{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -212,7 +212,7 @@ sub delDmn{
 		return 1 unless $data->{$_};
 	}
 
-	iMSCP::File->new(
+	Selity::File->new(
 		filename => "$self::proftpdConfig{FTPD_CONF_DIR}/$data->{FILE_NAME}"
 	)->delFile() and $rs = 1;
 
@@ -231,22 +231,22 @@ sub delSub{
 
 sub getTraffic{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $who		= shift;
-	my $trfFile	= "$main::imscpConfig{TRAFF_LOG_DIR}/$self::proftpdConfig{FTP_TRAFF_LOG}";
+	my $trfFile	= "$main::selityConfig{TRAFF_LOG_DIR}/$self::proftpdConfig{FTP_TRAFF_LOG}";
 
 	unless(exists $self->{logDb}){
 
 		$self->{logDb} = {};
-		my $rs = iMSCP::File->new(filename => $trfFile)->moveFile("$trfFile.old") if -f $trfFile;
+		my $rs = Selity::File->new(filename => $trfFile)->moveFile("$trfFile.old") if -f $trfFile;
 		if($rs){
 			delete $self->{logDb};
 			return 0;
 		}
 		if(-f "$trfFile.old"){
-			my $content = iMSCP::File->new(filename => "$trfFile.old")->get();
+			my $content = Selity::File->new(filename => "$trfFile.old")->get();
 			while($content =~ /^(\d+)\s[^\@]+\@(.*)$/mg){
 				$self->{logDb}->{$2} += $1 if (defined $2 && defined $1);
 			}
@@ -258,16 +258,16 @@ sub getTraffic{
 
 END{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $endCode	= $?;
 	my $self	= Servers::ftpd::proftpd->new();
 	my $rs		= 0;
-	my $trfFile	= "$main::imscpConfig{TRAFF_LOG_DIR}/$self::proftpdConfig{FTP_TRAFF_LOG}";
+	my $trfFile	= "$main::selityConfig{TRAFF_LOG_DIR}/$self::proftpdConfig{FTP_TRAFF_LOG}";
 
 	$rs			= $self->restart() if $self->{restart} && $self->{restart} eq 'yes';
 
-	$rs |= iMSCP::File->new(filename => "$trfFile.old")->delFile() if -f "$trfFile.old";
+	$rs |= Selity::File->new(filename => "$trfFile.old")->delFile() if -f "$trfFile.old";
 
 	$? = $endCode || $rs;
 }

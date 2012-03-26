@@ -17,8 +17,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * @category    iMSCP
- * @package     iMSCP Roundcube password changer
+ * @category    Selity
+ * @package     Selity Roundcube password changer
  * @copyright   2010-2011 by i-MSCP team
  * @author 		Sascha Bay
  * @link        http://www.i-mscp.net i-MSCP Home Site

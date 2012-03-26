@@ -28,9 +28,9 @@ package Servers::po::courier::uninstaller;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::File;
-use iMSCP::Execute;
+use Selity::Debug;
+use Selity::File;
+use Selity::Execute;
 
 use vars qw/@ISA/;
 
@@ -40,13 +40,13 @@ use Common::SingletonClass;
 sub _init{
 
 	my $self		= shift;
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/courier";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/courier";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/courier.data";
 
-	tie %self::courierConfig, 'iMSCP::Config','fileName' => $conf;
+	tie %self::courierConfig, 'Selity::Config','fileName' => $conf;
 
 	0;
 }
@@ -75,7 +75,7 @@ sub restoreConfFile{
 		$self::courierConfig{COURIER_IMAP_SSL},
 		$self::courierConfig{COURIER_POP_SSL}
 	) {
-		$rs	|=	iMSCP::File->new(
+		$rs	|=	Selity::File->new(
 					filename => "$self->{bkpDir}/$_.system"
 				)->copyFile(
 					"$self::courierConfig{'AUTHLIB_CONF_DIR'}/$_"
@@ -93,9 +93,9 @@ sub authDaemon{
 	my $rs		= 0;
 	my $file;
 
-	$file = iMSCP::File->new(filename => "$self::courierConfig{'AUTHLIB_CONF_DIR'}/authdaemonrc");
+	$file = Selity::File->new(filename => "$self::courierConfig{'AUTHLIB_CONF_DIR'}/authdaemonrc");
 	$rs |= $file->mode(0660);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	$rs;
 }
@@ -106,9 +106,9 @@ sub userDB{
 	my $rs		= 0;
 	my $file;
 
-	$file = iMSCP::File->new(filename => "$self::courierConfig{'AUTHLIB_CONF_DIR'}/userdb");
+	$file = Selity::File->new(filename => "$self::courierConfig{'AUTHLIB_CONF_DIR'}/userdb");
 	$rs |= $file->mode(0600);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	my ($rs, $stdout, $stderr);
 	$rs |= execute($self::courierConfig{'CMD_MAKEUSERDB'}, \$stdout, \$stderr);

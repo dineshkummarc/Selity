@@ -28,7 +28,7 @@ package Servers::named::bind;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 use vars qw/@ISA/;
 
@@ -38,14 +38,14 @@ use Common::SingletonClass;
 sub _init{
 	my $self	= shift;
 
-	$self->{cfgDir} = "$main::imscpConfig{'CONF_DIR'}/bind";
+	$self->{cfgDir} = "$main::selityConfig{'CONF_DIR'}/bind";
 	$self->{bkpDir} = "$self->{cfgDir}/backup";
 	$self->{wrkDir} = "$self->{cfgDir}/working";
 	$self->{tplDir}	= "$self->{cfgDir}/parts";
 
 	$self->{commentChar} = '#';
 
-	tie %self::bindConfig, 'iMSCP::Config','fileName' => "$self->{cfgDir}/bind.data", noerrors => 1;
+	tie %self::bindConfig, 'Selity::Config','fileName' => "$self->{cfgDir}/bind.data", noerrors => 1;
 	$self->{$_} = $self::bindConfig{$_} foreach(keys %self::bindConfig);
 }
 
@@ -127,7 +127,7 @@ sub restart{
 	my $self			= shift;
 	my ($rs, $stdout, $stderr);
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	# Reload config
 	$rs = execute("$self->{CMD_NAMED} restart", \$stdout, \$stderr);
@@ -140,8 +140,8 @@ sub restart{
 
 sub incTimeStamp{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 
 	my $self		= shift;
 	my $oldZoneFile	= shift;
@@ -151,13 +151,13 @@ sub incTimeStamp{
 	######################### TIMESTAMP SECTION START ###############################
 	# Create or Update serial number according RFC 1912
 
-	# Loading the template from /etc/imscp/bind/parts
-	my $entries = iMSCP::File->new(filename => "$self->{tplDir}/db_e.tpl")->get();
+	# Loading the template from /etc/selity/bind/parts
+	my $entries = Selity::File->new(filename => "$self->{tplDir}/db_e.tpl")->get();
 	return undef if (!$entries);
 
 	my $tags = { DMN_NAME	=> $dmnName };
-	my $cleanBTag	= iMSCP::File->new(filename => "$self->{tplDir}/db_time_b.tpl")->get();
-	my $cleanETag	= iMSCP::File->new(filename => "$self->{tplDir}/db_time_e.tpl")->get();
+	my $cleanBTag	= Selity::File->new(filename => "$self->{tplDir}/db_time_b.tpl")->get();
+	my $cleanETag	= Selity::File->new(filename => "$self->{tplDir}/db_time_e.tpl")->get();
 	my $bTag 		= process($tags, $cleanBTag);
 	my $eTag 		= process($tags, $cleanETag);
 	return undef if(!$cleanBTag ||!$bTag || !$cleanETag || !$eTag);
@@ -192,19 +192,19 @@ sub incTimeStamp{
 
 sub addDmnDb {
 
-	use iMSCP::Dialog;
-	use iMSCP::File;
-	use iMSCP::Templator;
-	use iMSCP::IP;
+	use Selity::Dialog;
+	use Selity::File;
+	use Selity::Templator;
+	use Selity::IP;
 
 	my $self		= shift;
 	my $option		= shift;
 	my $zoneFile	= "$self::bindConfig{BIND_DB_DIR}/$option->{DMN_NAME}.db";
-	my $ipH			= iMSCP::IP->new();
+	my $ipH			= Selity::IP->new();
 
 	#Saving the current production file if it exists
 	if(-f $zoneFile) {
-		iMSCP::File->new(
+		Selity::File->new(
 			filename => $zoneFile
 		)->copyFile(
 			"$self->{bkpDir}/$option->{DMN_NAME}.db." . time
@@ -213,12 +213,12 @@ sub addDmnDb {
 
 	# Load the current working db file
 	my $wrkCfg = "$self->{wrkDir}/$option->{DMN_NAME}.db";
-	my $wrkFileContent = iMSCP::File->new(filename => $wrkCfg)->get() if(-f $wrkCfg);
+	my $wrkFileContent = Selity::File->new(filename => $wrkCfg)->get() if(-f $wrkCfg);
 
 	## Building new configuration file
 
-	# Loading the template from /etc/imscp/bind/parts
-	my $entries = iMSCP::File->new(filename => "$self->{tplDir}/db_e.tpl")->get();
+	# Loading the template from /etc/selity/bind/parts
+	my $entries = Selity::File->new(filename => "$self->{tplDir}/db_e.tpl")->get();
 	return 1 if (!$entries);
 
 	########################## NS SECTION START #################################
@@ -267,8 +267,8 @@ sub addDmnDb {
 		DMN_IP				=> $option->{DMN_IP},
 		IP_TYPE				=> (lc($ipH->getIpType($option->{DMN_IP})) eq 'ipv4' ? 'A' : 'AAAA'),
 		TXT_DMN_IP_TYPE		=> lc($ipH->getIpType($option->{DMN_IP})),
-		TXT_SERVER_IP_TYPE	=> lc($ipH->getIpType($main::imscpConfig{BASE_SERVER_IP})),
-		BASE_SERVER_IP		=> $main::imscpConfig{BASE_SERVER_IP}
+		TXT_SERVER_IP_TYPE	=> lc($ipH->getIpType($main::selityConfig{BASE_SERVER_IP})),
+		BASE_SERVER_IP		=> $main::selityConfig{BASE_SERVER_IP}
 	};
 
 	# Replacement tags
@@ -287,8 +287,8 @@ sub addDmnDb {
 
 		my $bTag = "; ctm domain als entries BEGIN.\n";
 		my $eTag = "; ctm domain als entries END.\n";
-		my $fTag = iMSCP::File->new(filename => "$self->{tplDir}/db_dns_entry.tpl")->get();
-		my $old = iMSCP::File->new(filename => "$self->{wrkDir}/$option->{DMN_NAME}.db")->get() || '';
+		my $fTag = Selity::File->new(filename => "$self->{tplDir}/db_dns_entry.tpl")->get();
+		my $old = Selity::File->new(filename => "$self->{wrkDir}/$option->{DMN_NAME}.db")->get() || '';
 
 		$tags = {
 			MANUAL_DNS_NAME		=> $option->{DMN_ADD}->{MANUAL_DNS_NAME},
@@ -309,7 +309,7 @@ sub addDmnDb {
 
 		my $bTag = "; ctm domain als entries BEGIN.\n";
 		my $eTag = "; ctm domain als entries END.\n";
-		my $old = iMSCP::File->new(filename => "$self->{wrkDir}/$option->{DMN_NAME}.db")->get() || '';
+		my $old = Selity::File->new(filename => "$self->{wrkDir}/$option->{DMN_NAME}.db")->get() || '';
 
 		my $custom	= getBloc($bTag, $eTag, $old);
 		$custom =~ s/$option->{DMN_DEL}->{MANUAL_DNS_NAME}\s[^\n]*\n//img;
@@ -322,9 +322,9 @@ sub addDmnDb {
 	##################### CUSTOM DATA SECTION START ##########################
 	if( keys(%{$option->{DMN_CUSTOM}}) > 0 ){
 
-		my $bTag = iMSCP::File->new(filename => "$self->{tplDir}/db_dns_entry_b.tpl")->get();
-		my $eTag = iMSCP::File->new(filename =>"$self->{tplDir}/db_dns_entry_e.tpl")->get();
-		my $FormatTag = iMSCP::File->new(filename => "$self->{tplDir}/db_dns_entry.tpl")->get();
+		my $bTag = Selity::File->new(filename => "$self->{tplDir}/db_dns_entry_b.tpl")->get();
+		my $eTag = Selity::File->new(filename =>"$self->{tplDir}/db_dns_entry_e.tpl")->get();
+		my $FormatTag = Selity::File->new(filename => "$self->{tplDir}/db_dns_entry.tpl")->get();
 		my $custom = '';
 
 		for(keys %{$option->{DMN_CUSTOM}}){
@@ -351,11 +351,11 @@ sub addDmnDb {
 
 	## Store and install
 	# Store the file in the working directory
-	my $file = iMSCP::File->new(filename => $wrkCfg);
+	my $file = Selity::File->new(filename => $wrkCfg);
 	$file->set($entries) and return 1;
 	$file->save() and return 1;
 	$file->mode(0644) and return 1;
-	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+	$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 
 	# Install the file in the production directory
 	$file->copyFile($self::bindConfig{BIND_DB_DIR}) and return 1;
@@ -365,8 +365,8 @@ sub addDmnDb {
 
 sub addDmnConfig{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 	use File::Basename;
 
 	my $self	= shift;
@@ -377,7 +377,7 @@ sub addDmnConfig{
 	##backup config file
 	my $timestamp = time();
 	if(-f "$self->{wrkDir}/named.conf"){
-		my $file	= iMSCP::File->new( filename => "$self->{wrkDir}/named.conf" );
+		my $file	= Selity::File->new( filename => "$self->{wrkDir}/named.conf" );
 		my ($filename, $directories, $suffix) = fileparse("$self->{wrkDir}/named.conf");
 		$file->copyFile("$self->{bkpDir}/$filename$suffix.$timestamp") and return 1;
 	} else {
@@ -387,11 +387,11 @@ sub addDmnConfig{
 
 	## Building of new configuration file
 
-	# Loading all needed templates from /etc/imscp/bind/parts
+	# Loading all needed templates from /etc/selity/bind/parts
 	my ($entry_b, $entry_e, $entry) = ('', '', '');
-	$entry_b	= iMSCP::File->new(filename => "$self->{tplDir}/cfg_entry_b.tpl")->get();
-	$entry_e	= iMSCP::File->new(filename => "$self->{tplDir}/cfg_entry_e.tpl")->get();
-	$entry		= iMSCP::File->new(filename => "$self->{tplDir}/cfg_entry_$self::bindConfig{BIND_MODE}.tpl")->get();
+	$entry_b	= Selity::File->new(filename => "$self->{tplDir}/cfg_entry_b.tpl")->get();
+	$entry_e	= Selity::File->new(filename => "$self->{tplDir}/cfg_entry_e.tpl")->get();
+	$entry		= Selity::File->new(filename => "$self->{tplDir}/cfg_entry_$self::bindConfig{BIND_MODE}.tpl")->get();
 	return 1 if(!defined $entry_b ||!defined $entry_e ||!defined $entry);
 
 	# Preparation tags
@@ -407,8 +407,8 @@ sub addDmnConfig{
 	my $entry_val	= process($tags_hash, $entry);
 
 
-	# Loading working file from /etc/imscp/bind/working/named.conf
-	$file		= iMSCP::File->new(filename => "$self->{wrkDir}/named.conf");
+	# Loading working file from /etc/selity/bind/working/named.conf
+	$file		= Selity::File->new(filename => "$self->{wrkDir}/named.conf");
 	$cfg		= $file->get();
 	return 1 if (!$cfg);
 
@@ -423,11 +423,11 @@ sub addDmnConfig{
 	## Storage and installation of new file - Begin
 
 	# Store the new builded file in the working directory
-	$file = iMSCP::File->new(filename => "$self->{wrkDir}/named.conf");
+	$file = Selity::File->new(filename => "$self->{wrkDir}/named.conf");
 	$rs |= $file->set($cfg);
 	$rs |= $file->save();
 	$rs |= $file->mode(0644);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	# Install the new file in the production directory
 	$rs |= $file->copyFile($self::bindConfig{BIND_CONF_FILE});
@@ -465,12 +465,12 @@ sub addDmn{
 }
 
 sub postaddDmn{
-	use iMSCP::IP;
+	use Selity::IP;
 
 	my $self	= shift;
 	my $option	= shift;
 	my $rs		= 0;
-	my $ipH		= iMSCP::IP->new();
+	my $ipH		= Selity::IP->new();
 
 	$option = {} if ref $option ne 'HASH';
 
@@ -488,11 +488,11 @@ sub postaddDmn{
 	}
 
 	$rs |= $self->addDmn({
-			DMN_NAME	=> $main::imscpConfig{BASE_SERVER_VHOST},
-			DMN_IP		=> $main::imscpConfig{BASE_SERVER_IP},
+			DMN_NAME	=> $main::selityConfig{BASE_SERVER_VHOST},
+			DMN_IP		=> $main::selityConfig{BASE_SERVER_IP},
 			MX		=> '',
 			DMN_ADD		=> {
-				MANUAL_DNS_NAME		=> "$option->{USER_NAME}.$main::imscpConfig{BASE_SERVER_VHOST}.",
+				MANUAL_DNS_NAME		=> "$option->{USER_NAME}.$main::selityConfig{BASE_SERVER_VHOST}.",
 				MANUAL_DNS_CLASS	=> 'IN',
 				MANUAL_DNS_TYPE		=> (lc($ipH->getIpType($option->{DMN_IP})) eq 'ipv4' ? 'A' : 'AAAA'),
 				MANUAL_DNS_DATA		=> $option->{DMN_IP}
@@ -507,8 +507,8 @@ sub postaddDmn{
 
 sub delDmnConfig{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 	use File::Basename;
 
 	my $self	= shift;
@@ -518,17 +518,17 @@ sub delDmnConfig{
 
 	##backup config file
 	if(-f "$self->{wrkDir}/named.conf"){
-		my $file	= iMSCP::File->new( filename => "$self->{wrkDir}/named.conf" );
+		my $file	= Selity::File->new( filename => "$self->{wrkDir}/named.conf" );
 		$file->copyFile("$self->{bkpDir}/named.conf.".time) and return 1;
 	} else {
 		error("$self->{wrkDir}/named.conf not found. Run setup again to fix this");
 		return 1;
 	}
 
-	# Loading all needed templates from /etc/imscp/bind/parts
+	# Loading all needed templates from /etc/selity/bind/parts
 	my ($bTag, $eTag);
-	$bTag	= iMSCP::File->new(filename => "$self->{tplDir}/cfg_entry_b.tpl")->get();
-	$eTag	= iMSCP::File->new(filename => "$self->{tplDir}/cfg_entry_e.tpl")->get();
+	$bTag	= Selity::File->new(filename => "$self->{tplDir}/cfg_entry_b.tpl")->get();
+	$eTag	= Selity::File->new(filename => "$self->{tplDir}/cfg_entry_e.tpl")->get();
 	return 1 unless( $bTag && $eTag);
 
 	# Preparation tags
@@ -537,8 +537,8 @@ sub delDmnConfig{
 	$bTag	= process($tags_hash, $bTag);
 	$eTag	= process($tags_hash, $eTag);
 
-	# Loading working file from /etc/imscp/bind/working/named.conf
-	$file	= iMSCP::File->new(filename => "$self->{wrkDir}/named.conf");
+	# Loading working file from /etc/selity/bind/working/named.conf
+	$file	= Selity::File->new(filename => "$self->{wrkDir}/named.conf");
 	$cfg	= $file->get();
 	return 1 if (!$cfg);
 
@@ -546,11 +546,11 @@ sub delDmnConfig{
 	$cfg = replaceBloc($bTag, $eTag, '', $cfg, undef);
 
 	# Store the new builded file in the working directory
-	$file = iMSCP::File->new(filename => "$self->{wrkDir}/named.conf");
+	$file = Selity::File->new(filename => "$self->{wrkDir}/named.conf");
 	$rs |= $file->set($cfg);
 	$rs |= $file->save();
 	$rs |= $file->mode(0644);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	# Install the new file in the production directory
 	$rs |= $file->copyFile($self::bindConfig{BIND_CONF_FILE});
@@ -576,34 +576,34 @@ sub delDmn{
 
 	my $zoneFile = "$self::bindConfig{BIND_DB_DIR}/$option->{DMN_NAME}.db";
 
-	$rs |= iMSCP::File->new(filename => $zoneFile)->delFile() if -f $zoneFile;
+	$rs |= Selity::File->new(filename => $zoneFile)->delFile() if -f $zoneFile;
 
-	$rs |= iMSCP::File->new(
+	$rs |= Selity::File->new(
 		filename => "$self->{wrkDir}/$option->{DMN_NAME}.db"
 	)->delFile() if -f "$self->{wrkDir}/$option->{DMN_NAME}.db";
 
-	$zoneFile = "$self->{wrkDir}/$main::imscpConfig{BASE_SERVER_VHOST}.db";
-	$zoneFile = "$self::bindConfig{BIND_DB_DIR}/$main::imscpConfig{BASE_SERVER_VHOST}.db" unless -f $zoneFile;
+	$zoneFile = "$self->{wrkDir}/$main::selityConfig{BASE_SERVER_VHOST}.db";
+	$zoneFile = "$self::bindConfig{BIND_DB_DIR}/$main::selityConfig{BASE_SERVER_VHOST}.db" unless -f $zoneFile;
 
 	unless(-f $zoneFile) {
-		error("$main::imscpConfig{BASE_SERVER_VHOST}.db do not exists");
+		error("$main::selityConfig{BASE_SERVER_VHOST}.db do not exists");
 		return 1;
 	}
 
-	my $zContent = iMSCP::File->new( filename => $zoneFile )->get();
+	my $zContent = Selity::File->new( filename => $zoneFile )->get();
 	unless($zContent) {
-		error("$main::imscpConfig{BASE_SERVER_VHOST}.db is empty");
+		error("$main::selityConfig{BASE_SERVER_VHOST}.db is empty");
 		return 1;
 	}
 
-	$zContent =~ s/$option->{USER_NAME}\.$main::imscpConfig{BASE_SERVER_VHOST}\.\s[^\n]*\n//gmi;
+	$zContent =~ s/$option->{USER_NAME}\.$main::selityConfig{BASE_SERVER_VHOST}\.\s[^\n]*\n//gmi;
 
 	# Store the new builded file in the working directory
-	my $file = iMSCP::File->new(filename => "$self->{wrkDir}/$main::imscpConfig{BASE_SERVER_VHOST}.db");
+	my $file = Selity::File->new(filename => "$self->{wrkDir}/$main::selityConfig{BASE_SERVER_VHOST}.db");
 	$rs |= $file->set($zContent);
 	$rs |= $file->save();
 	$rs |= $file->mode(0644);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	# Install the new file in the production directory
 	$rs |= $file->copyFile($self::bindConfig{BIND_DB_DIR});
@@ -621,11 +621,11 @@ sub postdelDmn{
 	debug("Data: ". (Dumper $data));
 
 	$rs |= $self->addDmn({
-		DMN_NAME	=> $main::imscpConfig{BASE_SERVER_VHOST},
-		DMN_IP		=> $main::imscpConfig{BASE_SERVER_IP},
+		DMN_NAME	=> $main::selityConfig{BASE_SERVER_VHOST},
+		DMN_IP		=> $main::selityConfig{BASE_SERVER_IP},
 		MX			=> '',
 		DMN_DEL		=> {
-			MANUAL_DNS_NAME		=> "$data->{USER_NAME}.$main::imscpConfig{BASE_SERVER_VHOST}.",
+			MANUAL_DNS_NAME		=> "$data->{USER_NAME}.$main::selityConfig{BASE_SERVER_VHOST}.",
 		}
 	});
 
@@ -637,8 +637,8 @@ sub postdelDmn{
 
 sub addSub{
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -659,7 +659,7 @@ sub addSub{
 
 	my $zoneFile	= "$self::bindConfig{BIND_DB_DIR}/$data->{PARENT_DMN_NAME}.db";
 	#Saving the current production file if it exists
-	$rs |=	iMSCP::File->new(
+	$rs |=	Selity::File->new(
 				filename => $zoneFile
 			)->copyFile(
 				"$self->{bkpDir}/$data->{PARENT_DMN_NAME}.db." . time
@@ -667,7 +667,7 @@ sub addSub{
 
 	# Load the current working db file
 	my $wrkCfg = "$self->{wrkDir}/$data->{PARENT_DMN_NAME}.db";
-	my $wrkFileContent = iMSCP::File->new(filename => $wrkCfg)->get();
+	my $wrkFileContent = Selity::File->new(filename => $wrkCfg)->get();
 
 	if(!$wrkFileContent){
 		error("Can not load $wrkCfg");
@@ -681,9 +681,9 @@ sub addSub{
 	}
 
 	######################### SUBDOMAIN SECTION START ###############################
-	my $cleanBTag	= iMSCP::File->new(filename => "$self->{tplDir}/db_sub_entry_b.tpl")->get();
-	my $cleanTag	= iMSCP::File->new(filename => "$self->{tplDir}/db_sub_entry.tpl")->get();
-	my $cleanETag	= iMSCP::File->new(filename => "$self->{tplDir}/db_sub_entry_e.tpl")->get();
+	my $cleanBTag	= Selity::File->new(filename => "$self->{tplDir}/db_sub_entry_b.tpl")->get();
+	my $cleanTag	= Selity::File->new(filename => "$self->{tplDir}/db_sub_entry.tpl")->get();
+	my $cleanETag	= Selity::File->new(filename => "$self->{tplDir}/db_sub_entry_e.tpl")->get();
 
 	my $bTag		= "; sub MX entry BEGIN\n";
 	my $eTag		= "; sub MX entry END\n";
@@ -703,11 +703,11 @@ sub addSub{
 
 	## Store and install
 	# Store the file in the working directory
-	my $file = iMSCP::File->new(filename => $wrkCfg);
+	my $file = Selity::File->new(filename => $wrkCfg);
 	$rs |= $file->set($wrkFileContent);
 	$rs |= $file->save();
 	$rs |= $file->mode(0644);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	# Install the file in the production directory
 	$rs |= $file->copyFile($self::bindConfig{BIND_DB_DIR});
@@ -716,21 +716,21 @@ sub addSub{
 }
 
 sub postaddSub{
-	use iMSCP::IP;
+	use Selity::IP;
 	my $self	= shift;
 	my $data	= shift;
 	my $rs		= 0;
-	my $ipH		= iMSCP::IP->new();
+	my $ipH		= Selity::IP->new();
 
 	local $Data::Dumper::Terse = 1;
 	debug("Data: ". (Dumper $data));
 
 	$rs |= $self->addDmn({
-		DMN_NAME	=> $main::imscpConfig{BASE_SERVER_VHOST},
-		DMN_IP		=> $main::imscpConfig{BASE_SERVER_IP},
+		DMN_NAME	=> $main::selityConfig{BASE_SERVER_VHOST},
+		DMN_IP		=> $main::selityConfig{BASE_SERVER_IP},
 		MX			=> '',
 		DMN_ADD		=> {
-			MANUAL_DNS_NAME		=> "$data->{USER_NAME}.$main::imscpConfig{BASE_SERVER_VHOST}.",
+			MANUAL_DNS_NAME		=> "$data->{USER_NAME}.$main::selityConfig{BASE_SERVER_VHOST}.",
 			MANUAL_DNS_CLASS	=> 'IN',
 			MANUAL_DNS_TYPE		=> (lc($ipH->getIpType($data->{DMN_IP})) eq 'ipv4' ? 'A' : 'AAAA'),
 			MANUAL_DNS_DATA		=> $data->{DMN_IP}
@@ -746,9 +746,9 @@ sub postaddSub{
 
 sub delSub{
 
-	use iMSCP::Dialog;
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::Dialog;
+	use Selity::File;
+	use Selity::Templator;
 
 	my $self	= shift;
 	my $data	= shift;
@@ -770,7 +770,7 @@ sub delSub{
 
 	my $zoneFile	= "$self::bindConfig{BIND_DB_DIR}/$data->{PARENT_DMN_NAME}.db";
 	#Saving the current production file if it exists
-	$rs |=	iMSCP::File->new(
+	$rs |=	Selity::File->new(
 				filename => $zoneFile
 			)->copyFile(
 				"$self->{bkpDir}/$data->{PARENT_DMN_NAME}.db." . time
@@ -778,7 +778,7 @@ sub delSub{
 
 	# Load the current working db file
 	my $wrkCfg = "$self->{wrkDir}/$data->{PARENT_DMN_NAME}.db";
-	my $wrkFileContent = iMSCP::File->new(filename => $wrkCfg)->get();
+	my $wrkFileContent = Selity::File->new(filename => $wrkCfg)->get();
 
 	if(!$wrkFileContent){
 		error("Can not load $wrkCfg");
@@ -792,19 +792,19 @@ sub delSub{
 	}
 
 	######################### SUBDOMAIN SECTION START ###############################
-	my $cleanBTag	= iMSCP::File->new(filename => "$self->{tplDir}/db_sub_entry_b.tpl")->get();
-	my $cleanETag	= iMSCP::File->new(filename => "$self->{tplDir}/db_sub_entry_e.tpl")->get();
+	my $cleanBTag	= Selity::File->new(filename => "$self->{tplDir}/db_sub_entry_b.tpl")->get();
+	my $cleanETag	= Selity::File->new(filename => "$self->{tplDir}/db_sub_entry_e.tpl")->get();
 	my $bTag 		= process({SUB_NAME => $data->{DMN_NAME}}, $cleanBTag);
 	my $eTag 		= process({SUB_NAME => $data->{DMN_NAME}}, $cleanETag);
 	$wrkFileContent = replaceBloc($bTag, $eTag, '', $wrkFileContent, undef);
 	########################## SUBDOMAIN SECTION END ################################
 
 	# Store the file in the working directory
-	my $file = iMSCP::File->new(filename => $wrkCfg);
+	my $file = Selity::File->new(filename => $wrkCfg);
 	$rs |= $file->set($wrkFileContent);
 	$rs |= $file->save();
 	$rs |= $file->mode(0644);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	# Install the file in the production directory
 	$rs |= $file->copyFile($self::bindConfig{BIND_DB_DIR});
@@ -822,11 +822,11 @@ sub postdelSub{
 	debug("Data: ". (Dumper $data));
 
 	$rs |= $self->addDmn({
-		DMN_NAME	=> $main::imscpConfig{BASE_SERVER_VHOST},
-		DMN_IP		=> $main::imscpConfig{BASE_SERVER_IP},
+		DMN_NAME	=> $main::selityConfig{BASE_SERVER_VHOST},
+		DMN_IP		=> $main::selityConfig{BASE_SERVER_IP},
 		MX			=> '',
 		DMN_DEL		=> {
-			MANUAL_DNS_NAME		=> "$data->{USER_NAME}.$main::imscpConfig{BASE_SERVER_VHOST}.",
+			MANUAL_DNS_NAME		=> "$data->{USER_NAME}.$main::selityConfig{BASE_SERVER_VHOST}.",
 		}
 	});
 

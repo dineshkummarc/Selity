@@ -28,7 +28,7 @@ package Servers::ftpd;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 
 use vars qw/@ISA/;
 @ISA = ('Common::SimpleClass');
@@ -36,7 +36,7 @@ use Common::SimpleClass;
 
 sub factory{
 	my $self	= shift;
-	my $server	= shift || $main::imscpConfig{FTPD_SERVER};
+	my $server	= shift || $main::selityConfig{FTPD_SERVER};
 	my ($file, $class);
 
 	if(lc($server) =~ /^no$/ ){

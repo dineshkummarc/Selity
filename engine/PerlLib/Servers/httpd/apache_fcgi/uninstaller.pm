@@ -28,7 +28,7 @@ package Servers::httpd::apache_fcgi::uninstaller;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -40,13 +40,13 @@ sub _init{
 
 	my $self		= shift;
 
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/apache";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/apache";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/apache.data";
 
-	tie %self::apacheConfig, 'iMSCP::Config','fileName' => $conf;
+	tie %self::apacheConfig, 'Selity::Config','fileName' => $conf;
 
 	0;
 }
@@ -75,19 +75,19 @@ sub removeUsers{
 	use Modules::SystemUser;
 	$panelUName = Modules::SystemUser->new();
 	$panelUName->{force} = 'yes';
-	$rs |= $panelUName->delSystemUser($main::imscpConfig{'SYSTEM_USER_PREFIX'}.$main::imscpConfig{'SYSTEM_USER_MIN_UID'});
+	$rs |= $panelUName->delSystemUser($main::selityConfig{'SYSTEM_USER_PREFIX'}.$main::selityConfig{'SYSTEM_USER_MIN_UID'});
 
 	# Panel group
 	use Modules::SystemGroup;
 	$panelGName = Modules::SystemGroup->new();
-	$rs |= $panelGName->delSystemGroup($main::imscpConfig{'SYSTEM_USER_PREFIX'}.$main::imscpConfig{'SYSTEM_USER_MIN_UID'});
+	$rs |= $panelGName->delSystemGroup($main::selityConfig{'SYSTEM_USER_PREFIX'}.$main::selityConfig{'SYSTEM_USER_MIN_UID'});
 
 	$rs;
 }
 
 sub removeDirs{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 
 	my $rs			= 0;
 	my $self		= shift;
@@ -98,7 +98,7 @@ sub removeDirs{
 		$self::apacheConfig{'APACHE_CUSTOM_SITES_CONFIG_DIR'},
 		$self::apacheConfig{'PHP_STARTER_DIR'}
 	) {
-		$rs |= iMSCP::Dir->new(dirname => $_)->remove() if -d $_;
+		$rs |= Selity::Dir->new(dirname => $_)->remove() if -d $_;
 	}
 
 	$rs;
@@ -112,12 +112,12 @@ sub restoreConf{
 	my $rs			= 0;
 
 	for ((
-		"$main::imscpConfig{LOGROTATE_CONF_DIR}/apache2",
-		"$main::imscpConfig{LOGROTATE_CONF_DIR}/apache",
+		"$main::selityConfig{LOGROTATE_CONF_DIR}/apache2",
+		"$main::selityConfig{LOGROTATE_CONF_DIR}/apache",
 		"$self::apacheConfig{APACHE_CONF_DIR}/ports.conf"
 	)) {
 		my ($filename, $directories, $suffix) = fileparse($_);
-		$rs	=	iMSCP::File->new(
+		$rs	=	Selity::File->new(
 					filename => "$self->{bkpDir}/$filename$suffix.system"
 				)->copyFile($_)
 				if(-f "$self->{bkpDir}/$filename$suffix.system");
@@ -128,17 +128,17 @@ sub restoreConf{
 
 sub fastcgiConf {
 
-	use iMSCP::File;
+	use Selity::File;
 	use Servers::httpd::apache_fcgi;
 
 	my $self	= shift;
 	my $httpd	= Servers::httpd::apache_fcgi->new();
 	my $rs		= 0;
 
-	$rs |= $httpd->disableMod("fastcgi_imscp fcgid_imscp");
+	$rs |= $httpd->disableMod("fastcgi_selity fcgid_selity");
 
-	for (qw/fastcgi_imscp.conf fastcgi_imscp.load fcgid_imscp.conf fcgid_imscp.load/) {
-		$rs |= iMSCP::File->new(filename => "$self::apacheConfig{'APACHE_MODS_DIR'}/$_")->delFile();
+	for (qw/fastcgi_selity.conf fastcgi_selity.load fcgid_selity.conf fcgid_selity.load/) {
+		$rs |= Selity::File->new(filename => "$self::apacheConfig{'APACHE_MODS_DIR'}/$_")->delFile();
 	}
 
 	$rs;
@@ -146,7 +146,7 @@ sub fastcgiConf {
 
 sub vHostConf {
 
-	use iMSCP::File;
+	use Selity::File;
 	use Servers::httpd::apache_fcgi;
 
 	my $self	= shift;
@@ -158,7 +158,7 @@ sub vHostConf {
 		$rs |= $httpd->disableSite($_);
 
 		if(-f "$self::apacheConfig{'APACHE_SITES_DIR'}/$_") {
-			$rs |= iMSCP::File->new(
+			$rs |= Selity::File->new(
 				filename => "$self::apacheConfig{'APACHE_SITES_DIR'}/$_"
 			)->delFile();
 		}

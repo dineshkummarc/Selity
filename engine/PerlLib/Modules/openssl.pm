@@ -29,8 +29,8 @@ package Modules::openssl;
 use strict;
 use warnings;
 
-use iMSCP::Debug;
-use iMSCP::Execute qw/execute/;
+use Selity::Debug;
+use Selity::Execute qw/execute/;
 use Common::SingletonClass;
 
 use vars qw/@ISA/;

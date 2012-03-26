@@ -20,7 +20,7 @@
 # @category		i-MSCP
 # @copyright	2010 - 2012 by i-MSCP | http://i-mscp.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @version		SVN: $Id: imscp-migrate-from-ispcp 5363 2011-10-01 10:06:32Z sci2tech $
+# @version		SVN: $Id: selity-migrate-from-ispcp 5363 2011-10-01 10:06:32Z sci2tech $
 # @link			http://i-mscp.net i-MSCP Home Site
 # @license      http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 #
@@ -34,15 +34,15 @@ use lib "$FindBin::Bin/../PerlVendor";
 
 use version;
 
-use iMSCP::Debug;
-use iMSCP::Requirements;
+use Selity::Debug;
+use Selity::Requirements;
 use Data::Dumper;
 
 umask(027);
 
-newDebug('imscp-migrate-from-ispcp.log');
+newDebug('selity-migrate-from-ispcp.log');
 
-iMSCP::Boot->new(mode => 'all')->init({nodatabase => 'yes'});
+Selity::Boot->new(mode => 'all')->init({nodatabase => 'yes'});
 
 loadConfigs();
 
@@ -52,7 +52,7 @@ exit 0;
 
 sub setup_engine {
 
-	use iMSCP::Stepper;
+	use Selity::Stepper;
 
 	my @steps = (
 		[\&welcome, 'Just say Hello World: '],
@@ -64,7 +64,7 @@ sub setup_engine {
 		[\&confSave, 'Save system configuration: '],
 		[\&dbUpgrade, 'Save system configuration: '],
 		[\&otherMessCleanup, 'Some system cleaning: '],
-		[\&daemonRemove, 'Remove imscp daemon: '],
+		[\&daemonRemove, 'Remove selity daemon: '],
 		[\&removeDirs, 'Delete ispcp directories: '],
 		[\&removeFile, 'Delete ispcp files: ']
 	);
@@ -73,7 +73,7 @@ sub setup_engine {
 		exit 1 if step($_->[0], $_->[1], scalar @steps, $step);
 		$step++;
 	}
-	iMSCP::Dialog->factory()->endGauge()  if iMSCP::Dialog->factory()->needGauge();
+	Selity::Dialog->factory()->endGauge()  if Selity::Dialog->factory()->needGauge();
 
 	systemSetup();
 
@@ -82,31 +82,31 @@ sub setup_engine {
 
 sub loadConfigs{
 
-	use iMSCP::Config;
+	use Selity::Config;
 
 	my $path = ($^O =~ /bsd$/ ? '/usr/local/etc/' : '/etc/');
 
-	fatal('ispcp.conf files not found') if(! -f $path.'ispcp/ispcp.conf' || ! -f $path.'imscp/imscp.conf');
+	fatal('ispcp.conf files not found') if(! -f $path.'ispcp/ispcp.conf' || ! -f $path.'selity/selity.conf');
 
-	tie %main::ispcpConfig, 'iMSCP::Config','fileName' => $path.'ispcp/ispcp.conf';
+	tie %main::ispcpConfig, 'Selity::Config','fileName' => $path.'ispcp/ispcp.conf';
 
 	0;
 }
 
 sub welcome{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 
-	my $dialog = iMSCP::Dialog->factory();
-	$dialog->set('title', 'Upgrade to iMSCP');
-	$dialog->set('backtitle', "iMSCP internet Multi Server Control Panel");
+	my $dialog = Selity::Dialog->factory();
+	$dialog->set('title', 'Upgrade to Selity');
+	$dialog->set('backtitle', "Selity internet Multi Server Control Panel");
 
 	$dialog->set('yes-label','CONTINUE');
 	$dialog->set('no-label','EXIT');
 	exit 0 if ($dialog->yesno(
 					"\n
-						Welcome to \\Z1iMSCP internet Multi Server Control Panel v$main::imscpConfig{'Version'}\\Z0 Upgrade Dialog.
-						This program will upgrade your ispCP system to iMSCP.
+						Welcome to \\Z1Selity internet Multi Server Control Panel v$main::selityConfig{'Version'}\\Z0 Upgrade Dialog.
+						This program will upgrade your ispCP system to Selity.
 
 						\\ZuPlease make sure you have a backup of your server data\\Zn.
 
@@ -122,13 +122,13 @@ sub welcome{
 
 sub checkISPCPVersion{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 
 	$main::ispcpConfig{'Version'} =~ m!([\d.]+)!;
 	if(version->new($1) < version->new('1.0.7')){
 		error('Only migration from ispCP 1.0.7 or later is supported');
-		iMSCP::Dialog->factory()->set('defaultno', '');
-		exit 1 if iMSCP::Dialog->factory()->yesno("
+		Selity::Dialog->factory()->set('defaultno', '');
+		exit 1 if Selity::Dialog->factory()->yesno("
 
 
 						\\Z1\\ZuispCP $1 is not supported!\\Zn
@@ -146,8 +146,8 @@ sub checkISPCPVersion{
 
 sub checkDbPass{
 
-	use iMSCP::File;
-	use iMSCP::Dialog;
+	use Selity::File;
+	use Selity::Dialog;
 
 	my @paths = (
 		$main::ispcpConfig{'CONF_DIR'}.'/ispcp-keys.conf',
@@ -162,7 +162,7 @@ sub checkDbPass{
 		debug("\n\n\nTesting $keyfile");
 		next if(! -f $keyfile);
 
-		my $file = iMSCP::File->new(filename => "$keyfile")->get();
+		my $file = Selity::File->new(filename => "$keyfile")->get();
 		if($file =~ m!db_pass_key\s=\s'(.+)'! || $file =~ m!DB_PASS_KEY=(.+)!i){
 			$main::ispcpDBKey = $1;
 			debug($main::ispcpDBKey);
@@ -178,7 +178,7 @@ sub checkDbPass{
 		}
 	}
 
-	iMSCP::Dialog->factory()->msgbox("
+	Selity::Dialog->factory()->msgbox("
 
 
 							\\Z1\\ZuispCP database keys are corrupt!\\Zn
@@ -197,13 +197,13 @@ sub checkDbPass{
 
 sub connectispCPDb{
 
-	use iMSCP::Crypt;
+	use Selity::Crypt;
 
-	my $crypt = iMSCP::Crypt->new();
+	my $crypt = Selity::Crypt->new();
 	$crypt->set('key', $main::ispcpDBKey);
 	$crypt->set('iv', $main::ispcpDBiv);
 	my $pass = $crypt->decrypt_db_password($main::ispcpConfig{'DATABASE_PASSWORD'});
-	my $database = iMSCP::Database->new(db => 'mysql')->factory();
+	my $database = Selity::Database->new(db => 'mysql')->factory();
 	$database->set('DATABASE_NAME', $main::ispcpConfig{'DATABASE_NAME'});
 	$database->set('DATABASE_HOST', $main::ispcpConfig{'DATABASE_HOST'});
 	$database->set('DATABASE_USER', $main::ispcpConfig{'DATABASE_USER'});
@@ -214,9 +214,9 @@ sub connectispCPDb{
 
 sub databaseIntegrityTest{
 
-	use iMSCP::Crypt;
-	use iMSCP::Database;
-	use iMSCP::Dialog;
+	use Selity::Crypt;
+	use Selity::Database;
+	use Selity::Dialog;
 
 	#dependicies broken
 	my $query = "SELECT t1.* FROM `%s` as t1 LEFT JOIN `%s` as t2 ON t1.`%s` = t2.`%s` WHERE t2.`%s` is null %s";
@@ -255,7 +255,7 @@ sub databaseIntegrityTest{
 	local $Data::Dumper::Terse = 1;
 	for my $test (@tests){
 		my $preparedQuery =  sprintf($query, $test->{childTable}, $test->{parentTable}, $test->{childField}, $test->{parentField}, $test->{parentField}, $test->{limit});
-		my $database = iMSCP::Database->new(db => 'mysql')->factory();
+		my $database = Selity::Database->new(db => 'mysql')->factory();
 		my $result = $database->doQuery($test->{group}, $preparedQuery);
 		if (ref $result ne 'HASH'){
 			error $preparedQuery;
@@ -285,7 +285,7 @@ sub databaseIntegrityTest{
 
 	for my $test (@tests){
 		my $preparedQuery =  sprintf($query, $test->{table}, $test->{statusField});
-		my $database = iMSCP::Database->new(db => 'mysql')->factory();
+		my $database = Selity::Database->new(db => 'mysql')->factory();
 		my $result = $database->doQuery($test->{group}, $preparedQuery);
 		if (ref $result ne 'HASH'){
 			error $preparedQuery;
@@ -301,7 +301,7 @@ sub databaseIntegrityTest{
 
 	#test databases and sql users
 	$query = 'SELECT * FROM `sql_user` as t1 LEFT JOIN `sql_database` AS t2 ON t1.`sqld_id` = t2.`sqld_id`';
-	my $database = iMSCP::Database->new(db => 'mysql')->factory();
+	my $database = Selity::Database->new(db => 'mysql')->factory();
 	my $result = $database->doQuery('sqlu_id', $query);
 	if (ref $result ne 'HASH'){
 		error $query;
@@ -309,7 +309,7 @@ sub databaseIntegrityTest{
 		if (keys %{$result}){
 			for my $row (values %{$result}){
 				$database->set('DATABASE_USER', $row->{sqlu_name});
-				my $crypt = iMSCP::Crypt->new();
+				my $crypt = Selity::Crypt->new();
 				$crypt->set('key', $main::ispcpDBKey);
 				$crypt->set('iv', $main::ispcpDBiv);
 				$database->set('DATABASE_PASSWORD', $crypt->decrypt_db_password($row->{sqlu_pass}));
@@ -332,7 +332,7 @@ sub databaseIntegrityTest{
 		}
 	}
 	if (@errors){
-		iMSCP::Dialog->factory()->msgbox("
+		Selity::Dialog->factory()->msgbox("
 							\\Z1\\ZuispCP database records are corrupt!\\Zn\n
 							Please fix folowing:\n\n".
 							join("\n\n", @errors)
@@ -349,14 +349,14 @@ sub databaseIntegrityTest{
 
 sub userTest{
 
-	use iMSCP::Database;
-	use iMSCP::Dialog;
+	use Selity::Database;
+	use Selity::Dialog;
 
 	my @errors;
 
 	## CLIENT USER
 	my $query = 'SELECT * FROM `domain`';
-	my $database = iMSCP::Database->new(db => 'mysql')->factory();
+	my $database = Selity::Database->new(db => 'mysql')->factory();
 	my $result = $database->doQuery('domain_gid', $query);
 	if (ref $result ne 'HASH'){
 		push(@errors, "$query produced following error: $result");
@@ -375,7 +375,7 @@ sub userTest{
 	}
 
 	if (@errors){
-		iMSCP::Dialog->factory()->msgbox("
+		Selity::Dialog->factory()->msgbox("
 							\\Z1\\ZuispCP users records are missing or corrupt!\\Zn\n
 							Please fix folowing:\n\n".
 							join("\n\n", @errors)
@@ -390,9 +390,9 @@ sub userTest{
 
 sub systemConfigTest{
 
-	use iMSCP::Execute;
-	use iMSCP::Dialog;
-	use iMSCP::Database;
+	use Selity::Execute;
+	use Selity::Dialog;
+	use Selity::Database;
 
 	my ($stdout, $stderr, @errors);
 	my $rv		= execute("find $main::ispcpConfig{'CONF_DIR'} -type f -name '*.system'", \$stdout, \$stderr);
@@ -403,13 +403,13 @@ sub systemConfigTest{
 
 	for my $file (@files){
 		my $destination = $file;
-		$destination =~ s/$main::ispcpConfig{'CONF_DIR'}/$main::imscpConfig{'CONF_DIR'}/g;
+		$destination =~ s/$main::ispcpConfig{'CONF_DIR'}/$main::selityConfig{'CONF_DIR'}/g;
 		$rv = execute("cp -fv $file $destination", \$stdout, \$stderr);
 		debug("$stdout") if $stdout;
 		push (@errors, $stderr) if $rv;
 	}
 
-	my $database = iMSCP::Database->new(db => 'mysql')->factory();
+	my $database = Selity::Database->new(db => 'mysql')->factory();
 	my $query = "
 				SELECT `domain_name` AS 'name' FROM `domain`
 				UNION
@@ -423,7 +423,7 @@ sub systemConfigTest{
 			local $Data::Dumper::Terse = 1;
 			for my $row (values %{$result}){
 				if (-f "$main::ispcpConfig{'BIND_DB_DIR'}/$row->{name}.db"){
-					$rv = execute("cp -fv $main::ispcpConfig{'BIND_DB_DIR'}/$row->{name}.db $main::imscpConfig{'CONF_DIR'}/bind/working/", \$stdout, \$stderr);
+					$rv = execute("cp -fv $main::ispcpConfig{'BIND_DB_DIR'}/$row->{name}.db $main::selityConfig{'CONF_DIR'}/bind/working/", \$stdout, \$stderr);
 					debug("$stdout") if $stdout;
 					push (@errors, $stderr) if $rv;
 				}
@@ -434,7 +434,7 @@ sub systemConfigTest{
 
 	$rv = 0;
 	if (@errors){
-		if(iMSCP::Dialog->factory()->msgbox("
+		if(Selity::Dialog->factory()->msgbox("
 							\\Z1\\ZuErrors while saving system files!\\Zn:\n\n
 							".join("\n", @errors)."\n
 							Fix this and after that try again"
@@ -448,15 +448,15 @@ sub systemConfigTest{
 
 sub confSave{
 
-	use iMSCP::Crypt;
-	use iMSCP::Boot;
+	use Selity::Crypt;
+	use Selity::Boot;
 
-	my $crypt = iMSCP::Crypt->new();
+	my $crypt = Selity::Crypt->new();
 	my $pass = $crypt->decrypt_db_password($main::ispcpConfig{'DATABASE_PASSWORD'});
 
-	$crypt->set('key',	$main::imscpDBKey);
-	$crypt->set('iv',	 $main::imscpDBiv);
-	$main::imscpConfig{'DATABASE_PASSWORD'} = $crypt->encrypt_db_password($pass);
+	$crypt->set('key',	$main::selityDBKey);
+	$crypt->set('iv',	 $main::selityDBiv);
+	$main::selityConfig{'DATABASE_PASSWORD'} = $crypt->encrypt_db_password($pass);
 
 	for(qw/
 		DEFAULT_ADMIN_ADDRESS
@@ -471,7 +471,7 @@ sub confSave{
 		ZIP
 		/
 	){
-		$main::imscpConfig{$_} = $main::ispcpConfig{$_};
+		$main::selityConfig{$_} = $main::ispcpConfig{$_};
 	}
 
 	0;
@@ -486,19 +486,19 @@ sub savePass {
 	my $errors		= shift;
 
 	#switch key
-	my $crypt = iMSCP::Crypt->new();
+	my $crypt = Selity::Crypt->new();
 	$crypt->set('key',	$main::ispcpDBKey);
 	$crypt->set('iv',	 $main::ispcpDBiv);
 
 	my $pass =  $crypt->decrypt_db_password($values->{$field_pass});
 
 	#restore keys
-	$crypt->set('key',	$main::imscpDBKey);
-	$crypt->set('iv',	 $main::imscpDBiv);
+	$crypt->set('key',	$main::selityDBKey);
+	$crypt->set('iv',	 $main::selityDBiv);
 
 	$pass = $crypt->encrypt_db_password($pass);
 
-	my $database = iMSCP::Database->new(db => 'mysql')->factory();
+	my $database = Selity::Database->new(db => 'mysql')->factory();
 	my $query = "UPDATE `$table` SET `$field_pass` = ? WHERE `$field_id` = ?";
 	my $error = $database->doQuery('dummy', $query, $pass, $values->{$field_id});
 	if (ref $error ne 'HASH'){
@@ -513,14 +513,14 @@ sub dbUpgrade{
 	my @errors;
 
 	my $query = 'UPDATE `config` SET `value` = \'47\' WHERE `config`.`name` = \'DATABASE_REVISION\' AND `value` > \'47\'';
-	my $database = iMSCP::Database->new(db => 'mysql')->factory();
+	my $database = Selity::Database->new(db => 'mysql')->factory();
 	my $result = $database->doQuery('mail_id', $query);
 	if (ref $result ne 'HASH'){
 		push(@errors, "$query produced following error: $result");
 	}
 
 	$query = 'SELECT `mail_id`, `mail_pass` FROM `mail_users` WHERE `mail_pass` != \'_no_\'';
-	$database = iMSCP::Database->new(db => 'mysql')->factory();
+	$database = Selity::Database->new(db => 'mysql')->factory();
 	$result = $database->doQuery('mail_id', $query);
 	if (ref $result ne 'HASH'){
 		push(@errors, "$query produced following error: $result");
@@ -533,7 +533,7 @@ sub dbUpgrade{
 	}
 
 	$query = 'SELECT `sqlu_id`, `sqlu_pass` FROM `sql_user`';
-	$database = iMSCP::Database->new(db => 'mysql')->factory();
+	$database = Selity::Database->new(db => 'mysql')->factory();
 	$result = $database->doQuery('sqlu_id', $query);
 	if (ref $result ne 'HASH'){
 		push(@errors, "$query produced following error: $result");
@@ -547,7 +547,7 @@ sub dbUpgrade{
 
 	if (@errors){
 		error("\n".join("\n", @errors));
-		exit 0 if iMSCP::Dialog->factory()->msgbox("
+		exit 0 if Selity::Dialog->factory()->msgbox("
 								\\Z1\\ZuWARNING\\Zn\n
 								Please fix folowing:\n\n".
 								join("\n\n", @errors)
@@ -562,19 +562,19 @@ sub dbUpgrade{
 
 sub otherMessCleanup{
 
-	use iMSCP::Templator;
-	use iMSCP::File;
-	use iMSCP::Execute;
+	use Selity::Templator;
+	use Selity::File;
+	use Selity::Execute;
 
 	my ($startTag, $endTag, $file, $rs, $stdout, $stderr, @errors);
 
 	#named.conf make sure does not contain shitty tags
-	$startTag = iMSCP::File->new(filename => "$main::ispcpConfig{'CONF_DIR'}/bind/parts/cfg_dta_b.tpl")->get();
+	$startTag = Selity::File->new(filename => "$main::ispcpConfig{'CONF_DIR'}/bind/parts/cfg_dta_b.tpl")->get();
 	push(@errors, "Can not read $main::ispcpConfig{'CONF_DIR'}/bind/parts/cfg_dta_b.tpl") if !$startTag;
-	$endTag = iMSCP::File->new(filename => "$main::ispcpConfig{'CONF_DIR'}/bind/parts/cfg_dta_e.tpl")->get();
+	$endTag = Selity::File->new(filename => "$main::ispcpConfig{'CONF_DIR'}/bind/parts/cfg_dta_e.tpl")->get();
 	push(@errors, "Can not read $main::ispcpConfig{'CONF_DIR'}/bind/parts/cfg_dta_e.tpl") if !$endTag;
 
-	$file = iMSCP::File->new(filename => $main::ispcpConfig{'BIND_CONF_FILE'});
+	$file = Selity::File->new(filename => $main::ispcpConfig{'BIND_CONF_FILE'});
 	my $bind = $file->get();
 	push(@errors, "Can not read $main::ispcpConfig{'BIND_CONF_FILE'}") if !$bind;
 
@@ -585,9 +585,9 @@ sub otherMessCleanup{
 		$file->save() and push(@errors, getLastError());
 	}
 
-	$file = iMSCP::File->new(filename => "$main::imscpConfig{'CONF_DIR'}/bind/backup/named.conf.system");
+	$file = Selity::File->new(filename => "$main::selityConfig{'CONF_DIR'}/bind/backup/named.conf.system");
 	my $bkbind = $file->get();
-	push(@errors, "Can not read $main::imscpConfig{'CONF_DIR'}/bind/backup/named.conf.system") if !$bkbind;
+	push(@errors, "Can not read $main::selityConfig{'CONF_DIR'}/bind/backup/named.conf.system") if !$bkbind;
 
 	if($bkbind && $startTag && $endTag){
 		$bkbind = replaceBloc($startTag, $endTag, ' ', $bkbind, 0);
@@ -621,11 +621,11 @@ sub otherMessCleanup{
 
 	##logrotate
 	for ('apache', 'apache2') {
-		next if(! -e "$main::imscpConfig{'CONF_DIR'}/apache/backup/$_.system");
+		next if(! -e "$main::selityConfig{'CONF_DIR'}/apache/backup/$_.system");
 
-		$file = iMSCP::File->new(filename => "$main::imscpConfig{'CONF_DIR'}/apache/backup/$_.system");
+		$file = Selity::File->new(filename => "$main::selityConfig{'CONF_DIR'}/apache/backup/$_.system");
 		my $content = $file->get();
-		push(@errors, "Can not read $main::imscpConfig{'CONF_DIR'}/apache/backup/$_.system") if !$content;
+		push(@errors, "Can not read $main::selityConfig{'CONF_DIR'}/apache/backup/$_.system") if !$content;
 
 		$content =~ s/sharedscripts\n\tprerotate\n\t\t$main::ispcpConfig{'AWSTATS_ROOT_DIR'}\/awstats_updateall.pl now -awstatsprog=$main::ispcpConfig{'AWSTATS_ENGINE_DIR'}\/awstats.pl &> \/dev\/null\n\tendscript/sharedscripts/gi;
 
@@ -636,9 +636,9 @@ sub otherMessCleanup{
 	}
 	for ('/etc/logrotate.d/apache', '/etc/logrotate.d/apache2') {
 		next if(! -e $_);
-		$file = iMSCP::File->new(filename => $_);
+		$file = Selity::File->new(filename => $_);
 		my $content = $file->get();
-		push(@errors, "Can not read $main::imscpConfig{'CONF_DIR'}/apache/backup/$_.system") if !$content;
+		push(@errors, "Can not read $main::selityConfig{'CONF_DIR'}/apache/backup/$_.system") if !$content;
 
 		$content =~ s/sharedscripts\n\tprerotate\n\t\t$main::ispcpConfig{'AWSTATS_ROOT_DIR'}\/awstats_updateall.pl now -awstatsprog=$main::ispcpConfig{'AWSTATS_ENGINE_DIR'}\/awstats.pl &> \/dev\/null\n\tendscript/sharedscripts/gi;
 
@@ -650,7 +650,7 @@ sub otherMessCleanup{
 
 	if (@errors){
 		warning("\n".join("\n", @errors));
-		exit 0 if iMSCP::Dialog->factory()->msgbox("
+		exit 0 if Selity::Dialog->factory()->msgbox("
 								\\Z1\\ZuWARNING\\Zn\n
 								Please fix folowing:\n".
 								join("\n\n", @errors)
@@ -665,7 +665,7 @@ sub otherMessCleanup{
 
 sub daemonRemove{
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 	my ($rs, $stdout, $stderr, @errors);
 
 	for ($main::ispcpConfig{'CMD_ISPCPD'}, $main::ispcpConfig{'CMD_ISPCPN'}) {
@@ -693,7 +693,7 @@ sub daemonRemove{
 
 	if (@errors){
 		warning("\n".join("\n", @errors));
-		exit 0 if iMSCP::Dialog->factory()->msgbox("
+		exit 0 if Selity::Dialog->factory()->msgbox("
 								\\Z1\\ZuWARNING\\Zn\n
 								Please fix folowing:\n".
 								join("\n\n", @errors)
@@ -708,7 +708,7 @@ sub daemonRemove{
 
 sub removeDirs{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 	my $dir;
 	my $errors	= '';
 
@@ -720,12 +720,12 @@ sub removeDirs{
 		$main::ispcpConfig{'APACHE_CUSTOM_SITES_CONFIG_DIR'},				#/etc/apache2/ispcp
 		$main::ispcpConfig{'MTA_VIRTUAL_CONF_DIR'}							#/etc/postfix/ispcp
 	){
-		$dir = iMSCP::Dir->new(dirname => $_);
+		$dir = Selity::Dir->new(dirname => $_);
 		$errors .= getLastError() if $dir->remove();
 	}
 
 	 if ($errors) {
-		iMSCP::Dialog->factory()->msgbox("
+		Selity::Dialog->factory()->msgbox("
 									\\Z1\\ZuWARNING\\Zn\n
 									Please fix folowing:\n".
 									$errors
@@ -741,7 +741,7 @@ sub removeDirs{
 
 sub removeFile{
 
-	use iMSCP::File;
+	use Selity::File;
 	my $file;
 	my $errors;
 
@@ -749,12 +749,12 @@ sub removeFile{
 		($^O =~ /bsd$/ ? '/usr/local/etc/' : '/etc/').'cron.d/ispcp',		#/etc/cron.d/ispcp
 		($^O =~ /bsd$/ ? '/usr/local/etc/' : '/etc/').'logrotate.d/ispcp',	#/etc/logrotate.d/ispcp
 	){
-		$file = iMSCP::File->new(filename => $_);
+		$file = Selity::File->new(filename => $_);
 		$errors .= getLastError() if ($file->delFile());
 	}
 
 	if ($errors) {
-		iMSCP::Dialog->factory()->msgbox("
+		Selity::Dialog->factory()->msgbox("
 									\\Z1\\ZuWARNING\\Zn\n
 									Please fix folowing:\n".
 									$errors
@@ -770,9 +770,9 @@ sub removeFile{
 
 sub systemSetup{
 
-	iMSCP::Dialog->factory()->msgbox("
+	Selity::Dialog->factory()->msgbox("
 								\\Z1SUCCESS\\Zn\n\n
-								You can now install iMSCP. Type \\Z4./imscp-setup\\Zn
+								You can now install Selity. Type \\Z4./selity-setup\\Zn
 	");
 
 	0;

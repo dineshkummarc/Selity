@@ -51,7 +51,7 @@ local_destination_recipient_limit = 1
 local_recipient_maps         = unix:passwd.byname $alias_database
 
 # i-MSCP Autoresponder parameters
-imscp-arpl_destination_recipient_limit = 1
+selity-arpl_destination_recipient_limit = 1
 
 # Delivering virtual messages parameters
 virtual_mailbox_base         = {MTA_VIRTUAL_MAIL_DIR}

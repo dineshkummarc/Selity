@@ -28,10 +28,10 @@ package Servers::ftpd::proftpd::installer;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::Execute;
-use iMSCP::File;
-use iMSCP::Templator;
+use Selity::Debug;
+use Selity::Execute;
+use Selity::File;
+use Selity::Templator;
 
 use vars qw/@ISA/;
 
@@ -42,15 +42,15 @@ sub _init{
 
 	my $self		= shift;
 
-	$self->{cfgDir}	= "$main::imscpConfig{'CONF_DIR'}/proftpd";
+	$self->{cfgDir}	= "$main::selityConfig{'CONF_DIR'}/proftpd";
 	$self->{bkpDir}	= "$self->{cfgDir}/backup";
 	$self->{wrkDir}	= "$self->{cfgDir}/working";
 
 	my $conf		= "$self->{cfgDir}/proftpd.data";
 	my $oldConf		= "$self->{cfgDir}/proftpd.old.data";
 
-	tie %self::proftpdConfig, 'iMSCP::Config','fileName' => $conf;
-	tie %self::proftpdOldConfig, 'iMSCP::Config','fileName' => $oldConf, noerrors => 1 if -f $oldConf;
+	tie %self::proftpdConfig, 'Selity::Config','fileName' => $conf;
+	tie %self::proftpdOldConfig, 'Selity::Config','fileName' => $oldConf, noerrors => 1 if -f $oldConf;
 
 	0;
 }
@@ -78,7 +78,7 @@ sub install{
 
 sub removeOldFile{
 
-	use iMSCP::Execute;
+	use Selity::Execute;
 
 	my $self	= shift;
 	my $rs		= 0;
@@ -92,21 +92,21 @@ sub removeOldFile{
 
 sub saveConf{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 	my $rs		= 0;
-	my $file	= iMSCP::File->new(filename => "$self->{cfgDir}/proftpd.data");
+	my $file	= Selity::File->new(filename => "$self->{cfgDir}/proftpd.data");
 	my $cfg		= $file->get() or return 1;
 
 	$rs |= $file->mode(0640);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
-	$file = iMSCP::File->new(filename => "$self->{cfgDir}/proftpd.old.data");
+	$file = Selity::File->new(filename => "$self->{cfgDir}/proftpd.old.data");
 	$rs |= $file->set($cfg);
 	$rs |= $file->save();
 	$rs |= $file->mode(0640);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	$rs;
 }
@@ -117,26 +117,26 @@ sub logFiles{
 	my $rs		= 0;
 
 	## To fill ftp_traff.log file with something
-	if (! -d "$main::imscpConfig{'TRAFF_LOG_DIR'}/proftpd") {
-		debug("Create dir $main::imscpConfig{'TRAFF_LOG_DIR'}/proftpd");
-		$rs |= iMSCP::Dir->new(
-			dirname => "$main::imscpConfig{'TRAFF_LOG_DIR'}/proftpd"
+	if (! -d "$main::selityConfig{'TRAFF_LOG_DIR'}/proftpd") {
+		debug("Create dir $main::selityConfig{'TRAFF_LOG_DIR'}/proftpd");
+		$rs |= Selity::Dir->new(
+			dirname => "$main::selityConfig{'TRAFF_LOG_DIR'}/proftpd"
 		)->make({
-			user	=> $main::imscpConfig{'ROOT_USER'},
-			group	=> $main::imscpConfig{'ROOT_GROUP'},
+			user	=> $main::selityConfig{'ROOT_USER'},
+			group	=> $main::selityConfig{'ROOT_GROUP'},
 			mode	=> 0755
 		});
 	}
 
-	if(! -f "$main::imscpConfig{'TRAFF_LOG_DIR'}$self::proftpdConfig{'FTP_TRAFF_LOG'}") {
-		my $file = iMSCP::File->new(
-			filename => "$main::imscpConfig{'TRAFF_LOG_DIR'}$self::proftpdConfig{'FTP_TRAFF_LOG'}"
+	if(! -f "$main::selityConfig{'TRAFF_LOG_DIR'}$self::proftpdConfig{'FTP_TRAFF_LOG'}") {
+		my $file = Selity::File->new(
+			filename => "$main::selityConfig{'TRAFF_LOG_DIR'}$self::proftpdConfig{'FTP_TRAFF_LOG'}"
 		);
 		$rs |= $file->save();
 		$rs |= $file->mode(0644);
 		$rs |= $file->owner(
-			$main::imscpConfig{'ROOT_USER'},
-			$main::imscpConfig{'ROOT_GROUP'}
+			$main::selityConfig{'ROOT_USER'},
+			$main::selityConfig{'ROOT_GROUP'}
 		);
 	}
 
@@ -149,30 +149,30 @@ sub buildConf{
 	my $rs		= 0;
 
 	my $cfg = {
-		HOST_NAME		=> $main::imscpConfig{'SERVER_HOSTNAME'},
-		DATABASE_NAME	=> $main::imscpConfig{'DATABASE_NAME'},
-		DATABASE_HOST	=> $main::imscpConfig{'DATABASE_HOST'},
-		DATABASE_PORT	=> $main::imscpConfig{'DATABASE_PORT'},
+		HOST_NAME		=> $main::selityConfig{'SERVER_HOSTNAME'},
+		DATABASE_NAME	=> $main::selityConfig{'DATABASE_NAME'},
+		DATABASE_HOST	=> $main::selityConfig{'DATABASE_HOST'},
+		DATABASE_PORT	=> $main::selityConfig{'DATABASE_PORT'},
 		DATABASE_USER	=> $self::proftpdConfig{'DATABASE_USER'},
 		DATABASE_PASS	=> $self::proftpdConfig{'DATABASE_PASSWORD'},
 		FTPD_MIN_UID	=> $self::proftpdConfig{'MIN_UID'},
 		FTPD_MIN_GID	=> $self::proftpdConfig{'MIN_GID'},
-		GUI_CERT_DIR	=> $main::imscpConfig{'GUI_CERT_DIR'},
-		SSL				=> ($main::imscpConfig{'SSL_ENABLED'} eq 'yes' ? '' : '#')
+		GUI_CERT_DIR	=> $main::selityConfig{'GUI_CERT_DIR'},
+		SSL				=> ($main::selityConfig{'SSL_ENABLED'} eq 'yes' ? '' : '#')
 	};
 
-	my $file	= iMSCP::File->new(filename => "$self->{cfgDir}/proftpd.conf");
+	my $file	= Selity::File->new(filename => "$self->{cfgDir}/proftpd.conf");
 	my $cfgTpl	= $file->get();
 	return 1 if (!$cfgTpl);
 
-	$cfgTpl = iMSCP::Templator::process($cfg, $cfgTpl);
+	$cfgTpl = Selity::Templator::process($cfg, $cfgTpl);
 	return 1 if (!$cfgTpl);
 
-	$file = iMSCP::File->new(filename => "$self->{wrkDir}/proftpd.conf");
+	$file = Selity::File->new(filename => "$self->{wrkDir}/proftpd.conf");
 	$rs |= $file->set($cfgTpl);
 	$rs |= $file->save();
 	$rs |= $file->mode(0640);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 	$rs |= $file->copyFile($self::proftpdConfig{'FTPD_CONF_FILE'});
 
 	$rs;
@@ -203,34 +203,34 @@ sub setupDB{
 		my $dbUser = 'vftp';
 
 		do{
-			$dbUser = iMSCP::Dialog->factory()->inputbox("Please enter database user name for the restricted proftpd user (default vftp)", $dbUser);
+			$dbUser = Selity::Dialog->factory()->inputbox("Please enter database user name for the restricted proftpd user (default vftp)", $dbUser);
 			#we will not allow root user to be used as database user for proftpd since account will be restricted
-			if($dbUser eq $main::imscpConfig{DATABASE_USER}){
-				iMSCP::Dialog->factory()->msgbox("You can not use $main::imscpConfig{DATABASE_USER} as restricted user");
+			if($dbUser eq $main::selityConfig{DATABASE_USER}){
+				Selity::Dialog->factory()->msgbox("You can not use $main::selityConfig{DATABASE_USER} as restricted user");
 				$dbUser = undef;
 			}
 		} while (!$dbUser);
 
-		iMSCP::Dialog->factory()->set('cancel-label','Autogenerate');
+		Selity::Dialog->factory()->set('cancel-label','Autogenerate');
 		my $dbPass;
-		$dbPass = iMSCP::Dialog->factory()->inputbox("Please enter database password (leave blank for autogenerate)", $dbPass);
+		$dbPass = Selity::Dialog->factory()->inputbox("Please enter database password (leave blank for autogenerate)", $dbPass);
 		if(!$dbPass){
 			$dbPass = '';
 			my @allowedChars = ('A'..'Z', 'a'..'z', '0'..'9', '_');
 			$dbPass .= $allowedChars[rand()*($#allowedChars + 1)] for (1..16);
 		}
 		$dbPass =~ s/('|"|`|#|;|\/|\s|\||<|\?|\\)/_/g;
-		iMSCP::Dialog->factory()->msgbox("Your password is '".$dbPass."' (we have stripped not allowed chars)");
-		iMSCP::Dialog->factory()->set('cancel-label');
+		Selity::Dialog->factory()->msgbox("Your password is '".$dbPass."' (we have stripped not allowed chars)");
+		Selity::Dialog->factory()->set('cancel-label');
 		$self::proftpdConfig{'DATABASE_USER'}		= $dbUser;
 		$self::proftpdConfig{'DATABASE_PASSWORD'}	= $dbPass;
 	}
 
 	#restore db connection
-	my $crypt = iMSCP::Crypt->new();
+	my $crypt = Selity::Crypt->new();
 	my $err = $self->check_sql_connection(
-			$main::imscpConfig{'DATABASE_USER'},
-			$main::imscpConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::imscpConfig{'DATABASE_PASSWORD'}) : ''
+			$main::selityConfig{'DATABASE_USER'},
+			$main::selityConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::selityConfig{'DATABASE_PASSWORD'}) : ''
 	);
 	if ($err){
 		error("$err");
@@ -238,7 +238,7 @@ sub setupDB{
 	}
 
 	if(!$connData) {
-		my $database = iMSCP::Database->new(db => $main::imscpConfig{DATABASE_TYPE})->factory();
+		my $database = Selity::Database->new(db => $main::selityConfig{DATABASE_TYPE})->factory();
 
 		## We ensure that new data doesn't exist in database
 
@@ -253,7 +253,7 @@ sub setupDB{
 					`Db` = ?
 				AND
 					`User` = ?;
-			", $main::imscpConfig{'DATABASE_HOST'}, $main::imscpConfig{'DATABASE_NAME'}, $self::proftpdConfig{'DATABASE_USER'}
+			", $main::selityConfig{'DATABASE_HOST'}, $main::selityConfig{'DATABASE_NAME'}, $self::proftpdConfig{'DATABASE_USER'}
 		);
 		return $err if (ref $err ne 'HASH');
 
@@ -266,7 +266,7 @@ sub setupDB{
 					`Host` = ?
 				AND
 					`User` = ?;
-			", $main::imscpConfig{'DATABASE_HOST'}, $self::proftpdConfig{'DATABASE_USER'}
+			", $main::selityConfig{'DATABASE_HOST'}, $self::proftpdConfig{'DATABASE_USER'}
 		);
 		return $err if (ref $err ne 'HASH');
 
@@ -278,12 +278,12 @@ sub setupDB{
 			$err = $database->doQuery(
 				'dummy',
 				"
-					GRANT SELECT,INSERT,UPDATE,DELETE ON `$main::imscpConfig{'DATABASE_NAME'}`.`$_`
+					GRANT SELECT,INSERT,UPDATE,DELETE ON `$main::selityConfig{'DATABASE_NAME'}`.`$_`
 					TO ?@?
 					IDENTIFIED BY ?;
 				",
 				$self::proftpdConfig{DATABASE_USER},
-				$main::imscpConfig{DATABASE_HOST},
+				$main::selityConfig{DATABASE_HOST},
 				$self::proftpdConfig{DATABASE_PASSWORD}
 			);
 			return $err if (ref $err ne 'HASH');
@@ -295,10 +295,10 @@ sub setupDB{
 
 sub check_sql_connection{
 
-	use iMSCP::Database;
+	use Selity::Database;
 
 	my ($self, $dbUser, $dbPass) = (@_);
-	my $database = iMSCP::Database->new(db => $main::imscpConfig{DATABASE_TYPE})->factory();
+	my $database = Selity::Database->new(db => $main::selityConfig{DATABASE_TYPE})->factory();
 	$database->set('DATABASE_USER',		$dbUser);
 	$database->set('DATABASE_PASSWORD',	$dbPass);
 
@@ -314,7 +314,7 @@ sub bkpConfFile{
 	my $timestamp	= time;
 
 	if(-f $cfgFile){
-		my $file	= iMSCP::File->new( filename => $cfgFile );
+		my $file	= Selity::File->new( filename => $cfgFile );
 		my ($filename, $directories, $suffix) = fileparse($cfgFile);
 		if(!-f "$self->{bkpDir}/$filename$suffix.system") {
 			$file->copyFile("$self->{bkpDir}/$filename$suffix.system") and return 1;

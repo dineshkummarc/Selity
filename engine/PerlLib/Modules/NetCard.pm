@@ -28,8 +28,8 @@ package Modules::NetCard;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
-use iMSCP::Execute;
+use Selity::Debug;
+use Selity::Execute;
 use Data::Dumper;
 
 use vars qw/@ISA/;
@@ -42,11 +42,11 @@ sub process{
 	my $self	= shift;
 	my $rs		= 0;
 	my ($stdour, $stderr);
-	$rs |= execute("$main::imscpConfig{ENGINE_ROOT_DIR}/tools/imscp-net-interfaces-mngr stop", \$stdour, \$stderr);
+	$rs |= execute("$main::selityConfig{ENGINE_ROOT_DIR}/tools/selity-net-interfaces-mngr stop", \$stdour, \$stderr);
 	debug($stdour) if $stdour;
 	error($stderr) if $stderr;
 
-	$rs |= execute("$main::imscpConfig{ENGINE_ROOT_DIR}/tools/imscp-net-interfaces-mngr start", \$stdour, \$stderr);
+	$rs |= execute("$main::selityConfig{ENGINE_ROOT_DIR}/tools/selity-net-interfaces-mngr start", \$stdour, \$stderr);
 	debug($stdour) if $stdour;
 	error($stderr) if $stderr;
 

@@ -31,20 +31,20 @@ use FindBin;
 use lib "$FindBin::Bin/..";
 use lib "$FindBin::Bin/../PerlLib";
 
-use iMSCP::Debug;
-use iMSCP::Boot;
-use iMSCP::Execute;
-use iMSCP::Mail;
-use iMSCP::Servers;
-use iMSCP::Addons;
+use Selity::Debug;
+use Selity::Boot;
+use Selity::Execute;
+use Selity::Mail;
+use Selity::Servers;
+use Selity::Addons;
 use Data::Dumper;
 
-newDebug('imscp-del-tmp.log');
+newDebug('selity-del-tmp.log');
 
 sub logs_start_up {
 
 	umask(027);
-	iMSCP::Boot->new()->init({nolock => 'yes'});
+	Selity::Boot->new()->init({nolock => 'yes'});
 
 	0;
 }
@@ -53,7 +53,7 @@ sub del_tmp{
 
 	my $rs = 0;
 
-	my @servers	= iMSCP::Servers->new()->get();
+	my @servers	= Selity::Servers->new()->get();
 	unless(scalar @servers){
 		error("Can not get servers list");
 		return 1;
@@ -71,7 +71,7 @@ sub del_tmp{
 		}
 	}
 
-	my @addons	= iMSCP::Addons->new()->get();
+	my @addons	= Selity::Addons->new()->get();
 	unless(scalar @addons){
 		error("Can not get addons list");
 		return 1;

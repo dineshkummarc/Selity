@@ -28,7 +28,7 @@ package Addons::awstats::installer;
 
 use strict;
 use warnings;
-use iMSCP::Debug;
+use Selity::Debug;
 
 use vars qw/@ISA/;
 
@@ -38,39 +38,39 @@ use Common::SingletonClass;
 
 sub askAwstats{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 
 	my ($rs, $force);
 
-	if(!$main::imscpConfig{'AWSTATS_ACTIVE'}){
-		if($main::imscpConfigOld{'AWSTATS_ACTIVE'} && $main::imscpConfigOld{'AWSTATS_ACTIVE'} =~ /yes|no/){
-			$main::imscpConfig{'AWSTATS_ACTIVE'}	= $main::imscpConfigOld{'AWSTATS_ACTIVE'};
+	if(!$main::selityConfig{'AWSTATS_ACTIVE'}){
+		if($main::selityConfigOld{'AWSTATS_ACTIVE'} && $main::selityConfigOld{'AWSTATS_ACTIVE'} =~ /yes|no/){
+			$main::selityConfig{'AWSTATS_ACTIVE'}	= $main::selityConfigOld{'AWSTATS_ACTIVE'};
 		} else {
-			while (! ($rs = iMSCP::Dialog->factory()->radiolist("Do you want to enable Awstats?", 'yes', 'no'))){}
-			if($rs ne $main::imscpConfig{'AWSTATS_ACTIVE'}){
-				$main::imscpConfig{'AWSTATS_ACTIVE'} = $rs;
+			while (! ($rs = Selity::Dialog->factory()->radiolist("Do you want to enable Awstats?", 'yes', 'no'))){}
+			if($rs ne $main::selityConfig{'AWSTATS_ACTIVE'}){
+				$main::selityConfig{'AWSTATS_ACTIVE'} = $rs;
 				$force = 'yes';
 			}
 		}
 	}
 
-	if($main::imscpConfig{'AWSTATS_ACTIVE'} eq 'yes'){
+	if($main::selityConfig{'AWSTATS_ACTIVE'} eq 'yes'){
 		if($force){
-			while (! ($rs = iMSCP::Dialog->factory()->radiolist("Select Awstats mode?", 'dynamic', 'static'))){}
+			while (! ($rs = Selity::Dialog->factory()->radiolist("Select Awstats mode?", 'dynamic', 'static'))){}
 			$rs = $rs eq 'dynamic' ? 0 : 1;
-			$main::imscpConfig{'AWSTATS_MODE'} = $rs;
+			$main::selityConfig{'AWSTATS_MODE'} = $rs;
 		}
-		if(!defined $main::imscpConfig{'AWSTATS_MODE'} || $main::imscpConfig{'AWSTATS_MODE'} !~ /0|1/){
-			if(defined $main::imscpConfigOld{'AWSTATS_MODE'} && $main::imscpConfigOld{'AWSTATS_MODE'} =~ /0|1/){
-				$main::imscpConfig{'AWSTATS_MODE'}	= $main::imscpConfigOld{'AWSTATS_MODE'};
+		if(!defined $main::selityConfig{'AWSTATS_MODE'} || $main::selityConfig{'AWSTATS_MODE'} !~ /0|1/){
+			if(defined $main::selityConfigOld{'AWSTATS_MODE'} && $main::selityConfigOld{'AWSTATS_MODE'} =~ /0|1/){
+				$main::selityConfig{'AWSTATS_MODE'}	= $main::selityConfigOld{'AWSTATS_MODE'};
 			} else {
-				while (! ($rs = iMSCP::Dialog->factory()->radiolist("Select Awstats mode?", 'dynamic', 'static'))){}
+				while (! ($rs = Selity::Dialog->factory()->radiolist("Select Awstats mode?", 'dynamic', 'static'))){}
 				$rs = $rs eq 'dynamic' ? 0 : 1;
-				$main::imscpConfig{'AWSTATS_MODE'} = $rs;
+				$main::selityConfig{'AWSTATS_MODE'} = $rs;
 			}
 		}
 	} else {
-		$main::imscpConfig{'AWSTATS_MODE'} = '' if $main::imscpConfig{'AWSTATS_MODE'} ne '';
+		$main::selityConfig{'AWSTATS_MODE'} = '' if $main::selityConfig{'AWSTATS_MODE'} ne '';
 	}
 
 	0;
@@ -96,11 +96,11 @@ sub install{
 	my $rs		= 0;
 	$self->{httpd} = Servers::httpd->factory() unless $self->{httpd} ;
 
-	$self->{user} = $self->{httpd}->can('getRunningUser') ? $self->{httpd}->getRunningUser() : $main::imscpConfig{ROOT_USER};
-	$self->{group} = $self->{httpd}->can('getRunningUser') ? $self->{httpd}->getRunningGroup() : $main::imscpConfig{ROOT_GROUP};
+	$self->{user} = $self->{httpd}->can('getRunningUser') ? $self->{httpd}->getRunningUser() : $main::selityConfig{ROOT_USER};
+	$self->{group} = $self->{httpd}->can('getRunningUser') ? $self->{httpd}->getRunningGroup() : $main::selityConfig{ROOT_GROUP};
 
 	$self->askAwstats() and return 1;
-	if ($main::imscpConfig{'AWSTATS_ACTIVE'} eq 'yes') {
+	if ($main::selityConfig{'AWSTATS_ACTIVE'} eq 'yes') {
 		$self->makeDirs() and return 1;
 		$self->vhost() and return 1;
 	}
@@ -112,12 +112,12 @@ sub install{
 
 sub makeDirs{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 
 	my $self		= shift;
 
-	iMSCP::Dir->new(
-		dirname => $main::imscpConfig{'AWSTATS_CACHE_DIR'}
+	Selity::Dir->new(
+		dirname => $main::selityConfig{'AWSTATS_CACHE_DIR'}
 	)->make({
 		user => $self->{user},
 		group => $self->{group},
@@ -146,8 +146,8 @@ sub vhost {
 	my $httpd	= Servers::httpd->factory();
 
 	$httpd->setData({
-		AWSTATS_ENGINE_DIR	=> $main::imscpConfig{'AWSTATS_ENGINE_DIR'},
-		AWSTATS_WEB_DIR		=> $main::imscpConfig{'AWSTATS_WEB_DIR'}
+		AWSTATS_ENGINE_DIR	=> $main::selityConfig{'AWSTATS_ENGINE_DIR'},
+		AWSTATS_WEB_DIR		=> $main::selityConfig{'AWSTATS_WEB_DIR'}
 	});
 
 	if($httpd->can('buildConfFile')){
@@ -169,15 +169,15 @@ sub vhost {
 }
 sub disableConf{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 
-	if(-f "$main::imscpConfig{'AWSTATS_CONFIG_DIR'}/awstats.conf") {
-		iMSCP::File->new(
-			filename => "$main::imscpConfig{'AWSTATS_CONFIG_DIR'}/awstats.conf"
+	if(-f "$main::selityConfig{'AWSTATS_CONFIG_DIR'}/awstats.conf") {
+		Selity::File->new(
+			filename => "$main::selityConfig{'AWSTATS_CONFIG_DIR'}/awstats.conf"
 		)->moveFile(
-			"$main::imscpConfig{'AWSTATS_CONFIG_DIR'}/awstats.conf.disabled"
+			"$main::selityConfig{'AWSTATS_CONFIG_DIR'}/awstats.conf.disabled"
 		) and return 1;
 	}
 
@@ -186,16 +186,16 @@ sub disableConf{
 
 sub disableCron{
 
-	use iMSCP::File;
+	use Selity::File;
 
 	my $self	= shift;
 
 	# Removing default Debian Package cron task for awstats
-	if(-f "$main::imscpConfig{'CRON_D_DIR'}/awstats") {
-		iMSCP::File->new(
-			filename => "$main::imscpConfig{'CRON_D_DIR'}/awstats"
+	if(-f "$main::selityConfig{'CRON_D_DIR'}/awstats") {
+		Selity::File->new(
+			filename => "$main::selityConfig{'CRON_D_DIR'}/awstats"
 		)->moveFile(
-			"$main::imscpConfig{'CONF_DIR'}/cron.d/backup/awstats.system"
+			"$main::selityConfig{'CONF_DIR'}/cron.d/backup/awstats.system"
 		) and return 1;
 	}
 
@@ -204,7 +204,7 @@ sub disableCron{
 
 sub installLogrotate{
 
-	use iMSCP::Templator;
+	use Selity::Templator;
 
 	my $self	= shift;
 	my $content	= shift || '';
@@ -215,11 +215,11 @@ sub installLogrotate{
 			'# AWSTATS SECTION BEGIN',
 			'# AWSTATS SECTION END',
 			(
-				$main::imscpConfig{'AWSTATS_ACTIVE'} eq 'yes'
+				$main::selityConfig{'AWSTATS_ACTIVE'} eq 'yes'
 				?
 				"\tprerotate\n".
-				"\t\t$main::imscpConfig{'AWSTATS_ROOT_DIR'}\/awstats_updateall.pl ".
-				"now -awstatsprog=$main::imscpConfig{'AWSTATS_ENGINE_DIR'}\/awstats.pl &> \/dev\/null\n".
+				"\t\t$main::selityConfig{'AWSTATS_ROOT_DIR'}\/awstats_updateall.pl ".
+				"now -awstatsprog=$main::selityConfig{'AWSTATS_ENGINE_DIR'}\/awstats.pl &> \/dev\/null\n".
 				"\tendscript"
 				:
 				''

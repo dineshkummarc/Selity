@@ -34,12 +34,12 @@ program. If not, see <http://www.gnu.org/licenses/>
 	<folders mode="0700">${SYSTEM_ENGINE_ROOT}/tools</folders>
 	<folders mode="0700">${SYSTEM_ENGINE_ROOT}/traffic</folders>
 
-	<copy>${SYSTEM_ENGINE_ROOT}/imscp*</copy>
+	<copy>${SYSTEM_ENGINE_ROOT}/selity*</copy>
 	<copy>${SYSTEM_ENGINE_ROOT}/PerlLib</copy>
 	<copy>${SYSTEM_ENGINE_ROOT}/PerlVendor</copy>
 
 	<create_file />
 	<chown_file />
 
-	<chmod_file mode="0700">${SYSTEM_ENGINE_ROOT}/imscp-*</chmod_file>
+	<chmod_file mode="0700">${SYSTEM_ENGINE_ROOT}/selity-*</chmod_file>
 </install>

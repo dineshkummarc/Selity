@@ -20,7 +20,7 @@
 # @category		i-MSCP
 # @copyright	2010 - 2012 by i-MSCP | http://i-mscp.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @version		SVN: $Id: imscp-setup-methods.pl 5372 2011-10-01 21:39:16Z sci2tech $
+# @version		SVN: $Id: selity-setup-methods.pl 5372 2011-10-01 21:39:16Z sci2tech $
 # @link			http://i-mscp.net i-MSCP Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
@@ -34,7 +34,7 @@ use warnings;
 #
 sub setup_start_up {
 
-	iMSCP::Boot->new(mode => 'setup')->init({nodatabase => 'yes'});
+	Selity::Boot->new(mode => 'setup')->init({nodatabase => 'yes'});
 
 	#enter silent mode
 	silent(1);
@@ -45,16 +45,16 @@ sub setup_start_up {
 
 sub setup_engine {
 
-	use iMSCP::Stepper;
+	use Selity::Stepper;
 	## Starting user dialog
 	user_dialog();
 
 	my @steps = (
-		[\&load_old_imscp_cfg, 'Loading old i-MSCP configuration file: '],
-		[\&update_imscp_cfg, 'Save old variable if needed: '],
+		[\&load_old_selity_cfg, 'Loading old i-MSCP configuration file: '],
+		[\&update_selity_cfg, 'Save old variable if needed: '],
 		[\&setup_system_users, 'Creating default users: '],
-		[\&setup_imscp_database_connection, 'i-MSCP database connection: '],
-		[\&setup_imscp_database, 'i-MSCP database: '],
+		[\&setup_selity_database_connection, 'i-MSCP database connection: '],
+		[\&setup_selity_database, 'i-MSCP database: '],
 		[\&setup_system_dirs, 'i-MSCP directories: '],
 		[\&setup_base_server_IP, 'i-MSCP system IP: '],
 		[\&setup_hosts, 'i-MSCP system hosts file: '],
@@ -71,7 +71,7 @@ sub setup_engine {
 		[\&postinstallServers, 'i-MSCP server postinstall task: '],
 		[\&postinstallAddons, 'i-MSCP addons postinstall task: '],
 		[\&setup_crontab, 'i-MSCP crontab file: '],
-		[\&setup_imscp_daemon_network, 'i-MSCP init scripts: '],
+		[\&setup_selity_daemon_network, 'i-MSCP init scripts: '],
 		[\&askBackup, 'Setting backup: '],
 		[\&rebuild_customers_cfg, 'Rebuilding all customers configuration files: '],
 		[\&set_permissions, 'Permissions setup: '],
@@ -85,7 +85,7 @@ sub setup_engine {
 		$rs |= step($_->[0], $_->[1], scalar @steps, $step);
 		$step++;
 	}
-	iMSCP::Dialog->factory()->endGauge() if iMSCP::Dialog->factory()->needGauge();
+	Selity::Dialog->factory()->endGauge() if Selity::Dialog->factory()->needGauge();
 
 	$rs;
 }
@@ -97,15 +97,15 @@ sub setup_engine {
 #
 sub user_dialog {
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 
 	return 0 if $main::noprompt;
 
-	iMSCP::Dialog->factory()->set('yes-label','CONTINUE');
-	iMSCP::Dialog->factory()->set('no-label','EXIT');
-	if (iMSCP::Dialog->factory()->yesno(
+	Selity::Dialog->factory()->set('yes-label','CONTINUE');
+	Selity::Dialog->factory()->set('no-label','EXIT');
+	if (Selity::Dialog->factory()->yesno(
 					"\n
-						Welcome to \\Z1i-MSCP version $main::imscpConfig{'Version'}\\Zn Setup Dialog.
+						Welcome to \\Z1i-MSCP version $main::selityConfig{'Version'}\\Zn Setup Dialog.
 
 						\\Zu\\Z4[NOTICE]\\Zn
 						Make sure you have read and performed all steps from docs/distro/INSTALL document (where distro is your linux distribution).
@@ -113,13 +113,13 @@ sub user_dialog {
 						\\Zu\\Z4[NOTE]\\Zn
 						During the migration process some or all services might require to be shut down or restarted.
 
-						Only services that are not marked with 'NO' in your imscp.conf configuration file will be processed by this program.
+						Only services that are not marked with 'NO' in your selity.conf configuration file will be processed by this program.
 						You can stop this process by pushing \\Z1EXIT\\Z0 button
 						To continue select \\Z1CONTINUE\\Z0 button"
 
 					)
 	){
-		iMSCP::Dialog->factory()->msgbox(
+		Selity::Dialog->factory()->msgbox(
 					"\n
 					\\Z1[NOTICE]\\Zn
 
@@ -136,17 +136,17 @@ sub user_dialog {
 #
 # @return void
 #
-sub load_old_imscp_cfg {
+sub load_old_selity_cfg {
 
-	use iMSCP::Config;
+	use Selity::Config;
 
-	$main::imscpConfigOld = {};
+	$main::selityConfigOld = {};
 
-	$main::imscpConfigOld = {};
-	my $oldConf = "$main::imscpConfig{'CONF_DIR'}/imscp.old.conf";
+	$main::selityConfigOld = {};
+	my $oldConf = "$main::selityConfig{'CONF_DIR'}/selity.old.conf";
 
-	tie %main::imscpConfigOld, 'iMSCP::Config','fileName' => $oldConf if (-f $oldConf);
-	verbose($main::imscpConfigOld{'DEBUG'} || $main::imscpConfig{'DEBUG'});
+	tie %main::selityConfigOld, 'Selity::Config','fileName' => $oldConf if (-f $oldConf);
+	verbose($main::selityConfigOld{'DEBUG'} || $main::selityConfig{'DEBUG'});
 
 	0;
 }
@@ -156,37 +156,37 @@ sub load_old_imscp_cfg {
 #
 # @return int 0 on success, other on failure
 #
-sub setup_imscp_database_connection {
+sub setup_selity_database_connection {
 
-	use iMSCP::Crypt;
-	use iMSCP::Dialog;
+	use Selity::Crypt;
+	use Selity::Dialog;
 
-	my $pass = $main::imscpConfig{'DATABASE_PASSWORD'};
-	my $crypt = iMSCP::Crypt->new();
+	my $pass = $main::selityConfig{'DATABASE_PASSWORD'};
+	my $crypt = Selity::Crypt->new();
 
 	if(!check_sql_connection(
-			$main::imscpConfig{'DATABASE_TYPE'},
+			$main::selityConfig{'DATABASE_TYPE'},
 			'',
-			$main::imscpConfig{'DATABASE_HOST'} || '',
-			$main::imscpConfig{'DATABASE_PORT'} || '',
-			$main::imscpConfig{'DATABASE_USER'} || '',
-			$main::imscpConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::imscpConfig{'DATABASE_PASSWORD'}) : ''
+			$main::selityConfig{'DATABASE_HOST'} || '',
+			$main::selityConfig{'DATABASE_PORT'} || '',
+			$main::selityConfig{'DATABASE_USER'} || '',
+			$main::selityConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::selityConfig{'DATABASE_PASSWORD'}) : ''
 		)
 	){
-	}elsif($main::imscpConfigOld{'DATABASE_TYPE'} && !check_sql_connection(
-			$main::imscpConfigOld{'DATABASE_TYPE'},
+	}elsif($main::selityConfigOld{'DATABASE_TYPE'} && !check_sql_connection(
+			$main::selityConfigOld{'DATABASE_TYPE'},
 			'',
-			$main::imscpConfigOld{'DATABASE_HOST'} || '',
-			$main::imscpConfigOld{'DATABASE_PORT'} || '',
-			$main::imscpConfigOld{'DATABASE_USER'} || '',
-			$main::imscpConfigOld{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::imscpConfigOld{'DATABASE_PASSWORD'}) : ''
+			$main::selityConfigOld{'DATABASE_HOST'} || '',
+			$main::selityConfigOld{'DATABASE_PORT'} || '',
+			$main::selityConfigOld{'DATABASE_USER'} || '',
+			$main::selityConfigOld{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::selityConfigOld{'DATABASE_PASSWORD'}) : ''
 		)
 	){
-		$main::imscpConfig{'DATABASE_TYPE'}		= $main::imscpConfigOld{'DATABASE_TYPE'};
-		$main::imscpConfig{'DATABASE_HOST'}		= $main::imscpConfigOld{'DATABASE_HOST'};
-		$main::imscpConfig{'DATABASE_PORT'}		= $main::imscpConfigOld{'DATABASE_PORT'};
-		$main::imscpConfig{'DATABASE_USER'}		= $main::imscpConfigOld{'DATABASE_USER'};
-		$main::imscpConfig{'DATABASE_PASSWORD'}	= $main::imscpConfigOld{'DATABASE_PASSWORD'};
+		$main::selityConfig{'DATABASE_TYPE'}		= $main::selityConfigOld{'DATABASE_TYPE'};
+		$main::selityConfig{'DATABASE_HOST'}		= $main::selityConfigOld{'DATABASE_HOST'};
+		$main::selityConfig{'DATABASE_PORT'}		= $main::selityConfigOld{'DATABASE_PORT'};
+		$main::selityConfig{'DATABASE_USER'}		= $main::selityConfigOld{'DATABASE_USER'};
+		$main::selityConfig{'DATABASE_PASSWORD'}	= $main::selityConfigOld{'DATABASE_PASSWORD'};
 	} else {
 		my (
 			$dbType,
@@ -196,41 +196,41 @@ sub setup_imscp_database_connection {
 			$dbPass
 		) = (
 			'mysql',
-			$main::imscpConfig{'DATABASE_HOST'},
-			$main::imscpConfig{'DATABASE_PORT'},
-			$main::imscpConfig{'DATABASE_USER'}
+			$main::selityConfig{'DATABASE_HOST'},
+			$main::selityConfig{'DATABASE_PORT'},
+			$main::selityConfig{'DATABASE_USER'}
 		);
 
 		use Data::Validate::Domain qw/is_domain/;
-		my %options = $main::imscpConfig{'DEBUG'} ? (domain_private_tld => qr /^(?:bogus|test)$/) : ();
+		my %options = $main::selityConfig{'DEBUG'} ? (domain_private_tld => qr /^(?:bogus|test)$/) : ();
 
 		while (check_sql_connection($dbType, '', $dbHost, $dbPort, $dbUser, $dbPass)){
 			my $msg = '';
 			do{
-				$dbHost = iMSCP::Dialog->factory()->inputbox( "Please enter database host name (default localhost) $msg", $dbHost);
+				$dbHost = Selity::Dialog->factory()->inputbox( "Please enter database host name (default localhost) $msg", $dbHost);
 				$msg = "\n\n$dbHost is not a valid hostname!"
 			} while (! (Data::Validate::Domain->new(%options)->is_domain($dbHost)) && $dbHost ne 'localhost');
 
 			$msg = '';
 			do{
-				$dbPort = iMSCP::Dialog->factory()->inputbox("Please enter database port name (default null or 3306) $msg", $dbPort);
+				$dbPort = Selity::Dialog->factory()->inputbox("Please enter database port name (default null or 3306) $msg", $dbPort);
 				$dbPort =~ s/[^\d]//g;
 				$msg = "\n\n$dbPort is not a valid port number!";
 			} while ($dbPort && $dbPort !~ /^[\d]*$/);
 
-			$dbUser = iMSCP::Dialog->factory()->inputbox('Please enter database user name (default root)', $dbUser);
+			$dbUser = Selity::Dialog->factory()->inputbox('Please enter database user name (default root)', $dbUser);
 
-			$dbPass = iMSCP::Dialog->factory()->inputbox('Please enter database password','');
+			$dbPass = Selity::Dialog->factory()->inputbox('Please enter database password','');
 
 		}
 
 		use Net::LibIDN qw/idn_to_ascii idn_to_unicode/;
 
-		if ($main::imscpConfig{'DATABASE_TYPE'} ne $dbType) {$main::imscpConfig{'DATABASE_TYPE'} = $dbType};
-		if ($main::imscpConfig{'DATABASE_HOST'} ne idn_to_ascii($dbHost, 'utf-8')) {$main::imscpConfig{'DATABASE_HOST'} = idn_to_ascii($dbHost, 'utf-8');}
-		if ($main::imscpConfig{'DATABASE_PORT'} ne $dbPort) {$main::imscpConfig{'DATABASE_PORT'} = $dbPort;}
-		if ($main::imscpConfig{'DATABASE_USER'} ne $dbUser) {$main::imscpConfig{'DATABASE_USER'} = $dbUser;}
-		if ($main::imscpConfig{'DATABASE_PASSWORD'} ne $crypt->encrypt_db_password($dbPass)) {$main::imscpConfig{'DATABASE_PASSWORD'} = $crypt->encrypt_db_password($dbPass);}
+		if ($main::selityConfig{'DATABASE_TYPE'} ne $dbType) {$main::selityConfig{'DATABASE_TYPE'} = $dbType};
+		if ($main::selityConfig{'DATABASE_HOST'} ne idn_to_ascii($dbHost, 'utf-8')) {$main::selityConfig{'DATABASE_HOST'} = idn_to_ascii($dbHost, 'utf-8');}
+		if ($main::selityConfig{'DATABASE_PORT'} ne $dbPort) {$main::selityConfig{'DATABASE_PORT'} = $dbPort;}
+		if ($main::selityConfig{'DATABASE_USER'} ne $dbUser) {$main::selityConfig{'DATABASE_USER'} = $dbUser;}
+		if ($main::selityConfig{'DATABASE_PASSWORD'} ne $crypt->encrypt_db_password($dbPass)) {$main::selityConfig{'DATABASE_PASSWORD'} = $crypt->encrypt_db_password($dbPass);}
 
 	}
 	0;
@@ -254,9 +254,9 @@ sub check_sql_connection{
 
 	my ($dbType, $dbName, $dbHost, $dbPort, $dbUser, $dbPass) = (@_);
 
-	use iMSCP::Database;
+	use Selity::Database;
 
-	my $database = iMSCP::Database->new(db => $dbType)->factory();
+	my $database = Selity::Database->new(db => $dbType)->factory();
 	$database->set('DATABASE_NAME', $dbName);
 	$database->set('DATABASE_HOST', $dbHost);
 	$database->set('DATABASE_PORT', $dbPort);
@@ -271,30 +271,30 @@ sub check_sql_connection{
 #
 # @return int 0 on success, other on failure
 #
-sub setup_imscp_database {
+sub setup_selity_database {
 
-	use iMSCP::Crypt;
-	use iMSCP::Dialog;
+	use Selity::Crypt;
+	use Selity::Dialog;
 
-	my $crypt = iMSCP::Crypt->new();
+	my $crypt = Selity::Crypt->new();
 
-	my $dbName = $main::imscpConfig{'DATABASE_NAME'} ? $main::imscpConfig{'DATABASE_NAME'} : ($main::imscpConfigOld{'DATABASE_NAME'} ? $main::imscpConfigOld{'DATABASE_NAME'} : undef);
+	my $dbName = $main::selityConfig{'DATABASE_NAME'} ? $main::selityConfig{'DATABASE_NAME'} : ($main::selityConfigOld{'DATABASE_NAME'} ? $main::selityConfigOld{'DATABASE_NAME'} : undef);
 
 	if(!$dbName || check_sql_connection(
-			$main::imscpConfig{'DATABASE_TYPE'},
+			$main::selityConfig{'DATABASE_TYPE'},
 			$dbName,
-			$main::imscpConfig{'DATABASE_HOST'},
-			$main::imscpConfig{'DATABASE_PORT'},
-			$main::imscpConfig{'DATABASE_USER'},
-			$main::imscpConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::imscpConfig{'DATABASE_PASSWORD'}) : ''
+			$main::selityConfig{'DATABASE_HOST'},
+			$main::selityConfig{'DATABASE_PORT'},
+			$main::selityConfig{'DATABASE_USER'},
+			$main::selityConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::selityConfig{'DATABASE_PASSWORD'}) : ''
 		)
 	){
 
-		$dbName = 'imscp' unless $dbName;
+		$dbName = 'selity' unless $dbName;
 		my $msg = '';
 
 		do{
-			$dbName = iMSCP::Dialog->factory()->inputbox("Please enter database name (default $dbName)$msg", $dbName);
+			$dbName = Selity::Dialog->factory()->inputbox("Please enter database name (default $dbName)$msg", $dbName);
 
 			if($dbName =~ /[:;]/){
 				$dbName = undef ;
@@ -306,16 +306,16 @@ sub setup_imscp_database {
 
 		#test if we can connect using user`s suplied database
 		if(check_sql_connection(
-				$main::imscpConfig{'DATABASE_TYPE'},
+				$main::selityConfig{'DATABASE_TYPE'},
 				$dbName,
-				$main::imscpConfig{'DATABASE_HOST'},
-				$main::imscpConfig{'DATABASE_PORT'},
-				$main::imscpConfig{'DATABASE_USER'},
-				$main::imscpConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::imscpConfig{'DATABASE_PASSWORD'}) : ''
+				$main::selityConfig{'DATABASE_HOST'},
+				$main::selityConfig{'DATABASE_PORT'},
+				$main::selityConfig{'DATABASE_USER'},
+				$main::selityConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::selityConfig{'DATABASE_PASSWORD'}) : ''
 			)
 		){
 			#no, then we create tables in database
-			if (my $error = createDB($dbName, $main::imscpConfig{'DATABASE_TYPE'})){
+			if (my $error = createDB($dbName, $main::selityConfig{'DATABASE_TYPE'})){
 				error("$error");
 				return 1;
 			}
@@ -328,11 +328,11 @@ sub setup_imscp_database {
 		}
 
 		#save new database name
-		if ($main::imscpConfig{'DATABASE_NAME'} ne $dbName) {$main::imscpConfig{'DATABASE_NAME'} = $dbName};
+		if ($main::selityConfig{'DATABASE_NAME'} ne $dbName) {$main::selityConfig{'DATABASE_NAME'} = $dbName};
 
 	} else {
 
-		$main::imscpConfig{'DATABASE_NAME'} = $main::imscpConfigOld{'DATABASE_NAME'} if(! $main::imscpConfig{'DATABASE_NAME'});
+		$main::selityConfig{'DATABASE_NAME'} = $main::selityConfigOld{'DATABASE_NAME'} if(! $main::selityConfig{'DATABASE_NAME'});
 
 		if (my $error = updateDb()){
 			error("$error");
@@ -341,14 +341,14 @@ sub setup_imscp_database {
 	}
 
 	#secure accounts
-	my $rdata = iMSCP::Database->factory()->doQuery('User', "SELECT `User`, `Host` FROM `mysql`.`user` WHERE `Password` = ''");
+	my $rdata = Selity::Database->factory()->doQuery('User', "SELECT `User`, `Host` FROM `mysql`.`user` WHERE `Password` = ''");
 	if(ref $rdata ne 'HASH'){
 		error("$rdata");
 		return 1;
 	}
 
 	foreach (keys %$rdata) {
-		my $error = iMSCP::Database->factory()->doQuery('drop', "DROP USER ?@?", $_, $rdata->{$_}->{Host});
+		my $error = Selity::Database->factory()->doQuery('drop', "DROP USER ?@?", $_, $rdata->{$_}->{Host});
 		error("$error") if(ref $error ne 'HASH');
 	}
 
@@ -364,9 +364,9 @@ sub createDB{
 	my $dbName = shift;
 	my $dbType = shift;
 
-	use iMSCP::Database;
+	use Selity::Database;
 
-	my $database = iMSCP::Database->new(db => $dbType)->factory();
+	my $database = Selity::Database->new(db => $dbType)->factory();
 	$database->set('DATABASE_NAME', '');
 	my $error = $database->connect();
 	return $error if $error;
@@ -378,7 +378,7 @@ sub createDB{
 	$error = $database->connect();
 	return $error if $error;
 
-	$error = importSQLFile($database, "$main::imscpConfig{'CONF_DIR'}/database/database.sql");
+	$error = importSQLFile($database, "$main::selityConfig{'CONF_DIR'}/database/database.sql");
 	return $error if ($error);
 
 	0;
@@ -388,11 +388,11 @@ sub importSQLFile{
 	my $database	= shift;
 	my $file		= shift;
 
-	use iMSCP::File;
-	use iMSCP::Dialog;
-	use iMSCP::Stepper;
+	use Selity::File;
+	use Selity::Dialog;
+	use Selity::Stepper;
 
-	my $content = iMSCP::File->new(filename => $file)->get();
+	my $content = Selity::File->new(filename => $file)->get();
 	$content =~ s/^(--[^\n]{0,})?\n//mg;
 	my @queries = (split /;\n/, $content);
 
@@ -420,23 +420,23 @@ sub importSQLFile{
 #
 sub updateDb {
 
-	use iMSCP::File;
-	use iMSCP::Execute;
+	use Selity::File;
+	use Selity::Execute;
 
 	my ($rs, $stdout, $stderr);
 
-	my $file	= iMSCP::File->new(filename => "$main::imscpConfig{'ROOT_DIR'}/engine/setup/updDB.php");
+	my $file	= Selity::File->new(filename => "$main::selityConfig{'ROOT_DIR'}/engine/setup/updDB.php");
 	my $content	= $file->get();
 	return 1 if(!$content);
 
-	if($content =~ s/{GUI_ROOT_DIR}/$main::imscpConfig{'GUI_ROOT_DIR'}/) {
+	if($content =~ s/{GUI_ROOT_DIR}/$main::selityConfig{'GUI_ROOT_DIR'}/) {
 		$rs = $file->set($content);
 		return 1 if($rs != 0);
 		$rs = $file->save();
 		return 1 if($rs != 0);
 	}
 
-	$rs = execute("$main::imscpConfig{'CMD_PHP'} $main::imscpConfig{'ROOT_DIR'}/engine/setup/updDB.php", \$stdout, \$stderr);
+	$rs = execute("$main::selityConfig{'CMD_PHP'} $main::selityConfig{'ROOT_DIR'}/engine/setup/updDB.php", \$stdout, \$stderr);
 	error("$stdout $stderr") if $rs;
 	return ($stdout ? "$stdout " : '' ).$stderr." exitcode: $rs" if $rs;
 
@@ -450,42 +450,42 @@ sub updateDb {
 #
 sub setup_system_dirs {
 
-	use iMSCP::Dir;
-	my $rootUName = $main::imscpConfig{'ROOT_USER'};
-	my $rootGName = $main::imscpConfig{'ROOT_GROUP'};
+	use Selity::Dir;
+	my $rootUName = $main::selityConfig{'ROOT_USER'};
+	my $rootGName = $main::selityConfig{'ROOT_GROUP'};
 
 	for (
-		[$main::imscpConfig{'USER_HOME_DIR'},	$rootUName,	$rootGName,	0555],
-		[$main::imscpConfig{'LOG_DIR'},			$rootUName,	$rootGName,	0555],
-		[$main::imscpConfig{'BACKUP_FILE_DIR'},	$rootUName,	$rootGName,	0750],
+		[$main::selityConfig{'USER_HOME_DIR'},	$rootUName,	$rootGName,	0555],
+		[$main::selityConfig{'LOG_DIR'},			$rootUName,	$rootGName,	0555],
+		[$main::selityConfig{'BACKUP_FILE_DIR'},	$rootUName,	$rootGName,	0750],
 	) {
-		iMSCP::Dir->new(dirname => $_->[0])->make({ user => $_->[1], group => $_->[2], mode => $_->[3]}) and return 1;
+		Selity::Dir->new(dirname => $_->[0])->make({ user => $_->[1], group => $_->[2], mode => $_->[3]}) and return 1;
 	}
 
 	0;
 }
 
 sub setup_base_server_IP{
-	use iMSCP::Dialog;
-	use iMSCP::IP;
+	use Selity::Dialog;
+	use Selity::IP;
 	my $rs;
 
-	my $ips = iMSCP::IP->new();
+	my $ips = Selity::IP->new();
 	$rs = $ips->loadIPs();
 	return $rs if $rs;
 
 	return 0 if(
-		$main::imscpConfig{'BASE_SERVER_IP'} &&
-		$main::imscpConfig{'BASE_SERVER_IP'} ne '127.0.0.1' &&
-		$main::imscpConfig{'BASE_SERVER_IP'} ne $ips->normalize('::1')
+		$main::selityConfig{'BASE_SERVER_IP'} &&
+		$main::selityConfig{'BASE_SERVER_IP'} ne '127.0.0.1' &&
+		$main::selityConfig{'BASE_SERVER_IP'} ne $ips->normalize('::1')
 	);
 
 	if(
-		$main::imscpConfigOld{'BASE_SERVER_IP'} &&
-		$main::imscpConfigOld{'BASE_SERVER_IP'} ne '127.0.0.1' &&
-		$main::imscpConfig{'BASE_SERVER_IP'} ne $ips->normalize('::1')
+		$main::selityConfigOld{'BASE_SERVER_IP'} &&
+		$main::selityConfigOld{'BASE_SERVER_IP'} ne '127.0.0.1' &&
+		$main::selityConfig{'BASE_SERVER_IP'} ne $ips->normalize('::1')
 	){
-		$main::imscpConfig{'BASE_SERVER_IP'} = $main::imscpConfigOld{'BASE_SERVER_IP'};
+		$main::selityConfig{'BASE_SERVER_IP'} = $main::selityConfigOld{'BASE_SERVER_IP'};
 		return 0;
 	}
 
@@ -498,33 +498,33 @@ sub setup_base_server_IP{
 
 	my ($out, $card);
 
-	while (! ($out = iMSCP::Dialog->factory()->radiolist("Please select your external ip:", keys %allIPs, 'none'))){}
+	while (! ($out = Selity::Dialog->factory()->radiolist("Please select your external ip:", keys %allIPs, 'none'))){}
 	if(! ($ips->isValidIp($out))){
 		do{
-			while (! ($out = iMSCP::Dialog->factory()->inputbox("Please enter your ip:", (keys %allIPs)[0]))){}
+			while (! ($out = Selity::Dialog->factory()->inputbox("Please enter your ip:", (keys %allIPs)[0]))){}
 		} while(! ($ips->isValidIp($out) && $out ne '127.0.0.1' && $out ne $ips->normalize('::1')) );
 		unless(exists $ips->{ips}->{$out}){
-			while (! ($card = iMSCP::Dialog->factory()->radiolist("Please select your network card:", ($ips->getNetCards)))){}
+			while (! ($card = Selity::Dialog->factory()->radiolist("Please select your network card:", ($ips->getNetCards)))){}
 			$ips->attachIpToNetCard($card, $out);
 			$rs = $ips->reset();
 			return $rs if $rs;
 		}
 	}
 
-	$main::imscpConfig{'BASE_SERVER_IP'} = $out if($main::imscpConfig{'BASE_SERVER_IP'} ne $out);
+	$main::selityConfig{'BASE_SERVER_IP'} = $out if($main::selityConfig{'BASE_SERVER_IP'} ne $out);
 
-	iMSCP::Dialog->factory()->set('yes-label','Yes');
-	iMSCP::Dialog->factory()->set('no-label','No');
+	Selity::Dialog->factory()->set('yes-label','Yes');
+	Selity::Dialog->factory()->set('no-label','No');
 
-	my $database = iMSCP::Database->new(db => $main::imscpConfig{'DATABASE_TYPE'})->factory();
+	my $database = Selity::Database->new(db => $main::selityConfig{'DATABASE_TYPE'})->factory();
 
 	my %otherIPs = %allIPs;
 	delete($otherIPs{$out}) if exists $otherIPs{$out};
 
 	my $toSave ='';
 	if (scalar(keys %otherIPs) > 0 ){
-		my $out = iMSCP::Dialog->factory()->yesno("\n\n\t\t\tInsert other ips into database?");
-		$toSave = iMSCP::Dialog->factory()->checkbox("Please select ip`s to be entered to database:", keys %otherIPs) if !$out;
+		my $out = Selity::Dialog->factory()->yesno("\n\n\t\t\tInsert other ips into database?");
+		$toSave = Selity::Dialog->factory()->checkbox("Please select ip`s to be entered to database:", keys %otherIPs) if !$out;
 		$toSave =~ s/"//g;
 	}
 
@@ -547,30 +547,30 @@ sub setup_base_server_IP{
 #
 sub setup_hosts {
 
-	use iMSCP::File;
-	use iMSCP::IP;
+	use Selity::File;
+	use Selity::IP;
 
 	my $rs = 0;
 	my $err = askHostname();
 	return 1 if($err);
 
-	my @labels = split /\./, $main::imscpConfig{'SERVER_HOSTNAME'};
+	my @labels = split /\./, $main::selityConfig{'SERVER_HOSTNAME'};
 
 	use Net::LibIDN qw/idn_to_ascii/;
 
 	my $host = idn_to_ascii(shift(@labels), 'utf-8');
-	my $hostname_local = "$main::imscpConfig{'SERVER_HOSTNAME'}.local";
+	my $hostname_local = "$main::selityConfig{'SERVER_HOSTNAME'}.local";
 
-	my $file = iMSCP::File->new(filename => "/etc/hosts");
+	my $file = Selity::File->new(filename => "/etc/hosts");
 	$rs |= $file->copyFile("/etc/hosts.bkp") if(!-f '/etc/hosts.bkp');
 
 	my $content = "# 'hosts' file configuration.\n\n";
 
 	$content .= "127.0.0.1\t$hostname_local\tlocalhost\n";
-	$content .= "$main::imscpConfig{'BASE_SERVER_IP'}\t$main::imscpConfig{'SERVER_HOSTNAME'}\t$host\n";
-	$content .= "::ffff:$main::imscpConfig{'BASE_SERVER_IP'}\t$main::imscpConfig{'SERVER_HOSTNAME'}\t$host\n" if iMSCP::IP->new()->getIpType($main::imscpConfig{BASE_SERVER_IP}) eq 'ipv4';
-	$content .= "::1\tip6-localhost\tip6-loopback\n" if iMSCP::IP->new()->getIpType($main::imscpConfig{BASE_SERVER_IP}) eq 'ipv4';
-	$content .= "::1\tip6-localhost\tip6-loopback\t$host\n"  if iMSCP::IP->new()->getIpType($main::imscpConfig{BASE_SERVER_IP}) ne 'ipv4';
+	$content .= "$main::selityConfig{'BASE_SERVER_IP'}\t$main::selityConfig{'SERVER_HOSTNAME'}\t$host\n";
+	$content .= "::ffff:$main::selityConfig{'BASE_SERVER_IP'}\t$main::selityConfig{'SERVER_HOSTNAME'}\t$host\n" if Selity::IP->new()->getIpType($main::selityConfig{BASE_SERVER_IP}) eq 'ipv4';
+	$content .= "::1\tip6-localhost\tip6-loopback\n" if Selity::IP->new()->getIpType($main::selityConfig{BASE_SERVER_IP}) eq 'ipv4';
+	$content .= "::1\tip6-localhost\tip6-loopback\t$host\n"  if Selity::IP->new()->getIpType($main::selityConfig{BASE_SERVER_IP}) ne 'ipv4';
 	$content .= "fe00::0\tip6-localnet\n";
 	$content .= "ff00::0\tip6-mcastprefix\n";
 	$content .= "ff02::1\tip6-allnodes\n";
@@ -580,18 +580,18 @@ sub setup_hosts {
 	$rs |= $file->set($content);
 	$rs |= $file->save();
 	$rs |= $file->mode(0644);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
-	$file = iMSCP::File->new(filename => "/etc/hostname");
+	$file = Selity::File->new(filename => "/etc/hostname");
 	$rs |= $file->copyFile("/etc/hostname.bkp") if(!-f '/etc/hostname.bkp');
 	$content = $host;
 	$rs |= $file->set($content);
 	$rs |= $file->save();
 	$rs |= $file->mode(0644);
-	$rs |= $file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'});
+	$rs |= $file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'});
 
 	my ($stdout, $stderr);
-	$rs |= execute("$main::imscpConfig{'CMD_HOSTNAME'} $host", \$stdout, \$stderr);
+	$rs |= execute("$main::selityConfig{'CMD_HOSTNAME'} $host", \$stdout, \$stderr);
 	debug("$stdout") if $stdout;
 	warning("$stderr") if !$rs && $stderr;
 	error("$stderr") if $rs && $stderr;
@@ -605,12 +605,12 @@ sub askHostname{
 
 	my ($out, $err, $hostname);
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 	use Socket;
 
-	#$hostname = gethostbyaddr($main::imscpConfig{'BASE_SERVER_IP'}, &AF_INET);
+	#$hostname = gethostbyaddr($main::selityConfig{'BASE_SERVER_IP'}, &AF_INET);
 	if( !$hostname || $hostname !~ /^([\w][\w-]{0,253}[\w])\.([\w][\w-]{0,253}[\w])\.([a-zA-Z]{2,6})$/) {
-		if (execute("$main::imscpConfig{'CMD_HOSTNAME'} -f", \$hostname, \$err)){
+		if (execute("$main::selityConfig{'CMD_HOSTNAME'} -f", \$hostname, \$err)){
 			error("Can not find hostname (misconfigured?): $err");
 			$hostname = '';
 		}
@@ -618,28 +618,28 @@ sub askHostname{
 
 	chomp($hostname);
 
-	if($hostname && $main::imscpConfig{'SERVER_HOSTNAME'} eq $hostname){
+	if($hostname && $main::selityConfig{'SERVER_HOSTNAME'} eq $hostname){
 		return 0;
 	}
-	if($hostname && $main::imscpConfigOld{'SERVER_HOSTNAME'} && $main::imscpConfigOld{'SERVER_HOSTNAME'} eq $hostname){
-		$main::imscpConfig{'SERVER_HOSTNAME'} = $main::imscpConfigOld{'SERVER_HOSTNAME'};
+	if($hostname && $main::selityConfigOld{'SERVER_HOSTNAME'} && $main::selityConfigOld{'SERVER_HOSTNAME'} eq $hostname){
+		$main::selityConfig{'SERVER_HOSTNAME'} = $main::selityConfigOld{'SERVER_HOSTNAME'};
 		return 0;
 	}
 
 	use Data::Validate::Domain qw/is_domain/;
 
-	my %options = $main::imscpConfig{'DEBUG'} ? (domain_private_tld => qr /^(?:bogus|test)$/) : ();
+	my %options = $main::selityConfig{'DEBUG'} ? (domain_private_tld => qr /^(?:bogus|test)$/) : ();
 
 	my ($msg, @labels) = ('', ());
 	do{
-		while (! ($out = iMSCP::Dialog->factory()->inputbox( "Please enter a fully qualified hostname (fqdn): $msg", $hostname))){}
+		while (! ($out = Selity::Dialog->factory()->inputbox( "Please enter a fully qualified hostname (fqdn): $msg", $hostname))){}
 		$msg = "\n\n$out is not a valid fqdn!";
 		@labels = split(/\./, $out);
 	} while (! (Data::Validate::Domain->new(%options)->is_domain($out) && ( @labels >= 3)));
 
 	use Net::LibIDN qw/idn_to_ascii idn_to_unicode/;
 
-	$main::imscpConfig{'SERVER_HOSTNAME'} = idn_to_ascii($out, 'utf-8');
+	$main::selityConfig{'SERVER_HOSTNAME'} = idn_to_ascii($out, 'utf-8');
 
 	0;
 }
@@ -651,31 +651,31 @@ sub askHostname{
 #
 sub setup_resolver {
 
-	use iMSCP::File;
-	use iMSCP::Dialog;
+	use Selity::File;
+	use Selity::Dialog;
 
 	my ($err, $file, $content, $out);
 
-	if(-f $main::imscpConfig{'RESOLVER_CONF_FILE'}) {
-		$file = iMSCP::File->new(filename => $main::imscpConfig{'RESOLVER_CONF_FILE'});
+	if(-f $main::selityConfig{'RESOLVER_CONF_FILE'}) {
+		$file = Selity::File->new(filename => $main::selityConfig{'RESOLVER_CONF_FILE'});
 		$content = $file->get();
 
 		if (! $content){
-			$err = "Can't read $main::imscpConfig{'RESOLVER_CONF_FILE'}";
+			$err = "Can't read $main::selityConfig{'RESOLVER_CONF_FILE'}";
 			error("$err");
 			return 1;
 		}
 
-		if($main::imscpConfig{'LOCAL_DNS_RESOLVER'} !~ /yes|no/i) {
-			if($main::imscpConfigOld{'LOCAL_DNS_RESOLVER'} && $main::imscpConfigOld{'LOCAL_DNS_RESOLVER'} =~ /yes|no/i){
-				$main::imscpConfig{'LOCAL_DNS_RESOLVER'} = $main::imscpConfigOld{'LOCAL_DNS_RESOLVER'};
+		if($main::selityConfig{'LOCAL_DNS_RESOLVER'} !~ /yes|no/i) {
+			if($main::selityConfigOld{'LOCAL_DNS_RESOLVER'} && $main::selityConfigOld{'LOCAL_DNS_RESOLVER'} =~ /yes|no/i){
+				$main::selityConfig{'LOCAL_DNS_RESOLVER'} = $main::selityConfigOld{'LOCAL_DNS_RESOLVER'};
 			} else {
-				while (! ($out = iMSCP::Dialog->factory()->radiolist("Do you want allow the system resolver to use the local nameserver?:", ('yes', 'no')))){}
-				$main::imscpConfig{'LOCAL_DNS_RESOLVER'} = $out;
+				while (! ($out = Selity::Dialog->factory()->radiolist("Do you want allow the system resolver to use the local nameserver?:", ('yes', 'no')))){}
+				$main::selityConfig{'LOCAL_DNS_RESOLVER'} = $out;
 			}
 		}
 
-		if($main::imscpConfig{'LOCAL_DNS_RESOLVER'} =~ /yes/i) {
+		if($main::selityConfig{'LOCAL_DNS_RESOLVER'} =~ /yes/i) {
 			if($content !~ /nameserver 127.0.0.1/i) {
 				$content =~ s/(nameserver.*)/nameserver 127.0.0.1\n$1/i;
 			}
@@ -684,14 +684,14 @@ sub setup_resolver {
 		}
 
 		# Saving the old file if needed
-		if(!-f "$main::imscpConfig{'RESOLVER_CONF_FILE'}.bkp") {
-			$file->copyFile("$main::imscpConfig{'RESOLVER_CONF_FILE'}.bkp") and return 1;
+		if(!-f "$main::selityConfig{'RESOLVER_CONF_FILE'}.bkp") {
+			$file->copyFile("$main::selityConfig{'RESOLVER_CONF_FILE'}.bkp") and return 1;
 		}
 
 		# Storing the new file
 		$file->set($content) and return 1;
 		$file->save() and return 1;
-		$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+		$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 		$file->mode(0644) and return 1;
 
 	} else {
@@ -709,8 +709,8 @@ sub setup_resolver {
 #
 sub setup_crontab {
 
-	use iMSCP::File;
-	use iMSCP::Templator;
+	use Selity::File;
+	use Selity::Templator;
 
 	my ($rs, $cfgTpl, $err);
 
@@ -718,26 +718,26 @@ sub setup_crontab {
 	my ($rkhunter, $chkrootkit);
 
 	# Directories paths
-	my $cfgDir = $main::imscpConfig{'CONF_DIR'} . '/cron.d';
+	my $cfgDir = $main::selityConfig{'CONF_DIR'} . '/cron.d';
 	my $bkpDir = $cfgDir . '/backup';
 	my $wrkDir = $cfgDir . '/working';
 
 	# Retrieving production directory path
-	my $prodDir = ($^O =~ /bsd$/ ? '/usr/local/etc/cron.daily/imscp' : '/etc/cron.d');
+	my $prodDir = ($^O =~ /bsd$/ ? '/usr/local/etc/cron.daily/selity' : '/etc/cron.d');
 
 	# Saving the current production file if it exists
-	if(-f "$prodDir/imscp") {
-		iMSCP::File->new(filename => "$prodDir/imscp")->copyFile("$bkpDir/imscp." . time) and return 1;
+	if(-f "$prodDir/selity") {
+		Selity::File->new(filename => "$prodDir/selity")->copyFile("$bkpDir/selity." . time) and return 1;
 	}
 
 	## Building new configuration file
 
-	# Loading the template from /etc/imscp/cron.d/imscp
-	$cfgTpl = iMSCP::File->new(filename => "$cfgDir/imscp")->get();
+	# Loading the template from /etc/selity/cron.d/selity
+	$cfgTpl = Selity::File->new(filename => "$cfgDir/selity")->get();
 	return 1 if (!$cfgTpl);
 
-	# Awstats cron task preparation (On|Off) according status in imscp.conf
-	if ($main::imscpConfig{'AWSTATS_ACTIVE'} ne 'yes' || $main::imscpConfig{'AWSTATS_MODE'} eq 1) {
+	# Awstats cron task preparation (On|Off) according status in selity.conf
+	if ($main::selityConfig{'AWSTATS_ACTIVE'} ne 'yes' || $main::selityConfig{'AWSTATS_MODE'} eq 1) {
 		$awstats = '#';
 	}
 
@@ -747,18 +747,18 @@ sub setup_crontab {
 	($chkrootkit = `which chkrootkit`) =~ s/\s$//g;
 
 	# Building the new file
-	$cfgTpl = iMSCP::Templator::process(
+	$cfgTpl = Selity::Templator::process(
 		{
-			LOG_DIR				=> $main::imscpConfig{'LOG_DIR'},
-			CONF_DIR			=> $main::imscpConfig{'CONF_DIR'},
-			QUOTA_ROOT_DIR		=> $main::imscpConfig{'QUOTA_ROOT_DIR'},
-			TRAFF_ROOT_DIR		=> $main::imscpConfig{'TRAFF_ROOT_DIR'},
-			TOOLS_ROOT_DIR		=> $main::imscpConfig{'TOOLS_ROOT_DIR'},
-			BACKUP_ROOT_DIR		=> $main::imscpConfig{'BACKUP_ROOT_DIR'},
-			RKHUNTER_LOG		=> $main::imscpConfig{'RKHUNTER_LOG'},
-			CHKROOTKIT_LOG		=> $main::imscpConfig{'CHKROOTKIT_LOG'},
-			AWSTATS_ROOT_DIR	=> $main::imscpConfig{'AWSTATS_ROOT_DIR'},
-			AWSTATS_ENGINE_DIR	=> $main::imscpConfig{'AWSTATS_ENGINE_DIR'},
+			LOG_DIR				=> $main::selityConfig{'LOG_DIR'},
+			CONF_DIR			=> $main::selityConfig{'CONF_DIR'},
+			QUOTA_ROOT_DIR		=> $main::selityConfig{'QUOTA_ROOT_DIR'},
+			TRAFF_ROOT_DIR		=> $main::selityConfig{'TRAFF_ROOT_DIR'},
+			TOOLS_ROOT_DIR		=> $main::selityConfig{'TOOLS_ROOT_DIR'},
+			BACKUP_ROOT_DIR		=> $main::selityConfig{'BACKUP_ROOT_DIR'},
+			RKHUNTER_LOG		=> $main::selityConfig{'RKHUNTER_LOG'},
+			CHKROOTKIT_LOG		=> $main::selityConfig{'CHKROOTKIT_LOG'},
+			AWSTATS_ROOT_DIR	=> $main::selityConfig{'AWSTATS_ROOT_DIR'},
+			AWSTATS_ENGINE_DIR	=> $main::selityConfig{'AWSTATS_ENGINE_DIR'},
 			'AW-ENABLED'		=> $awstats,
 			'RK-ENABLED'		=> !length($rkhunter) ? '#' : '',
 			RKHUNTER			=> $rkhunter,
@@ -772,10 +772,10 @@ sub setup_crontab {
 	## Storage and installation of new file
 
 	# Storing new file in the working directory
-	my $file = iMSCP::File->new(filename => "$wrkDir/imscp");
+	my $file = Selity::File->new(filename => "$wrkDir/selity");
 	$file->set($cfgTpl);
 	$file->save() and return 1;
-	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+	$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 	$file->mode(0644) and return 1;
 
 	# Install the new file in production directory
@@ -791,23 +791,23 @@ sub setup_crontab {
 #
 # @return int 0 on success, other on failure
 #
-sub setup_imscp_daemon_network {
+sub setup_selity_daemon_network {
 
 	my ($rs, $rdata, $fileName, $stdout, $stderr);
 
 	# Odering is important here.
-	# Service imscp_network has to be enabled to start service imscp_daemon. It's a
+	# Service selity_network has to be enabled to start service selity_daemon. It's a
 	# dependency added to be sure that if an admin adds an new IP through the GUI,
 	# the traffic will always be correctly computed. When we'll switch to mutli-server,
 	# the traffic logger will be review to avoid this dependency
-	for ($main::imscpConfig{'CMD_IMSCPN'}, $main::imscpConfig{'CMD_IMSCPD'}) {
+	for ($main::selityConfig{'CMD_SELITYN'}, $main::selityConfig{'CMD_SELITYD'}) {
 		# Do not process if the service is disabled
 		next if(/^no$/i);
 
 		($fileName) = /.*\/([^\/]*)$/;
 
-		my $file = iMSCP::File->new(filename => $_);
-		$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+		my $file = Selity::File->new(filename => $_);
+		$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 		$file->mode(0755) and return 1;
 
 		# Services installation / update (Debian, Ubuntu)
@@ -833,19 +833,19 @@ sub setup_imscp_daemon_network {
 #
 sub set_permissions {
 
-	use iMSCP::Rights;
+	use Selity::Rights;
 
 	my $rs;
-	my $rootUName	= $main::imscpConfig{'ROOT_USER'};
-	my $rootGName	= $main::imscpConfig{'ROOT_GROUP'};
-	my $masterUName	= $main::imscpConfig{'MASTER_GROUP'};
-	my $CONF_DIR	= $main::imscpConfig{'CONF_DIR'};
-	my $ROOT_DIR	= $main::imscpConfig{'ROOT_DIR'};
-	my $LOG_DIR		= $main::imscpConfig{'LOG_DIR'};
+	my $rootUName	= $main::selityConfig{'ROOT_USER'};
+	my $rootGName	= $main::selityConfig{'ROOT_GROUP'};
+	my $masterUName	= $main::selityConfig{'MASTER_GROUP'};
+	my $CONF_DIR	= $main::selityConfig{'CONF_DIR'};
+	my $ROOT_DIR	= $main::selityConfig{'ROOT_DIR'};
+	my $LOG_DIR		= $main::selityConfig{'LOG_DIR'};
 
 	$rs |= setRights("$CONF_DIR", {user => $rootUName, group => $masterUName, mode => '0770'});
-	$rs |= setRights("$CONF_DIR/imscp.conf", {user => $rootUName, group => $masterUName, mode => '0660'});
-	$rs |= setRights("$CONF_DIR/imscp-db-keys", {user => $rootUName, group => $masterUName, mode => '0640'});
+	$rs |= setRights("$CONF_DIR/selity.conf", {user => $rootUName, group => $masterUName, mode => '0660'});
+	$rs |= setRights("$CONF_DIR/selity-db-keys", {user => $rootUName, group => $masterUName, mode => '0640'});
 	$rs |= setRights("$ROOT_DIR/engine", {user => $rootUName, group => $masterUName, mode => '0755', recursive => 'yes'});
 	$rs |= setRights($LOG_DIR, {user => $rootUName, group => $masterUName, mode => '0750'});
 
@@ -859,15 +859,15 @@ sub set_permissions {
 #
 sub restart_services {
 
-	use iMSCP::Dialog;
-	use iMSCP::Stepper;
+	use Selity::Dialog;
+	use Selity::Stepper;
 
 	startDetail();
 
 	my @services = (
 		#['Variable holding command', 'command to execute', 'ignore error if 0 exit on error if 1']
-		['CMD_IMSCPN',			'restart',	1],
-		['CMD_IMSCPD',			'restart',	1],
+		['CMD_SELITYN',			'restart',	1],
+		['CMD_SELITYD',			'restart',	1],
 		['CMD_CLAMD',			'reload',	1],
 		['CMD_POSTGREY',		'restart',	1],
 		['CMD_POLICYD_WEIGHT',	'reload',	0],
@@ -878,15 +878,15 @@ sub restart_services {
 	my $count = 1;
 
 	for (@services) {
-		if($main::imscpConfig{$_->[0]} && ($main::imscpConfig{$_->[0]} !~ /^no$/i) && -f $main::imscpConfig{$_->[0]}) {
+		if($main::selityConfig{$_->[0]} && ($main::selityConfig{$_->[0]} !~ /^no$/i) && -f $main::selityConfig{$_->[0]}) {
 			$rs = step(
-				sub { execute("$main::imscpConfig{$_->[0]} $_->[1]", \$stdout, \$stderr)},
-				"Restarting $main::imscpConfig{$_->[0]}",
+				sub { execute("$main::selityConfig{$_->[0]} $_->[1]", \$stdout, \$stderr)},
+				"Restarting $main::selityConfig{$_->[0]}",
 				scalar @services,
 				$count
 			);
-			debug("$main::imscpConfig{$_->[0]} $stdout") if $stdout;
-			error("$main::imscpConfig{$_->[0]} $stderr $rs") if ($rs && $_->[2]);
+			debug("$main::selityConfig{$_->[0]} $stdout") if $stdout;
+			error("$main::selityConfig{$_->[0]} $stderr $rs") if ($rs && $_->[2]);
 			return $rs if ($rs && $_->[2]);
 		}
 		$count++;
@@ -909,12 +909,12 @@ sub restart_services {
 #
 sub setup_default_sql_data {
 
-	use iMSCP::Crypt;
-	use iMSCP::Database;
+	use Selity::Crypt;
+	use Selity::Database;
 
 	my ($error);
 
-	my $database = iMSCP::Database->new(db => $main::imscpConfig{'DATABASE_TYPE'})->factory();
+	my $database = Selity::Database->new(db => $main::selityConfig{'DATABASE_TYPE'})->factory();
 	my $admins = $database->doQuery(
 						'admin_id',
 						'SELECT
@@ -930,13 +930,13 @@ sub setup_default_sql_data {
 	my $msg = '';
 	if( ! scalar keys %{$admins} ){
 		my ($admin, $pass, $rpass, $msg, $admin_email) = ('admin');
-		while(!($admin	= iMSCP::Dialog->factory()->inputbox('Please enter administrator login name', $admin))){};
+		while(!($admin	= Selity::Dialog->factory()->inputbox('Please enter administrator login name', $admin))){};
 		do{
-			while(!($pass	= iMSCP::Dialog->factory()->passwordbox("Please enter administrator password ". ($msg ? $msg : ''),''))){};
-			while(!($rpass	= iMSCP::Dialog->factory()->passwordbox('Please repeat administrator password',''))){};
+			while(!($pass	= Selity::Dialog->factory()->passwordbox("Please enter administrator password ". ($msg ? $msg : ''),''))){};
+			while(!($rpass	= Selity::Dialog->factory()->passwordbox('Please repeat administrator password',''))){};
 			$msg = "\n\n\\Z1Password do not match\\Zn.\n\nPlease try again";
 		}while($pass ne $rpass);
-		$pass = iMSCP::Crypt->new()->crypt_md5_data($pass);
+		$pass = Selity::Crypt->new()->crypt_md5_data($pass);
 		$admin_email = askAdminEmail();
 		my $error = $database->doQuery(
 			'dummy',
@@ -967,7 +967,7 @@ sub setup_default_sql_data {
 			`ip_domain` = ?
 		WHERE
 			`ip_number` = ?
-		", $main::imscpConfig{'SERVER_HOSTNAME'}, $main::imscpConfig{'BASE_SERVER_IP'}
+		", $main::selityConfig{'SERVER_HOSTNAME'}, $main::selityConfig{'BASE_SERVER_IP'}
 	);
 	return $error if (ref $error ne 'HASH');
 
@@ -982,7 +982,7 @@ sub setup_default_sql_data {
 			`ip_number` != ?
 		AND
 			`ip_domain` = ?
-		", $main::imscpConfig{'BASE_SERVER_IP'}, $main::imscpConfig{'SERVER_HOSTNAME'}
+		", $main::selityConfig{'BASE_SERVER_IP'}, $main::selityConfig{'SERVER_HOSTNAME'}
 	);
 	return $error if (ref $error ne 'HASH');
 
@@ -993,11 +993,11 @@ sub setup_default_sql_data {
 
 sub askMYSQLPrefix{
 
-	my $useprefix	= $main::imscpConfig{'MYSQL_PREFIX'} ? $main::imscpConfig{'MYSQL_PREFIX'} : ($main::imscpConfigOld{'MYSQL_PREFIX'} ? $main::imscpConfigOld{'MYSQL_PREFIX'} : '');
-	my $prefix		= $main::imscpConfig{'MYSQL_PREFIX_TYPE'} ? $main::imscpConfig{'MYSQL_PREFIX_TYPE'} : ($main::imscpConfigOld{'MYSQL_PREFIX_TYPE'} ? $main::imscpConfigOld{'MYSQL_PREFIX_TYPE'} : '');
+	my $useprefix	= $main::selityConfig{'MYSQL_PREFIX'} ? $main::selityConfig{'MYSQL_PREFIX'} : ($main::selityConfigOld{'MYSQL_PREFIX'} ? $main::selityConfigOld{'MYSQL_PREFIX'} : '');
+	my $prefix		= $main::selityConfig{'MYSQL_PREFIX_TYPE'} ? $main::selityConfig{'MYSQL_PREFIX_TYPE'} : ($main::selityConfigOld{'MYSQL_PREFIX_TYPE'} ? $main::selityConfigOld{'MYSQL_PREFIX_TYPE'} : '');
 
 	while(!$useprefix || !$prefix){
-		my $prefix = $prefix = iMSCP::Dialog->factory()->radiolist("Use MySQL Prefix? Possible values:", 'do not use', 'infront', 'after');
+		my $prefix = $prefix = Selity::Dialog->factory()->radiolist("Use MySQL Prefix? Possible values:", 'do not use', 'infront', 'after');
 		if($prefix eq 'do not use'){
 			$useprefix	= 'no';
 			$prefix		= 'none';
@@ -1006,23 +1006,23 @@ sub askMYSQLPrefix{
 		}
 	}
 
-	$main::imscpConfig{'MYSQL_PREFIX'} = $useprefix if($main::imscpConfig{'MYSQL_PREFIX'} ne $useprefix);
-	$main::imscpConfig{'MYSQL_PREFIX_TYPE'} = $prefix if($main::imscpConfig{'MYSQL_PREFIX_TYPE'} ne $prefix);
+	$main::selityConfig{'MYSQL_PREFIX'} = $useprefix if($main::selityConfig{'MYSQL_PREFIX'} ne $useprefix);
+	$main::selityConfig{'MYSQL_PREFIX_TYPE'} = $prefix if($main::selityConfig{'MYSQL_PREFIX_TYPE'} ne $prefix);
 
 	0;
 }
 
 sub askAdminEmail{
 
-	my $admin_email = $main::imscpConfig{'DEFAULT_ADMIN_ADDRESS'} ? $main::imscpConfig{'DEFAULT_ADMIN_ADDRESS'} : ($main::imscpConfigOld{'DEFAULT_ADMIN_ADDRESS'} ? $main::imscpConfigOld{'DEFAULT_ADMIN_ADDRESS'} : '');
+	my $admin_email = $main::selityConfig{'DEFAULT_ADMIN_ADDRESS'} ? $main::selityConfig{'DEFAULT_ADMIN_ADDRESS'} : ($main::selityConfigOld{'DEFAULT_ADMIN_ADDRESS'} ? $main::selityConfigOld{'DEFAULT_ADMIN_ADDRESS'} : '');
 	use Email::Valid;
 	my $msg = '';
 	while(!$admin_email){
-		$admin_email = iMSCP::Dialog->factory()->inputbox("Please enter administrator e-mail address .$msg");
+		$admin_email = Selity::Dialog->factory()->inputbox("Please enter administrator e-mail address .$msg");
 		$admin_email = '' if(!Email::Valid->address($admin_email));
 		$msg = "\n\n\\Z1Email is not valid\\Zn.\n\nPlease try again";
 	}
-	$main::imscpConfig{'DEFAULT_ADMIN_ADDRESS'} = $admin_email if($main::imscpConfig{'DEFAULT_ADMIN_ADDRESS'} ne $admin_email);
+	$main::selityConfig{'DEFAULT_ADMIN_ADDRESS'} = $admin_email if($main::selityConfig{'DEFAULT_ADMIN_ADDRESS'} ne $admin_email);
 
 	$admin_email;
 }
@@ -1036,25 +1036,25 @@ sub askAdminEmail{
 #
 sub setup_gui_pma {
 
-	my $cfgDir	= "$main::imscpConfig{'CONF_DIR'}/pma";
+	my $cfgDir	= "$main::selityConfig{'CONF_DIR'}/pma";
 	my $bkpDir	= "$cfgDir/backup";
 	my $wrkDir	= "$cfgDir/working";
-	my $prodDir	= "$main::imscpConfig{'GUI_PUBLIC_DIR'}/tools/pma";
-	my $dbType	= $main::imscpConfig{'DATABASE_TYPE'};
-	my $dbHost	= $main::imscpConfig{'DATABASE_HOST'};
-	my $dbPort	= $main::imscpConfig{'DATABASE_PORT'};
-	my $dbName	= $main::imscpConfig{'DATABASE_NAME'};
+	my $prodDir	= "$main::selityConfig{'GUI_PUBLIC_DIR'}/tools/pma";
+	my $dbType	= $main::selityConfig{'DATABASE_TYPE'};
+	my $dbHost	= $main::selityConfig{'DATABASE_HOST'};
+	my $dbPort	= $main::selityConfig{'DATABASE_PORT'};
+	my $dbName	= $main::selityConfig{'DATABASE_NAME'};
 
 	my ($error, $blowfishSecret, $ctrlUser, $ctrlUserPwd, $cfgFile, $file, $rebuild);
 
 	# Saving the current production file if it exists
 	if(-f "$prodDir/config.inc.php") {
-		$file = iMSCP::File->new(filename => "$prodDir/config.inc.php")->copyFile("$bkpDir/config.inc.php." . time) and return 1;
+		$file = Selity::File->new(filename => "$prodDir/config.inc.php")->copyFile("$bkpDir/config.inc.php." . time) and return 1;
 	}
 
 	if(-f "$wrkDir/config.inc.php") {
 		# Gets the pma configuration file
-		$file = iMSCP::File->new(filename => "$cfgDir/working/config.inc.php");
+		$file = Selity::File->new(filename => "$cfgDir/working/config.inc.php");
 		$cfgFile = $file->get();
 		return 1 if (!$cfgFile);
 
@@ -1064,15 +1064,15 @@ sub setup_gui_pma {
 		} qw /blowfish_secret controluser controlpass/;
 		$rebuild = check_sql_connection($dbType, '', $dbHost, $dbPort, $ctrlUser || '', $ctrlUserPwd || '');
 
-		my $crypt = iMSCP::Crypt->new();
+		my $crypt = Selity::Crypt->new();
 
 		my $err = check_sql_connection(
-			$main::imscpConfig{'DATABASE_TYPE'},
-			$main::imscpConfig{'DATABASE_NAME'},
-			$main::imscpConfig{'DATABASE_HOST'},
-			$main::imscpConfig{'DATABASE_PORT'},
-			$main::imscpConfig{'DATABASE_USER'},
-			$main::imscpConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::imscpConfig{'DATABASE_PASSWORD'}) : ''
+			$main::selityConfig{'DATABASE_TYPE'},
+			$main::selityConfig{'DATABASE_NAME'},
+			$main::selityConfig{'DATABASE_HOST'},
+			$main::selityConfig{'DATABASE_PORT'},
+			$main::selityConfig{'DATABASE_USER'},
+			$main::selityConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::selityConfig{'DATABASE_PASSWORD'}) : ''
 		);
 		if ($err){
 			error("$err");
@@ -1091,7 +1091,7 @@ sub setup_gui_pma {
 	}
 
 	if($rebuild){
-		iMSCP::Dialog->factory()->msgbox("
+		Selity::Dialog->factory()->msgbox("
 							\n\\Z1[WARNING]\\Zn
 
 							Unable to found your working PMA configuration file !
@@ -1100,31 +1100,31 @@ sub setup_gui_pma {
 						"
 		);
 
-		$ctrlUser = $ctrlUser ? $ctrlUser : ($main::imscpConfig{'PMA_USER'} ? $main::imscpConfig{'PMA_USER'} : ($main::imscpConfigOld{'PMA_USER'} ? $main::imscpConfigOld{'PMA_USER'} : 'pma'));
+		$ctrlUser = $ctrlUser ? $ctrlUser : ($main::selityConfig{'PMA_USER'} ? $main::selityConfig{'PMA_USER'} : ($main::selityConfigOld{'PMA_USER'} ? $main::selityConfigOld{'PMA_USER'} : 'pma'));
 
 		do{
-			$ctrlUser = iMSCP::Dialog->factory()->inputbox("Please enter database user name for the restricted phpmyadmin user (default pma)", $ctrlUser);
+			$ctrlUser = Selity::Dialog->factory()->inputbox("Please enter database user name for the restricted phpmyadmin user (default pma)", $ctrlUser);
 			#we will not allow root user to be used as database user for proftpd since account will be restricted
-			if($ctrlUser eq $main::imscpConfig{DATABASE_USER}){
-				iMSCP::Dialog->factory()->msgbox("You can not use $main::imscpConfig{DATABASE_USER} as restricted user");
+			if($ctrlUser eq $main::selityConfig{DATABASE_USER}){
+				Selity::Dialog->factory()->msgbox("You can not use $main::selityConfig{DATABASE_USER} as restricted user");
 				$ctrlUser = undef;
 			}
 		} while (!$ctrlUser);
 
-		iMSCP::Dialog->factory()->set('cancel-label','Autogenerate');
+		Selity::Dialog->factory()->set('cancel-label','Autogenerate');
 
 		# Ask for proftpd SQL user password
-		$ctrlUserPwd = iMSCP::Dialog->factory()->inputbox("Please enter database password (leave blank for autogenerate)", '');
+		$ctrlUserPwd = Selity::Dialog->factory()->inputbox("Please enter database password (leave blank for autogenerate)", '');
 		if(!$ctrlUserPwd){
 			$ctrlUserPwd = '';
 			my @allowedChars = ('A'..'Z', 'a'..'z', '0'..'9', '_');
 			$ctrlUserPwd .= $allowedChars[rand()*($#allowedChars + 1)]for (1..16);
 		}
 		$ctrlUserPwd =~ s/('|"|`|#|;|\/|\s|\||<|\?|\\)/_/g;
-		iMSCP::Dialog->factory()->msgbox("Your password is '".$ctrlUserPwd."'");
-		iMSCP::Dialog->factory()->set('cancel-label');
+		Selity::Dialog->factory()->msgbox("Your password is '".$ctrlUserPwd."'");
+		Selity::Dialog->factory()->set('cancel-label');
 
-		my $database = iMSCP::Database->new(db => $main::imscpConfig{'DATABASE_TYPE'})->factory();
+		my $database = Selity::Database->new(db => $main::selityConfig{'DATABASE_TYPE'})->factory();
 
 		## We ensure that new data doesn't exist in database
 		$error = $database->doQuery(
@@ -1213,13 +1213,13 @@ sub setup_gui_pma {
 		);
 		return $error if (ref $error ne 'HASH');
 
-		$main::imscpConfig{'PMA_USER'} = $ctrlUser if($main::imscpConfig{'PMA_USER'} ne $ctrlUser);
+		$main::selityConfig{'PMA_USER'} = $ctrlUser if($main::selityConfig{'PMA_USER'} ne $ctrlUser);
 	}
 
 	## Building the new file
 
 	# Getting the template file
-	$file = iMSCP::File->new(filename => "$cfgDir/config.inc.tpl");
+	$file = Selity::File->new(filename => "$cfgDir/config.inc.tpl");
 	$cfgFile = $file->get();
 	return 1 if (!$cfgFile);
 
@@ -1228,8 +1228,8 @@ sub setup_gui_pma {
 			PMA_USER	=> $ctrlUser,
 			PMA_PASS	=> $ctrlUserPwd,
 			HOSTNAME	=> $dbHost,
-			UPLOADS_DIR	=> "$main::imscpConfig{'GUI_ROOT_DIR'}/data/uploads",
-			TMP_DIR		=> "$main::imscpConfig{'GUI_ROOT_DIR'}/data/tmp",
+			UPLOADS_DIR	=> "$main::selityConfig{'GUI_ROOT_DIR'}/data/uploads",
+			TMP_DIR		=> "$main::selityConfig{'GUI_ROOT_DIR'}/data/tmp",
 			BLOWFISH	=> $blowfishSecret
 		},
 		$cfgFile
@@ -1237,26 +1237,26 @@ sub setup_gui_pma {
 	return 1 if (!$cfgFile);
 
 	# Storing the file in the working directory
-	$file = iMSCP::File->new(filename => "$cfgDir/working/config.inc.php");
+	$file = Selity::File->new(filename => "$cfgDir/working/config.inc.php");
 	$file->set($cfgFile) and return 1;
 	$file->save() and return 1;
 	$file->mode(0640) and return 1;
-	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+	$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 
 	# Installing the file in the production directory
 	# Note: permission are set by the set-gui-permissions.sh script
 	$file->copyFile("$prodDir/") and return 1;
 
 	#restore defaul connection
-	my $crypt = iMSCP::Crypt->new();
+	my $crypt = Selity::Crypt->new();
 
 	$error = check_sql_connection(
-		$main::imscpConfig{'DATABASE_TYPE'},
-		$main::imscpConfig{'DATABASE_NAME'},
-		$main::imscpConfig{'DATABASE_HOST'},
-		$main::imscpConfig{'DATABASE_PORT'},
-		$main::imscpConfig{'DATABASE_USER'},
-		$main::imscpConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::imscpConfig{'DATABASE_PASSWORD'}) : ''
+		$main::selityConfig{'DATABASE_TYPE'},
+		$main::selityConfig{'DATABASE_NAME'},
+		$main::selityConfig{'DATABASE_HOST'},
+		$main::selityConfig{'DATABASE_PORT'},
+		$main::selityConfig{'DATABASE_USER'},
+		$main::selityConfig{'DATABASE_PASSWORD'} ? $crypt->decrypt_db_password($main::selityConfig{'DATABASE_PASSWORD'}) : ''
 	);
 	return $error if ($error);
 
@@ -1265,18 +1265,18 @@ sub setup_gui_pma {
 
 sub askPHPTimezone{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 	use DateTime;
 	use DateTime::TimeZone;
 
 	my $dt;
 
-	if($main::imscpConfig{'PHP_TIMEZONE'}){
+	if($main::selityConfig{'PHP_TIMEZONE'}){
 		return 0;
 	}
 
-	if($main::imscpConfigOld{'PHP_TIMEZONE'}){
-		$main::imscpConfig{'PHP_TIMEZONE'} = $main::imscpConfigOld{'PHP_TIMEZONE'};
+	if($main::selityConfigOld{'PHP_TIMEZONE'}){
+		$main::selityConfig{'PHP_TIMEZONE'} = $main::selityConfigOld{'PHP_TIMEZONE'};
 		return 0;
 	}
 
@@ -1284,44 +1284,44 @@ sub askPHPTimezone{
 
 	my $msg = '';
 	do{
-		while (! ($dt = iMSCP::Dialog->factory()->inputbox( "Please enter Server`s Timezone $msg", $dt))){}
+		while (! ($dt = Selity::Dialog->factory()->inputbox( "Please enter Server`s Timezone $msg", $dt))){}
 		$msg = "$dt is not a valid timezone! The continent and the city, both must start with a capital letter, e.g. Europe/London'";
 	} while (! DateTime::TimeZone->is_valid_name($dt));
 
-	$main::imscpConfig{'PHP_TIMEZONE'} = $dt;
+	$main::selityConfig{'PHP_TIMEZONE'} = $dt;
 
 	0;
 }
 
 sub askVHOST{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 
-	if($main::imscpConfig{'BASE_SERVER_VHOST'}){
+	if($main::selityConfig{'BASE_SERVER_VHOST'}){
 		return 0;
 	}
 
-	if($main::imscpConfigOld{'BASE_SERVER_VHOST'}){
-		$main::imscpConfig{'BASE_SERVER_VHOST'} = $main::imscpConfigOld{'BASE_SERVER_VHOST'};
+	if($main::selityConfigOld{'BASE_SERVER_VHOST'}){
+		$main::selityConfig{'BASE_SERVER_VHOST'} = $main::selityConfigOld{'BASE_SERVER_VHOST'};
 		return 0;
 	}
 
 	use Data::Validate::Domain qw/is_domain/;
 
-	my $hostname = "admin.$main::imscpConfig{'SERVER_HOSTNAME'}";
+	my $hostname = "admin.$main::selityConfig{'SERVER_HOSTNAME'}";
 
-	my %options = $main::imscpConfig{'DEBUG'} ? (domain_private_tld => qr /^(?:bogus|test)$/) : ();
+	my %options = $main::selityConfig{'DEBUG'} ? (domain_private_tld => qr /^(?:bogus|test)$/) : ();
 
 	my ($msg, @labels) = ('', ());
 	do{
-		while (! ($hostname = iMSCP::Dialog->factory()->inputbox( "Please enter the domain name where i-MSCP will be reachable on: $msg", $hostname))){}
+		while (! ($hostname = Selity::Dialog->factory()->inputbox( "Please enter the domain name where i-MSCP will be reachable on: $msg", $hostname))){}
 		$msg = "\n\n$hostname is not a valid fqdn!";
 		@labels = split(/\./, $hostname);
 	} while (! (Data::Validate::Domain->new(%options)->is_domain($hostname) && ( @labels >= 3)));
 
 	use Net::LibIDN qw/idn_to_ascii/;
 
-	$main::imscpConfig{'BASE_SERVER_VHOST'} = idn_to_ascii($hostname, 'utf-8');
+	$main::selityConfig{'BASE_SERVER_VHOST'} = idn_to_ascii($hostname, 'utf-8');
 
 	0;
 }
@@ -1335,16 +1335,16 @@ sub askVHOST{
 sub save_conf{
 
 
-	use iMSCP::File;
+	use Selity::File;
 
-	my$file = iMSCP::File->new(filename => "$main::imscpConfig{'CONF_DIR'}/imscp.conf");
+	my$file = Selity::File->new(filename => "$main::selityConfig{'CONF_DIR'}/selity.conf");
 	my $cfg = $file->get() or return 1;
 
-	$file = iMSCP::File->new(filename => "$main::imscpConfig{'CONF_DIR'}/imscp.old.conf");
+	$file = Selity::File->new(filename => "$main::selityConfig{'CONF_DIR'}/selity.old.conf");
 	$file->set($cfg) and return 1;
 	$file->save and return 1;
 	$file->mode(0644) and return 1;
-	$file->owner($main::imscpConfig{'ROOT_USER'}, $main::imscpConfig{'ROOT_GROUP'}) and return 1;
+	$file->owner($main::selityConfig{'ROOT_USER'}, $main::selityConfig{'ROOT_GROUP'}) and return 1;
 
 	0;
 }
@@ -1354,7 +1354,7 @@ sub save_conf{
 #
 # @return int 0
 #
-sub update_imscp_cfg {
+sub update_selity_cfg {
 
 	for(qw/
 		ZIP
@@ -1366,8 +1366,8 @@ sub update_imscp_cfg {
 		GUI_EXCEPTION_WRITERS
 		DEBUG
 	/){
-		if($main::imscpConfigOld{$_} && $main::imscpConfigOld{$_} ne $main::imscpConfig{$_}){
-			$main::imscpConfig{$_} = $main::imscpConfigOld{$_};
+		if($main::selityConfigOld{$_} && $main::selityConfigOld{$_} ne $main::selityConfig{$_}){
+			$main::selityConfig{$_} = $main::selityConfigOld{$_};
 		}
 	}
 
@@ -1386,7 +1386,7 @@ sub setup_system_users{
 
 	my $group = Modules::SystemGroup->new();
 	$group->{system}	= 'yes';
-	$group->addSystemGroup($main::imscpConfig{'MASTER_GROUP'}) and return 1;
+	$group->addSystemGroup($main::selityConfig{'MASTER_GROUP'}) and return 1;
 
 	0;
 }
@@ -1394,20 +1394,20 @@ sub setup_system_users{
 sub askBackup{
 
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 
-	my $BACKUP_IMSCP	= $main::imscpConfig{'BACKUP_IMSCP'} ? $main::imscpConfig{'BACKUP_IMSCP'} : ($main::imscpConfigOld{'BACKUP_IMSCP'} ? $main::imscpConfigOld{'BACKUP_IMSCP'} : '');
-	my $BACKUP_DOMAINS	= $main::imscpConfig{'BACKUP_DOMAINS'} ? $main::imscpConfig{'BACKUP_DOMAINS'} : ($main::imscpConfigOld{'BACKUP_DOMAINS'} ? $main::imscpConfigOld{'BACKUP_DOMAINS'} : '');
+	my $BACKUP_SELITY	= $main::selityConfig{'BACKUP_SELITY'} ? $main::selityConfig{'BACKUP_SELITY'} : ($main::selityConfigOld{'BACKUP_SELITY'} ? $main::selityConfigOld{'BACKUP_SELITY'} : '');
+	my $BACKUP_DOMAINS	= $main::selityConfig{'BACKUP_DOMAINS'} ? $main::selityConfig{'BACKUP_DOMAINS'} : ($main::selityConfigOld{'BACKUP_DOMAINS'} ? $main::selityConfigOld{'BACKUP_DOMAINS'} : '');
 
-	if (!$BACKUP_IMSCP){
-		while (! ($BACKUP_IMSCP = iMSCP::Dialog->factory()->radiolist("Do you want to enable backup for iMSCP configuration?", 'yes', 'no'))){}
+	if (!$BACKUP_SELITY){
+		while (! ($BACKUP_SELITY = Selity::Dialog->factory()->radiolist("Do you want to enable backup for Selity configuration?", 'yes', 'no'))){}
 	}
-	if($BACKUP_IMSCP ne $main::imscpConfig{'BACKUP_IMSCP'}){ $main::imscpConfig{'BACKUP_IMSCP'} = $BACKUP_IMSCP; }
+	if($BACKUP_SELITY ne $main::selityConfig{'BACKUP_SELITY'}){ $main::selityConfig{'BACKUP_SELITY'} = $BACKUP_SELITY; }
 
 	if (!$BACKUP_DOMAINS){
-		while (! ($BACKUP_DOMAINS = iMSCP::Dialog->factory()->radiolist("Do you want to enable backup for domains?", 'yes', 'no'))){}
+		while (! ($BACKUP_DOMAINS = Selity::Dialog->factory()->radiolist("Do you want to enable backup for domains?", 'yes', 'no'))){}
 	}
-	if($BACKUP_DOMAINS ne $main::imscpConfig{'BACKUP_DOMAINS'}){ $main::imscpConfig{'BACKUP_DOMAINS'} = $BACKUP_DOMAINS; }
+	if($BACKUP_DOMAINS ne $main::selityConfig{'BACKUP_DOMAINS'}){ $main::selityConfig{'BACKUP_DOMAINS'} = $BACKUP_DOMAINS; }
 
 	0;
 }
@@ -1419,7 +1419,7 @@ sub askBackup{
 #
 sub additional_tasks{
 
-	use iMSCP::Stepper;
+	use Selity::Stepper;
 
 	startDetail();
 
@@ -1454,7 +1454,7 @@ sub setup_rkhunter {
 	my ($rs, $rdata);
 
 	# Deleting any existent log files
-	my $file = iMSCP::File->new (filename => $main::imscpConfig{'RKHUNTER_LOG'});
+	my $file = Selity::File->new (filename => $main::selityConfig{'RKHUNTER_LOG'});
 	$file->set();
 	$file->save() and return 1;
 	$file->owner('root', 'adm');
@@ -1464,7 +1464,7 @@ sub setup_rkhunter {
 	# to disable the default cron task (i-MSCP provides its own cron job for rkhunter)
 	if(-e '/etc/default/rkhunter') {
 		# Get the file as a string
-		$file = iMSCP::File->new (filename => '/etc/default/rkhunter');
+		$file = Selity::File->new (filename => '/etc/default/rkhunter');
 		$rdata = $file->get();
 		return 1 if(!$rdata);
 
@@ -1480,7 +1480,7 @@ sub setup_rkhunter {
 	# to modify rigts
 	if(-e '/etc/logrotate.d/rkhunter') {
 		# Get the file as a string
-		$file = iMSCP::File->new (filename => '/etc/logrotate.d/rkhunter');
+		$file = Selity::File->new (filename => '/etc/logrotate.d/rkhunter');
 		$rdata = $file->get();
 		return 1 if(!$rdata);
 
@@ -1496,7 +1496,7 @@ sub setup_rkhunter {
 	# creation of unreadable log file
 	if(-e '/etc/cron.weekly/rkhunter') {
 		# Get the rkhunter file content
-		$file = iMSCP::File->new (filename => '/etc/cron.weekly/rkhunter');
+		$file = Selity::File->new (filename => '/etc/cron.weekly/rkhunter');
 		$rdata = $file->get();
 		return 1 if(!$rdata);
 
@@ -1518,7 +1518,7 @@ sub setup_rkhunter {
 #
 sub rebuild_customers_cfg {
 
-	use iMSCP::Boot;
+	use Selity::Boot;
 
 	my $tables = {
 		ssl_certs => 'status', domain => 'domain_status', domain_aliasses => 'alias_status',
@@ -1529,7 +1529,7 @@ sub rebuild_customers_cfg {
 
 	# Set status as 'change'
 	my $error;
-	my $database = iMSCP::Database->new(db => $main::imscpConfig{'DATABASE_TYPE'})->factory();
+	my $database = Selity::Database->new(db => $main::selityConfig{'DATABASE_TYPE'})->factory();
 	while (my ($table, $field) = each %$tables) {
 		$error = $database->doQuery('dummy',
 			"
@@ -1546,14 +1546,14 @@ sub rebuild_customers_cfg {
 	}
 
 
-	iMSCP::Boot->new()->unlock();
+	Selity::Boot->new()->unlock();
 
 	my ($stdout, $stderr, $rs);
-	$rs = execute("perl $main::imscpConfig{'ENGINE_ROOT_DIR'}/imscp-rqst-mngr", \$stdout, \$stderr);
+	$rs = execute("perl $main::selityConfig{'ENGINE_ROOT_DIR'}/selity-rqst-mngr", \$stdout, \$stderr);
 	debug("$stdout") if $stdout;
 	error("$stderr") if $stderr;
 	error("Error while rebuilding customers configuration files") if(!$stderr && $rs);
-	iMSCP::Boot->new()->lock();
+	Selity::Boot->new()->lock();
 	return $rs if $rs;
 
 	0;
@@ -1561,33 +1561,33 @@ sub rebuild_customers_cfg {
 
 sub setup_ssl{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 
 	my $rs;
 
-	$main::imscpConfig{'SSL_ENABLED'} = $main::imscpConfigOld{'SSL_ENABLED'}
-		if(!$main::imscpConfig{'SSL_ENABLED'} && $main::imscpConfigOld{'SSL_ENABLED'});
-	$main::imscpConfig{'BASE_SERVER_VHOST_PREFIX'} = $main::imscpConfigOld{'BASE_SERVER_VHOST_PREFIX'}
-		if $main::imscpConfigOld{'BASE_SERVER_VHOST_PREFIX'} && ($main::imscpConfig{'BASE_SERVER_VHOST_PREFIX'} ne $main::imscpConfigOld{'BASE_SERVER_VHOST_PREFIX'});
+	$main::selityConfig{'SSL_ENABLED'} = $main::selityConfigOld{'SSL_ENABLED'}
+		if(!$main::selityConfig{'SSL_ENABLED'} && $main::selityConfigOld{'SSL_ENABLED'});
+	$main::selityConfig{'BASE_SERVER_VHOST_PREFIX'} = $main::selityConfigOld{'BASE_SERVER_VHOST_PREFIX'}
+		if $main::selityConfigOld{'BASE_SERVER_VHOST_PREFIX'} && ($main::selityConfig{'BASE_SERVER_VHOST_PREFIX'} ne $main::selityConfigOld{'BASE_SERVER_VHOST_PREFIX'});
 
-	if(!$main::imscpConfig{'SSL_ENABLED'}){
-		Modules::openssl->new()->{openssl_path} = $main::imscpConfig{'CMD_OPENSSL'};
+	if(!$main::selityConfig{'SSL_ENABLED'}){
+		Modules::openssl->new()->{openssl_path} = $main::selityConfig{'CMD_OPENSSL'};
 		$rs = sslDialog();
 		return $rs if $rs;
-	} elsif($main::imscpConfig{'SSL_ENABLED'} eq 'yes') {
-		Modules::openssl->new()->{openssl_path}				= $main::imscpConfig{'CMD_OPENSSL'};
-		Modules::openssl->new()->{cert_path}				= "$main::imscpConfig{'GUI_CERT_DIR'}/$main::imscpConfig{'SERVER_HOSTNAME'}.pem";
-		Modules::openssl->new()->{intermediate_cert_path}	= "$main::imscpConfig{'GUI_CERT_DIR'}/$main::imscpConfig{'SERVER_HOSTNAME'}.pem";
-		Modules::openssl->new()->{key_path}					= "$main::imscpConfig{'GUI_CERT_DIR'}/$main::imscpConfig{'SERVER_HOSTNAME'}.pem";
+	} elsif($main::selityConfig{'SSL_ENABLED'} eq 'yes') {
+		Modules::openssl->new()->{openssl_path}				= $main::selityConfig{'CMD_OPENSSL'};
+		Modules::openssl->new()->{cert_path}				= "$main::selityConfig{'GUI_CERT_DIR'}/$main::selityConfig{'SERVER_HOSTNAME'}.pem";
+		Modules::openssl->new()->{intermediate_cert_path}	= "$main::selityConfig{'GUI_CERT_DIR'}/$main::selityConfig{'SERVER_HOSTNAME'}.pem";
+		Modules::openssl->new()->{key_path}					= "$main::selityConfig{'GUI_CERT_DIR'}/$main::selityConfig{'SERVER_HOSTNAME'}.pem";
 		if(Modules::openssl->new()->ssl_check_all()){
-			iMSCP::Dialog->factory()->msgbox("Certificate is missing or corrupt. Starting recover");
+			Selity::Dialog->factory()->msgbox("Certificate is missing or corrupt. Starting recover");
 			$rs = sslDialog();
 			return $rs if $rs;
 		}
 	}
 
-	if($main::imscpConfig{'SSL_ENABLED'} ne 'yes'){
-		$main::imscpConfig{'BASE_SERVER_VHOST_PREFIX'} = "http://";
+	if($main::selityConfig{'SSL_ENABLED'} ne 'yes'){
+		$main::selityConfig{'BASE_SERVER_VHOST_PREFIX'} = "http://";
 	};
 
 	0;
@@ -1595,19 +1595,19 @@ sub setup_ssl{
 
 sub ask_certificate_key_path{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 	use Modules::openssl;
 
 	my $rs;
-	my $key = "/root/$main::imscpConfig{'SERVER_HOSTNAME'}.key";
+	my $key = "/root/$main::selityConfig{'SERVER_HOSTNAME'}.key";
 	my $pass = '';
 
 	do{
-		$rs = iMSCP::Dialog->factory()->passwordbox("Please enter password for key if needed:", $pass);
+		$rs = Selity::Dialog->factory()->passwordbox("Please enter password for key if needed:", $pass);
 		$rs =~s/(["\$`\\])/\\$1/g;
 		Modules::openssl->new()->{key_pass} = $rs;
 		do{
-			while (! ($rs = iMSCP::Dialog->factory()->fselect($key))){}
+			while (! ($rs = Selity::Dialog->factory()->fselect($key))){}
 		}while (! -f $rs);
 		Modules::openssl->new()->{key_path} = $rs;
 		$key = $rs;
@@ -1619,17 +1619,17 @@ sub ask_certificate_key_path{
 
 sub ask_intermediate_certificate_path{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 	use Modules::openssl;
 
 	my $rs;
 	my $cert = '/root/';
 
-	iMSCP::Dialog->factory()->set('yes-label');
-	iMSCP::Dialog->factory()->set('no-label');
-	return 0 if(iMSCP::Dialog->factory()->yesno('Do you have an intermediate certificate?'));
+	Selity::Dialog->factory()->set('yes-label');
+	Selity::Dialog->factory()->set('no-label');
+	return 0 if(Selity::Dialog->factory()->yesno('Do you have an intermediate certificate?'));
 	do{
-		while (! ($rs = iMSCP::Dialog->factory()->fselect($cert))){}
+		while (! ($rs = Selity::Dialog->factory()->fselect($cert))){}
 	}while ($rs && !-f $rs);
 	Modules::openssl->new()->{intermediate_cert_path} = $rs;
 
@@ -1638,16 +1638,16 @@ sub ask_intermediate_certificate_path{
 
 sub ask_certificate_path{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 	use Modules::openssl;
 
 	my $rs;
-	my $cert = "/root/$main::imscpConfig{'SERVER_HOSTNAME'}.crt";
+	my $cert = "/root/$main::selityConfig{'SERVER_HOSTNAME'}.crt";
 
-	iMSCP::Dialog->factory()->msgbox('Please select certificate');
+	Selity::Dialog->factory()->msgbox('Please select certificate');
 	do{
 		do{
-			while (! ($rs = iMSCP::Dialog->factory()->fselect($cert))){}
+			while (! ($rs = Selity::Dialog->factory()->fselect($cert))){}
 		}while (! -f $rs);
 		Modules::openssl->new()->{cert_path} = $rs;
 		$cert = $rs;
@@ -1659,20 +1659,20 @@ sub ask_certificate_path{
 
 sub sslDialog{
 
-	use iMSCP::Dialog;
+	use Selity::Dialog;
 	use Modules::openssl;
 
 	my $rs;
 
-	while (! ($rs = iMSCP::Dialog->factory()->radiolist("Do you want to activate SSL?", 'no', 'yes'))){}
-	if($rs ne $main::imscpConfig{'SSL_ENABLED'}){ $main::imscpConfig{'SSL_ENABLED'} = $rs; }
+	while (! ($rs = Selity::Dialog->factory()->radiolist("Do you want to activate SSL?", 'no', 'yes'))){}
+	if($rs ne $main::selityConfig{'SSL_ENABLED'}){ $main::selityConfig{'SSL_ENABLED'} = $rs; }
 	if($rs eq 'yes'){
-		Modules::openssl->new()->{new_cert_path} = $main::imscpConfig{'GUI_CERT_DIR'};
-		Modules::openssl->new()->{new_cert_name} = $main::imscpConfig{'SERVER_HOSTNAME'};
-		while (! ($rs = iMSCP::Dialog->factory()->radiolist('Select method', 'Create a self signed certificate', 'I already have a signed certificate'))){}
+		Modules::openssl->new()->{new_cert_path} = $main::selityConfig{'GUI_CERT_DIR'};
+		Modules::openssl->new()->{new_cert_name} = $main::selityConfig{'SERVER_HOSTNAME'};
+		while (! ($rs = Selity::Dialog->factory()->radiolist('Select method', 'Create a self signed certificate', 'I already have a signed certificate'))){}
 		$rs = $rs eq 'Create a self signed certificate' ? 0 : 1;
 		Modules::openssl->new()->{cert_selfsigned} = $rs;
-		Modules::openssl->new()->{vhost_cert_name} = $main::imscpConfig{'SERVER_HOSTNAME'} if ( !$rs );
+		Modules::openssl->new()->{vhost_cert_name} = $main::selityConfig{'SERVER_HOSTNAME'} if ( !$rs );
 
 		if( Modules::openssl->new()->{cert_selfsigned}){
 			Modules::openssl->new()->{intermediate_cert_path} = '';
@@ -1683,9 +1683,9 @@ sub sslDialog{
 		$rs = Modules::openssl->new()->ssl_export_all();
 		return $rs if $rs;
 	}
-	if($main::imscpConfig{'SSL_ENABLED'} eq 'yes'){
-		while (! ($rs = iMSCP::Dialog->factory()->radiolist("Select default access mode for master domain?", 'https', 'http'))){}
-		$main::imscpConfig{'BASE_SERVER_VHOST_PREFIX'} = "$rs://";
+	if($main::selityConfig{'SSL_ENABLED'} eq 'yes'){
+		while (! ($rs = Selity::Dialog->factory()->radiolist("Select default access mode for master domain?", 'https', 'http'))){}
+		$main::selityConfig{'BASE_SERVER_VHOST_PREFIX'} = "$rs://";
 	}
 
 	0;
@@ -1693,13 +1693,13 @@ sub sslDialog{
 
 sub preinstallServers{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 	use FindBin;
-	use iMSCP::Stepper;
+	use Selity::Stepper;
 
 	my ($rs, $file, $class, $server, $msg);
 
-	my $dir	= iMSCP::Dir->new(dirname => "$main::imscpConfig{'ENGINE_ROOT_DIR'}/PerlLib/Servers");
+	my $dir	= Selity::Dir->new(dirname => "$main::selityConfig{'ENGINE_ROOT_DIR'}/PerlLib/Servers");
 	$rs		= $dir->get();
 	return $rs if $rs;
 
@@ -1714,7 +1714,7 @@ sub preinstallServers{
 		$class	= "Servers::$_";
 		require $file;
 		$server	= $class->factory();
-		$msg = "Performing preinstall tasks for ".uc($_)." server". ($main::imscpConfig{uc($_)."_SERVER"} ? ": ".$main::imscpConfig{uc($_)."_SERVER"} : '');
+		$msg = "Performing preinstall tasks for ".uc($_)." server". ($main::selityConfig{uc($_)."_SERVER"} ? ": ".$main::selityConfig{uc($_)."_SERVER"} : '');
 		$rs |= step(sub{ $server->preinstall() }, $msg, scalar @servers, $step) if($server->can('preinstall'));
 		$step++;
 	}
@@ -1726,13 +1726,13 @@ sub preinstallServers{
 }
 sub preinstallAddons{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 	use FindBin;
-	use iMSCP::Stepper;
+	use Selity::Stepper;
 
 	my ($rs, $file, $class, $addons, $msg);
 
-	my $dir	= iMSCP::Dir->new(dirname => "$main::imscpConfig{'ENGINE_ROOT_DIR'}/PerlLib/Addons");
+	my $dir	= Selity::Dir->new(dirname => "$main::selityConfig{'ENGINE_ROOT_DIR'}/PerlLib/Addons");
 	$rs		= $dir->get();
 	return $rs if $rs;
 
@@ -1759,13 +1759,13 @@ sub preinstallAddons{
 
 sub installServers{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 	use FindBin;
-	use iMSCP::Stepper;
+	use Selity::Stepper;
 
 	my ($rs, $file, $class, $server, $msg);
 
-	my $dir	= iMSCP::Dir->new(dirname => "$main::imscpConfig{'ENGINE_ROOT_DIR'}/PerlLib/Servers");
+	my $dir	= Selity::Dir->new(dirname => "$main::selityConfig{'ENGINE_ROOT_DIR'}/PerlLib/Servers");
 	$rs		= $dir->get();
 	return $rs if $rs;
 
@@ -1780,7 +1780,7 @@ sub installServers{
 		$class	= "Servers::$_";
 		require $file;
 		$server	= $class->factory();
-		$msg = "Performing install tasks for ".uc($_)." server". ($main::imscpConfig{uc($_)."_SERVER"} ? ": ".$main::imscpConfig{uc($_)."_SERVER"} : '');
+		$msg = "Performing install tasks for ".uc($_)." server". ($main::selityConfig{uc($_)."_SERVER"} ? ": ".$main::selityConfig{uc($_)."_SERVER"} : '');
 		$rs |= step(sub{ $server->install() }, $msg, scalar @servers, $step) if($server->can('install'));
 		$step++;
 	}
@@ -1792,13 +1792,13 @@ sub installServers{
 
 sub installAddons{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 	use FindBin;
-	use iMSCP::Stepper;
+	use Selity::Stepper;
 
 	my ($rs, $file, $class, $addons, $msg);
 
-	my $dir	= iMSCP::Dir->new(dirname => "$main::imscpConfig{'ENGINE_ROOT_DIR'}/PerlLib/Addons");
+	my $dir	= Selity::Dir->new(dirname => "$main::selityConfig{'ENGINE_ROOT_DIR'}/PerlLib/Addons");
 	$rs		= $dir->get();
 	return $rs if $rs;
 
@@ -1825,13 +1825,13 @@ sub installAddons{
 
 sub postinstallServers{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 	use FindBin;
-	use iMSCP::Stepper;
+	use Selity::Stepper;
 
 	my ($rs, $file, $class, $server, $msg);
 
-	my $dir	= iMSCP::Dir->new(dirname => "$main::imscpConfig{'ENGINE_ROOT_DIR'}/PerlLib/Servers");
+	my $dir	= Selity::Dir->new(dirname => "$main::selityConfig{'ENGINE_ROOT_DIR'}/PerlLib/Servers");
 	$rs		= $dir->get();
 	return $rs if $rs;
 
@@ -1846,7 +1846,7 @@ sub postinstallServers{
 		$class	= "Servers::$_";
 		require $file;
 		$server	= $class->factory();
-		$msg = "Performing postinstall tasks for ".uc($_)." server". ($main::imscpConfig{uc($_)."_SERVER"} ? ": ".$main::imscpConfig{uc($_)."_SERVER"} : '');
+		$msg = "Performing postinstall tasks for ".uc($_)." server". ($main::selityConfig{uc($_)."_SERVER"} ? ": ".$main::selityConfig{uc($_)."_SERVER"} : '');
 		$rs |= step(sub{ $server->postinstall() }, $msg, scalar @servers, $step) if($server->can('postinstall'));
 		$step++;
 	}
@@ -1858,13 +1858,13 @@ sub postinstallServers{
 
 sub postinstallAddons{
 
-	use iMSCP::Dir;
+	use Selity::Dir;
 	use FindBin;
-	use iMSCP::Stepper;
+	use Selity::Stepper;
 
 	my ($rs, $file, $class, $addons, $msg);
 
-	my $dir	= iMSCP::Dir->new(dirname => "$main::imscpConfig{'ENGINE_ROOT_DIR'}/PerlLib/Addons");
+	my $dir	= Selity::Dir->new(dirname => "$main::selityConfig{'ENGINE_ROOT_DIR'}/PerlLib/Addons");
 	$rs		= $dir->get();
 	return $rs if $rs;
 
