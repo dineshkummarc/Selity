@@ -1,9 +1,10 @@
 --
--- i-MSCP - internet Multi Server Control Panel
+-- Selity - multiserver hosting control panel
 --
 -- Copyright (C) 2001-2006 by moleSoftware GmbH - http://www.molesoftware.com
 -- Copyright (C) 2006-2010 by isp Control Panel - http://ispcp.net
 -- Copyright (C) 2010-2012 by internet Multi Server Control Panel - http://i-mscp.net
+-- Copyright (C) 2012 by Selity - http://selity.net
 --
 -- Version: $Id$
 --
@@ -29,9 +30,12 @@
 -- Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
 -- internet Multi Server Control Panel. All Rights Reserved.
 --
--- The i-MSCP Home Page is:
+-- Portions created by the Selity Team are Copyright (C) 2012 by Selity.
+-- All Rights Reserved.
 --
---    http://i-mscp.net
+-- The Selity Home Page is:
+--
+--    http://selity.net
 --
 -- --------------------------------------------------------
 
@@ -97,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `config` (
 --
 
 INSERT IGNORE INTO `config` (`name`, `value`) VALUES
-('PORT_SELITY_DAEMON', '9876;tcp;i-MSCP-Daemon;1;0;127.0.0.1'),
+('PORT_SELITY_DAEMON', '9876;tcp;Selity-Daemon;1;0;127.0.0.1'),
 ('PORT_FTP', '21;tcp;FTP;1;0;'),
 ('PORT_SSH', '22;tcp;SSH;1;1;'),
 ('PORT_TELNET', '23;tcp;TELNET;1;0;'),
@@ -118,7 +122,7 @@ INSERT IGNORE INTO `config` (`name`, `value`) VALUES
 ('PREVENT_EXTERNAL_LOGIN_ADMIN', '1'),
 ('PREVENT_EXTERNAL_LOGIN_RESELLER', '1'),
 ('PREVENT_EXTERNAL_LOGIN_CLIENT', '1'),
-('DATABASE_REVISION', '108'),
+('DATABASE_REVISION', '0'),
 ('PHPINI_ALLOW_URL_FOPEN', 'Off'),
 ('PHPINI_DISPLAY_ERRORS', 'Off'),
 ('PHPINI_REGISTER_GLOBALS', 'Off'),
@@ -878,7 +882,7 @@ CREATE TABLE IF NOT EXISTS `web_software_options` (
 -- Dumping data for table `web_software_options`
 --
 
-INSERT IGNORE INTO `web_software_options` (`use_webdepot`, `webdepot_xml_url`, `webdepot_last_update`) VALUES (1, 'http://app-pkg.i-mscp.net/selity_webdepot_list.xml', '0000-00-00 00:00:00');
+INSERT IGNORE INTO `web_software_options` (`use_webdepot`, `webdepot_xml_url`, `webdepot_last_update`) VALUES (1, 'http://app-pkg.selity.net/selity_webdepot_list.xml', '0000-00-00 00:00:00');
 
 CREATE TABLE IF NOT EXISTS `roundcube_users` (
 	`user_id` int(10) unsigned NOT NULL AUTO_INCREMENT,

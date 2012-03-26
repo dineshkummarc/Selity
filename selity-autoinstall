@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# i-MSCP - internet Multi Server Control Panel
-# Copyright 2010 - 2012 by internet Multi Server Control Panel
+# Selity - multiserver hosting control panel
+# Copyright 2012 by Selity
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,22 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-# @category		i-MSCP
-# @copyright	2010 - 2012 by i-MSCP | http://i-mscp.net
+# @category		Selity
+# @copyright	2012 by Selity | http://selity.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @version		SVN: $Id$
-# @link			http://i-mscp.net i-MSCP Home Site
+# @link			http://selity.net Selity Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
-
-#####################################################################################
-# Script description:
-#
-# This script is responsible to build the i-MSCP tree into a temporary folder from
-# the upstream archive. This script can optionnaly installing all i-MSCP dependencies
-# and launch the i-MSCP setup/update script. It attemp to detect the target
-# distribution, process backup taskq and save the current GUI working data in update
-# mode before doing any changes on the files system. In case the target distribution
-# cannot be detected, the script exit with a specific error message.
 
 use strict;
 use warnings;
@@ -70,7 +59,7 @@ my $SO = Selity::SO->new();
 my $rs = $SO->getSO();
 exit $rs if $rs;
 
-# Display the i-MSCP README file
+# Display the Selity README file
 use Selity::File;
 my $file = Selity::File->new(filename => $FindBin::Bin.'/README');
 my $content = $file->get() or fatal("Unable to find the $FindBin::Bin/README file.");
@@ -97,14 +86,13 @@ tie %main::defaultConf, 'Selity::Config','fileName' => $defaultConf;
 use Selity::Stepper;
 
 my @steps = (
-	[\&installDependencies,				"Installing all required $SO->{Distribution} packages for i-MSCP"],
-	[\&testRequirements,				'Testing i-MSCP requirements'],
+	[\&installDependencies,				"Installing all required $SO->{Distribution} packages for Selity"],
+	[\&testRequirements,				'Testing Selity requirements'],
 	[\&processConfFile,					"Loading $SO->{Distribution} specific variables"],
 	[\&processSpecificConfFile,			'Processing distribution specific configuration files'],
-	[\&buildSelityDaemon,				'Building i-MSCP daemon'],
+	[\&buildSelityDaemon,				'Building Selity daemon'],
 	[\&installEngine,					'Installing engine files'],
 	[\&installGui,						'Installing GUI files'],
-	[\&InstallDistMaintainerScripts,	'Installing distribution maintainer scripts'],
 	[\&finishBuild,						'Processing post-build tasks'],
 	[\&cleanUpTmp,						'Processing cleanup tasks']
 );
@@ -133,7 +121,7 @@ if (@errors > 0  || @warnings > 0) {
 	$msg  =	"\n\\Z2 -> Build step finished without errors\n";
 }
 
-$msg .= "\nDo you want to continue the i-MSCP installation?";
+$msg .= "\nDo you want to continue the Selity installation?";
 
 unless(Selity::Dialog->factory()->yesno($msg)) {
 
@@ -144,9 +132,9 @@ unless(Selity::Dialog->factory()->yesno($msg)) {
 	@steps = (
 		[\&doSelityBackup,		'Backup existing installation'],
 		[\&saveGuiWorkingData,	'Saving GUI working data'],
-		[\&installTmp,			'Installing new i-MSCP files in final destination'],
-		[\&setup_start_up,		'Prepare i-MSCP setup/update'],
-		[\&setup_engine,		'Processing i-MSCP setup/update']
+		[\&installTmp,			'Installing new Selity files in final destination'],
+		[\&setup_start_up,		'Prepare Selity setup/update'],
+		[\&setup_engine,		'Processing Selity setup/update']
 	);
 
 	$step = 1;
@@ -158,7 +146,7 @@ unless(Selity::Dialog->factory()->yesno($msg)) {
 	}
 
 	Selity::Dialog->factory()->endGauge() if Selity::Dialog->factory()->needGauge();
-	Selity::Dialog->factory()->msgbox("i-MSCP $main::defaultConf{Version} was successfully installed on your system.");
+	Selity::Dialog->factory()->msgbox("Selity $main::defaultConf{Version} was successfully installed on your system.");
 	Selity::Dialog->factory()->infobox("Removing temporary files...");
 
 	$rs = removeTmp();
@@ -186,9 +174,9 @@ unless(Selity::Dialog->factory()->yesno($msg)) {
 		"\t# cd /var/www/selity/engine/setup\n\n".
 		"8. Start the engine update\n\n".
 		"\t# perl selity-setup\n\n".
-		"9. Update i-MSCP step-by-step\n\n".
+		"9. Update Selity step-by-step\n\n".
 		"If you get no error, all went good; if you get one, look at ".
-		"http://forum.i-mscp.net to solve the problem."
+		"http://selity.net/forum/ to solve the problem."
 	);
 }
 

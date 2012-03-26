@@ -774,7 +774,7 @@ function customerHasFeature($featureName, $forceReload = false)
 			'custom_error_pages' => true,
 			'aps' => ($dmnProps['domain_software_allowed'] != 'no' && $dmnProps['domain_ftpacc_limit'] != '-1') ? true : false);
 
-		if (($cfg->IMSCP_SUPPORT_SYSTEM)) {
+		if (($cfg->SELITY_SUPPORT_SYSTEM)) {
 			$query = "SELECT `support_system` FROM `reseller_props` WHERE `reseller_id` = ?";
 			$stmt = exec_query($query, $_SESSION['user_created_by']);
 			$availableFeatures['support'] = ($stmt->fields['support_system'] == 'yes') ? true : false;

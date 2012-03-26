@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# i-MSCP - internet Multi Server Control Panel
-# Copyright 2010 - 2012 by internet Multi Server Control Panel
+# Selity - multiserver hosting control panel
+# Copyright 2012 by Selity
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,19 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-# @category		i-MSCP
-# @copyright	2010 - 2012 by i-MSCP | http://i-mscp.net
+# @category		Selity
+# @copyright	2012 by Selity | http://selity.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @version		SVN: $Id$
-# @link			http://i-mscp.net i-MSCP Home Site
+# @link			http://selity.net Selity Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
-
-#####################################################################################
-# Package description:
-#
-# This package provides a class that is responsible to install all dependencies
-# (libraries, tools and softwares) required by i-MSCP on Debian like operating systems.
-#
 
 package library::debian_autoinstall;
 
@@ -45,10 +37,6 @@ use vars qw/@ISA/;
 @ISA = ('Common::SingletonClass');
 use Common::SingletonClass;
 
-# Initializer.
-#
-# @param self $self Selity::debian_autoinstall instance
-# @return int 0
 sub _init {
 	debug('Starting...');
 
@@ -60,17 +48,13 @@ sub _init {
 	0;
 }
 
-# Process pre-build tasks.
-#
-# @param self $self Selity::debian_autoinstall instance
-# @return int 0 on success, other on failure
 sub preBuild {
 	debug('Starting...');
 
 	my $self = shift;
 	my $rs;
 
-	#$rs = $self->updateSystemPackagesIndex();
+	$rs = $self->updateSystemPackagesIndex();
 	return $rs if $rs;
 
 	$rs = $self->preRequish();
@@ -99,9 +83,6 @@ sub preBuild {
 	0;
 }
 
-# Updates system packages index from remote repository.
-#
-# @return int 0 on success, other on failure
 sub updateSystemPackagesIndex {
 	debug('Starting...');
 
@@ -119,10 +100,6 @@ sub updateSystemPackagesIndex {
 	0;
 }
 
-# Installs pre-required packages.
-#
-# @param self $self Selity::debian_autoinstall instance
-# @return int 0 on success, other on failure
 sub preRequish {
 	debug('Starting...');
 
@@ -144,9 +121,6 @@ sub preRequish {
 	0;
 }
 
-# Load old i-MSCP main configuration file.
-#
-# @return int 0
 sub loadOldSelityConfigFile {
 
 	debug('Starting...');
@@ -163,14 +137,6 @@ sub loadOldSelityConfigFile {
 	0;
 }
 
-# Process apt source list.
-#
-# This subroutine parse the apt source list file to ensure presence of the non-free
-# packages availability. If non-free section is not already enabled, this method try
-# to find in on the remote repository and add it to the current Debian repository URI.
-#
-# @param self $self Selity::debian_autoinstall instance
-# @return int 0 on success, other on failure
 sub UpdateAptSourceList {
 	debug('Starting...');
 
@@ -232,10 +198,6 @@ sub UpdateAptSourceList {
 	0;
 }
 
-# Reads packages list to be installed.
-#
-# @param self $self Selity::debian_autoinstall instance
-# @return int 0 on success, other on failure
 sub readPackagesList {
 	debug('Starting...');
 
@@ -325,10 +287,6 @@ sub readPackagesList {
 	0;
 }
 
-# Install Debian packages list required by i-MSCP.
-#
-# @param self $self Selity::debian_autoinstall instance
-# @return in 0 on success, other on failure
 sub installPackagesList {
 	debug('Starting...');
 
@@ -347,10 +305,6 @@ sub installPackagesList {
 	0;
 }
 
-# Remove Debian packages that might conflict with those required by i-MSCP.
-#
-# @param self $self Selity::debian_autoinstall instance
-# @return in 0 on success, other on failure
 sub removeNotNeeded {
 	debug('Starting...');
 
@@ -371,10 +325,6 @@ sub removeNotNeeded {
 	0;
 }
 
-# Perfomr post-build tasks.
-#
-# @param self $self Selity::debian_autoinstall instance
-# @return in 0 on success, other on failure
 sub postBuild {
 	debug('Starting...');
 
@@ -391,11 +341,6 @@ sub postBuild {
 	0;
 }
 
-# Trim a string.
-#
-# @access private
-# @param string $var String to be trimmed
-# @return string
 sub _trim {
 	my $var = shift;
 	$var =~ s/^\s+//;
@@ -403,11 +348,6 @@ sub _trim {
 	$var;
 }
 
-# Clean a string.
-#
-# @access private
-# @param string $var String to be trimmed
-# @return string
 sub _clean {
 	my $var = shift;
 	$var =~ s/\n+//mg;
@@ -416,12 +356,6 @@ sub _clean {
 	$var;
 }
 
-# Parse hash.
-#
-# @access private
-# @param self $self Selity::debian_autoinstall instance
-# @param HASH $hash Hash to be parsed
-# @return void
 sub _parseHash {
 	my $self = shift;
 	my $hash = shift;
@@ -439,12 +373,6 @@ sub _parseHash {
 	$rv;
 }
 
-# Parse array
-#
-# @access private
-# @param self $self Selity::debian_autoinstall instance
-# @param ARRAY $array Array to be parsed
-# @return void
 sub _parseArray {
 	my $self = shift;
 	my $array = shift;

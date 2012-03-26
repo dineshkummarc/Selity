@@ -5,6 +5,7 @@
 # Copyright (C) 2001-2006 by moleSoftware GmbH - http://www.molesoftware.com
 # Copyright (C) 2006-2010 by isp Control Panel - http://ispcp.net
 # Copyright (C) 2010-2012 by internet Multi Server Control Panel - http://i-mscp.net
+# Copyright (C) 2012 by Selity - http://selity.net
 #
 # Version: $Id$
 #
@@ -30,9 +31,12 @@
 # Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
 # internet Multi Server Control Panel. All Rights Reserved.
 #
-# The i-MSCP Home Page is:
+# Portions created by the Selity Team are Copyright (C) 2012 by Selity.
+# All Rights Reserved.
 #
-#    http://i-mscp.net
+# The Selity Home Page is:
+#
+#    http://selity.net
 #
 
 
@@ -633,13 +637,13 @@ sub set_zone {
 		$fdata = substr( $fdata, $ll );
 
 		if($zs == 0) {
-			if(index($curline, $comment."## START i-MSCP ".$zone." ###") == 0 ) {
+			if(index($curline, $comment."## START SELITY ".$zone." ###") == 0 ) {
 				$zs = 1;
 			} else {
 				$bz .= $curline;
 			}
 		} elsif($ze == 0) {
-			if(index($curline, $comment."## END i-MSCP ".$zone." ###") == 0) {
+			if(index($curline, $comment."## END SELITY ".$zone." ###") == 0) {
 				$ze = 1;
 			}
 		} elsif($ze == 1) {
@@ -649,9 +653,9 @@ sub set_zone {
 
 	return
 		$bz . ($zs == 1 ? "" : "\n").
-		$comment."## START i-MSCP ".$zone." ###\n".
+		$comment."## START SELITY ".$zone." ###\n".
 		$data."\n".
-		$comment."## END i-MSCP ".$zone." ###\n".
+		$comment."## END SELITY ".$zone." ###\n".
 		$az;
 }
 
@@ -678,11 +682,11 @@ sub get_zone {
 		$fdata = substr($fdata, $ll);
 
 		if($zs == 0) {
-			if(index($curline, $comment."## START i-MSCP ".$zone." ###") == 0) {
+			if(index($curline, $comment."## START SELITY ".$zone." ###") == 0) {
 				$zs = 1;
 			}
 		} elsif($ze == 0) {
-			if(index($curline, $comment."## END i-MSCP ".$zone." ###") == 0) {
+			if(index($curline, $comment."## END SELITY ".$zone." ###") == 0) {
 				$ze = 1;
 			} else {
 				$zonecontent .= $curline;
@@ -717,13 +721,13 @@ sub del_zone {
 		$fdata = substr( $fdata, $ll );
 
 		if($zs == 0) {
-			if(index($curline, $comment."## START i-MSCP ".$zone." ###") == 0) {
+			if(index($curline, $comment."## START SELITY ".$zone." ###") == 0) {
 				$zs = 1;
 			} else {
 				$bz .= $curline;
 			}
 		} elsif($ze == 0) {
-			if(index($curline, $comment."## END i-MSCP ".$zone." ###") == 0) {
+			if(index($curline, $comment."## END SELITY ".$zone." ###") == 0) {
 				$ze = 1;
 			}
 		} elsif($ze == 1) {
@@ -1501,7 +1505,7 @@ sub connect_selity_daemon {
 		push_el(
 			\@main::el,
 			'connect_selity_daemon()',
-			"[ERROR] Can't connect to I-MSCP license daemon !"
+			"[ERROR] Can't connect to Selity license daemon !"
 		);
 
 		return (-1, '');
@@ -1757,7 +1761,7 @@ sub setup_main_vars {
 # global database variables and redefines the DSN.
 #
 # @param [scalar $file_name filename from where the configuration must be loaded]
-# Default value is the main i-MSCP configuration file (selity.conf)
+# Default value is the main Selity configuration file (selity.conf)
 # @return int 0 on success, 1 otherwise
 #
 sub get_conf {
@@ -1841,7 +1845,7 @@ sub set_conf_val {
 # not exist in the configuration file.
 #
 # @param [scalar optional filename where the configuration must be stored]
-# Default value is the main i-MSCP configuration file (selity.conf)
+# Default value is the main Selity configuration file (selity.conf)
 # @return int 0 on success, 1 otherwise
 #
 sub store_conf {
@@ -2483,9 +2487,9 @@ $errmsg
 	$out -> build(
 		From => "$server_name ($server_ip) <$admin_email>",
 		To => $admin_email,
-		Subject => "[$date] i-MSCP Error report",
+		Subject => "[$date] Selity Error report",
 		Data => $msg_data,
-		'X-Mailer' => "i-MSCP $main::cfg{'Version'} Automatic Error Messenger"
+		'X-Mailer' => "Selity $main::cfg{'Version'} Automatic Error Messenger"
 	);
 
 	open MAIL, "| /usr/sbin/sendmail -t -oi";

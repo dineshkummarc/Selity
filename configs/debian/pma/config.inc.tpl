@@ -1,16 +1,17 @@
 <?php
 /**
- * i-MSCP a internet Multi Server Control Panel
+ * Selity - multiserver hosting control panel
  *
- * phpMyAdmin configuration file preedided by i-MSCP
+ * phpMyAdmin configuration file preedided by Selity
  *
  * All directives are explained in Documentation.html and on phpMyAdmin
  * wiki <http://wiki.phpmyadmin.net>.
  *
- * @version     $Id$
  * @package     phpMyAdmin
  * @copyright   2010-2012 by i-MSCP | http://i-mscp.net
+ * @copyright   2012 by Selity | http://selity.net
  * @link        http://i-mscp.net
+ * @link        http://selity.net
  * @author      i-MSCP Team
  */
 
@@ -35,7 +36,7 @@ $i++;
 $cfg['Servers'][$i]['auth_type']                = 'cookie';
 
 /**
- * Parameters set by i-MSCP
+ * Parameters set by Selity
  */
 $cfg['Servers'][$i]['user']                     = $_POST['pma_username'];
 $cfg['Servers'][$i]['password']                 = $_POST['pma_password'];
@@ -88,7 +89,7 @@ $cfg['SuhosinDisableWarning']                   = true;
 /* Name of the Server displayed */
 /*$cfg['Servers'][$i]['verbose']                = 'mysql.myserver.com';*/
 
-$cfg['Servers'][$i]['SignonSession']            = 'i-MSCP';
+$cfg['Servers'][$i]['SignonSession']            = 'Selity';
 /* Contrib / Swekey authentication */
 // $cfg['Servers'][$i]['auth_swekey_config']    = '/etc/swekey-pma.conf';
 

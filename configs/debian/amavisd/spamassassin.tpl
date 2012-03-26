@@ -1,9 +1,10 @@
 #!/usr/bin/perl
 
-# i-MSCP a internet Multi Server Control Panel
+# Selity - multiserver hosting control panel
 #
 # Copyright (C) 2006-2010 by isp Control Panel - http://ispcp.net
 # Copyright (C) 2010-2012 by internet Multi Server Control Panel - http://i-mscp.net
+# Copyright (C) 2012 by Selity - http://selity.net
 #
 # Version: $Id$
 #
@@ -26,14 +27,17 @@
 # Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
 # internet Multi Server Control Panel. All Rights Reserved.
 #
-# The i-MSCP Home Page is:
+# Portions created by the Selity Team are Copyright (C) 2010-2012 by Selity.
+# All Rights Reserved.
 #
-#    http://i-mscp.net
+# The Selity Home Page is:
+#
+#    http://selity.net
 #
 
-# i-MSCP specific:
+# Selity specific:
 #
-# If you do not want this file to be regenerated from scratch during i-MSCP
+# If you do not want this file to be regenerated from scratch during Selity
 # update process, change the 'SPAMASSASSIN_REGENERATE' parameter value to 'no' in
 # the selity.conf file.
 

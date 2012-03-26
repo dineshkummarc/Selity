@@ -5,13 +5,12 @@
 Introduction
 ------------
 
-Since i-MSCP Beta 1, we are using the Transifex service to translate our translation
-files. In the past, we used several shell scripts for updating translation files but
-it was tedious.
+We are using the Transifex service to translate our translation files. In the past,
+we used several shell scripts for updating translation files but it was tedious.
 
 Before the process was as follows:
 
-1.	Updating the iMSCP.pot (portable object template) file with the makemsgs script
+1.	Updating the Selity.pot (portable object template) file with the makemsgs script
 2.	Updating all the *.po files (portable object files) with the updateToPOT script
 3.	Checking all the *.po files (in strict mode) with the checkPo script
 
@@ -69,12 +68,12 @@ Updating translation files
 As normal user:
 
 1.	Use the shell script "makemsgs" to get all strings from GUI php files within
-	the i18n/po/iMSCP.pot file
+	the i18n/po/Selity.pot file
 
 	$ cd {YOUR_WORKING_COPY}/i18n/tools
 	$ sh ./makemsgs
 
-2.	Pushing the new iMSCP.pot on Transifex
+2.	Pushing the new Selity.pot on Transifex
 
 	$ cd {YOUR_WORKING_COPY}/i18n
 	$ tx push -s

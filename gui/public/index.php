@@ -89,9 +89,9 @@ $tpl->define_dynamic(
 
 $tpl->assign(
 	array(
-		'productLongName' => tr('internet Multi Server Control Panel'),
+		'productLongName' => tr('multiserver hosting control panel'),
 		'productLink' => 'http://www.i-mscp.net',
-		'productCopyright' => tr('© 2010-2012 i-MSCP Team<br/>All Rights Reserved'),
+		'productCopyright' => tr('© 2010-2012 Selity Team<br/>All Rights Reserved'),
 		'THEME_CHARSET' => tr('encoding')));
 
 /** @var $cfg iMSCP_Config_Handler_File */

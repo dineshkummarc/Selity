@@ -1,9 +1,10 @@
 <?php
 /**
- * i-MSCP - internet Multi Server Control Panel
+ * Selity - multiserver hosting control panel
  *
  * Copyright (C) 2006-2010 by isp Control Panel - http://ispcp.net
  * Copyright (C) 2010-2012 by internet Multi Server Control Panel - http://i-mscp.net
+ * Copyright (C) 2012 Selity - http://selity.net
  *
  * Author:  Laurent Declercq <l.declercq@nuxwin.com>
  * Version: $Id$
@@ -27,9 +28,12 @@
  * Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
  * internet Multi Server Control Panel. All Rights Reserved.
  *
- * The i-MSCP Home Page is:
+ * Portions created by the Selity Team are Copyright (C) 2012 by Selity.
+ * All Rights Reserved.
  *
- *    http://i-mscp.net
+ * The Selity Home Page is:
+ *
+ *    http://selity.net
  *
  */
 
@@ -65,6 +69,6 @@ try {
 	exit(1);
 }
 
-print "\n[INFO]: i-MSCP database update succeeded!\n\n";
+print "\n[INFO]: Selity database update succeeded!\n\n";
 
 exit(0);

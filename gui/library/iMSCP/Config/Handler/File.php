@@ -80,7 +80,7 @@ require_once  'iMSCP/Config/Handler.php';
  * @property bool SLD_STRICT_VALIDATION If TRUE, only restricted tld list can have sld with a single character
  * @property int MAX_DNAMES_LABELS Maximum number of labels for a domain name
  * @property int MAX_SUBDNAMES_LABELS Maximum number of labels for a subdomain
- * @property bool IMSCP_SUPPORT_SYSTEM If TRUE, support system is available
+ * @property bool SELITY_SUPPORT_SYSTEM If TRUE, support system is available
  * @property bool LOSTPASSWORD If TRUE lost password is available
  * @property int LOSTPASSWORD_TIMEOUT Timeout for lost password
  * @property int LOSTPASSWORD_CAPTCHA_WIDTH Captcha width
@@ -108,7 +108,7 @@ require_once  'iMSCP/Config/Handler.php';
  * @property bool PREVENT_EXTERNAL_LOGIN_RESELLER If TRUE, login from external site is prevented for resellers
  * @property bool PREVENT_EXTERNAL_LOGIN_CLIENT
  * @property bool CHECK_FOR_UPDATES If TRUE, update cheching is enabled
- * @property string IMSCP_SUPPORT_SYSTEM_TARGET
+ * @property string SELITY_SUPPORT_SYSTEM_TARGET
  * @property string BASE_SERVER_VHOST_PREFIX
  * @property string DATE_FORMAT Date format
  * @property string BASE_SERVER_VHOST Base server vhost
@@ -140,7 +140,7 @@ require_once  'iMSCP/Config/Handler.php';
  * @property string CMD_SHELL Path to shell interpreter
  * @property string FTP_HOMEDIR Ftp home directory
  * @property string SERVER_HOSTNAME Server hostname
- * @property string IMSCP_SUPPORT_SYSTEM_PATH
+ * @property string SELITY_SUPPORT_SYSTEM_PATH
  * @property string Version
  * @property string CodeName
  * @property int ORDERS_EXPIRE_TIME Default expiration time for unconfirmed orders
@@ -178,17 +178,17 @@ class iMSCP_Config_Handler_File extends iMSCP_Config_Handler
 	public function __construct($pathFile = null)
 	{
 		if (is_null($pathFile)) {
-			if (getenv('IMSCP_CONF')) {
-				$pathFile = getEnv('IMSCP_CONF');
+			if (getenv('SELITY_CONF')) {
+				$pathFile = getEnv('SELITY_CONF');
 			} else {
 				switch (PHP_OS) {
 					case 'FreeBSD':
 					case 'OpenBSD':
 					case 'NetBSD':
-						$pathFile = '/usr/local/etc/imscp/imscp.conf';
+						$pathFile = '/usr/local/etc/selity/selity.conf';
 						break;
 					default:
-						$pathFile = '/etc/imscp/imscp.conf';
+						$pathFile = '/etc/selity/selity.conf';
 				}
 			}
 		}

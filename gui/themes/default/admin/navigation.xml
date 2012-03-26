@@ -171,7 +171,7 @@
 				</maintenance_mode>
 				<updates>
 					<label>Updates</label>
-					<uri>/admin/imscp_updates.php</uri>
+					<uri>/admin/selity_updates.php</uri>
 					<title_class>update</title_class>
 				</updates>
 				<database_updates>
@@ -181,7 +181,7 @@
 				</database_updates>
 				<debugger>
 					<label>Debugger</label>
-					<uri>/admin/imscp_debugger.php</uri>
+					<uri>/admin/selity_debugger.php</uri>
 					<title_class>debugger</title_class>
 				</debugger>
 				<rootkits_log>

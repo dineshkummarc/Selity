@@ -1,8 +1,10 @@
 # ====================================================================
-# i-MSCP Internet - Multi Server Control Panel
+# Selity - multiserver hosting control panel
 #
 # @copyright	2010-2012 by i-MSCP | http://www.i-mscp.net
+# @copyright	2012 by Selity | http://selity.net
 # @link			http://www.i-mscp.net
+# @link			http://selity.net
 # @author		i-MSCP Team
 # ====================================================================
 #
@@ -109,7 +111,7 @@ localhost:10025 inet  n -       n       -      -        smtpd
   -o mynetworks=127.0.0.0/8
   -o strict_rfc821_envelopes=yes
 
-# i-MSCP autoresponder
+# Selity autoresponder
 selity-arpl unix  -      n       n       -       -       pipe
   flags=O user={ARPL_USER}:{ARPL_GROUP} argv={ARPL_PATH} $recipient
 

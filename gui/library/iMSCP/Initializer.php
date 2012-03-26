@@ -335,7 +335,7 @@ class iMSCP_Initializer
 	{
 		$db_pass_key = $db_pass_iv = '';
 
-		eval(@file_get_contents($this->_config->CONF_DIR . '/imscp-db-keys'));
+		eval(@file_get_contents($this->_config->CONF_DIR . '/selity-db-keys'));
 
 		if (!empty($db_pass_key) && !empty($db_pass_iv)) {
 			iMSCP_Registry::set('MCRYPT_KEY', $db_pass_key);

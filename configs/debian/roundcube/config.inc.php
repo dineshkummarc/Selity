@@ -1,7 +1,8 @@
 <?php
 /**
- * i-MSCP - internet Multi Server Control Panel
+ * Selity - multiserver hosting control panel
  * Copyright (C) 2010-2011 by i-MSCP team
+ * Copyright (C) 2012 by Selity team
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,8 +21,10 @@
  * @category    Selity
  * @package     Selity Roundcube password changer
  * @copyright   2010-2011 by i-MSCP team
+ * @copyright   2012 by Selity team
  * @author 		Sascha Bay
  * @link        http://www.i-mscp.net i-MSCP Home Site
+ * @link        http://selity.net Selity Home Site
  * @license     http://www.gnu.org/licenses/gpl-2.0.html GPL v2
  */
 

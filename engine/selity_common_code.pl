@@ -1,10 +1,11 @@
 #!/usr/bin/perl
 
-# i-MSCP a internet Multi Server Control Panel
+# Selity - multiserver hosting control panel
 #
 # Copyright (C) 2001-2006 by moleSoftware GmbH - http://www.molesoftware.com
 # Copyright (C) 2006-2010 by isp Control Panel - http://ispcp.net
 # Copyright (C) 2010-2012 by internet Multi Server Control Panel - http://i-mscp.net
+# Copyright (C) 2012 by Selity - http://selity.net
 #
 # Version: $Id$
 #
@@ -30,9 +31,12 @@
 # Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
 # internet Multi Server Control Panel. All Rights Reserved.
 #
-# The i-MSCP Home Page is:
+# Portions created by the Selity Team are Copyright (C) 2012 by Selity.
+# All Rights Reserved.
 #
-#    http://i-mscp.net
+# The Selity Home Page is:
+#
+#    http://selity.net
 #
 
 BEGIN {
@@ -101,7 +105,7 @@ $main::engine_debug = undef;
 require 'selity_common_methods.pl';
 
 ################################################################################
-# Load i-MSCP configuration from the selity.conf file
+# Load Selity configuration from the selity.conf file
 
 if(-e '/usr/local/etc/selity/selity.conf'){
 	$main::cfg_file = '/usr/local/etc/selity/selity.conf';
@@ -127,7 +131,7 @@ my $file;
 require "$key_file" if( -f $key_file);
 
 ################################################################################
-# Generating i-MSCP Db key and initialization vector if needed
+# Generating Selity Db key and initialization vector if needed
 #
 if ($db_pass_key eq '{KEY}' || $db_pass_iv eq '{IV}') {
 

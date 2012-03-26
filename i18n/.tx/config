@@ -1,7 +1,7 @@
 [main]
 host = https://www.transifex.net
 
-[i-MSCP.imscppot]
+[Selity.selitypot]
 file_filter = po/<lang>.po
-source_file = po/iMSCP.pot
+source_file = po/selity.pot
 source_lang = en

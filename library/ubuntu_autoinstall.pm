@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# i-MSCP - internet Multi Server Control Panel
-# Copyright 2010 - 2012 by internet Multi Server Control Panel
+# Selity - multiserver hosting control panel
+# Copyright 2012 by Selity
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,19 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-# @category		i-MSCP
-# @copyright	2010 - 2012 by i-MSCP | http://i-mscp.net
+# @category		Selity
+# @copyright	2012 by Selity | http://selity.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @version		SVN: $Id$
-# @link			http://i-mscp.net i-MSCP Home Site
+# @link			http://selity.net Selity Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
-
-#####################################################################################
-# Package description:
-#
-# This package provides a class that is responsible to install all dependencies
-# (libraries, tools and softwares) required by i-MSCP on Ubuntu operating systems.
-#
 
 package library::ubuntu_autoinstall;
 
@@ -44,10 +36,6 @@ use vars qw/@ISA/;
 use Common::SingletonClass;
 use library::debian_autoinstall;
 
-# Initializer.
-#
-# @param self $self Selity::debian_autoinstall instance
-# return int 0
 sub _init {
 	debug('Starting...');
 

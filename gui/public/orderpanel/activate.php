@@ -180,9 +180,9 @@ $tpl->assign(
 	array(
 		'TR_PAGE_TITLE' => tr('Order Panel / Order confirmation'),
 		'CONTEXT_CLASS' => 'box_message',
-		'productLongName' => tr('internet Multi Server Control Panel'),
+		'productLongName' => tr('multiserver hosting control panel'),
 		'productLink' => 'http://www.i-mscp.net',
-		'productCopyright' => tr('© 2010-2012 i-MSCP Team<br/>All Rights Reserved'),
+		'productCopyright' => tr('© 2010-2012 Selity Team<br/>All Rights Reserved'),
 		'BOX_MESSAGE_TITLE' => tr('Order confirmation'),
 		'BOX_MESSAGE' => $msg,
 		'BACKLINK_BLOCK' => ''

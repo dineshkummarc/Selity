@@ -1101,7 +1101,7 @@ function resellerHasFeature($featureName, $forceReload = false)
 			'php_editor' => ($resellerProps['php_ini_system'] == 'yes') ? true : false,
 			'backup' => ($cfg->BACKUP_DOMAINS != 'no') ? true : false,
 			'aps' => ($resellerProps['software_allowed'] != 'no') ? true : false, // aps feature check must be revisted
-			'support' => ($cfg->IMSCP_SUPPORT_SYSTEM && $resellerProps['support_system'] == 'yes') ? true : false
+			'support' => ($cfg->SELITY_SUPPORT_SYSTEM && $resellerProps['support_system'] == 'yes') ? true : false
 		);
 	}
 

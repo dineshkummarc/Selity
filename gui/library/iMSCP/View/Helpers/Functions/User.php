@@ -270,8 +270,8 @@ function gen_client_menu($tpl, $menuTemplateFile)
 				 'TR_LMENU_OPEN_TICKETS' => tr('Open tickets'),
 				 'TR_LMENU_CLOSED_TICKETS' => tr('Closed tickets'),
 				 'TR_LMENU_NEW_TICKET' => tr('New ticket'),
-				 'SUPPORT_SYSTEM_PATH' => $cfg->IMSCP_SUPPORT_SYSTEM_PATH,
-				 'SUPPORT_SYSTEM_TARGET' => $cfg->IMSCP_SUPPORT_SYSTEM_TARGET));
+				 'SUPPORT_SYSTEM_PATH' => $cfg->SELITY_SUPPORT_SYSTEM_PATH,
+				 'SUPPORT_SYSTEM_TARGET' => $cfg->SELITY_SUPPORT_SYSTEM_TARGET));
 	} else {
 		$tpl->assign('SUPPORT_SYSTEM_FEATURE', '');
 	}

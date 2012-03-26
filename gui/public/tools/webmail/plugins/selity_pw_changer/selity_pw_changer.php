@@ -28,7 +28,7 @@ define('PASSWORD_ERROR', 2);
 define('PASSWORD_CONNECT_ERROR', 3);
 define('PASSWORD_SUCCESS', 0);
 
-class imscp_pw_changer extends rcube_plugin{
+class selity_pw_changer extends rcube_plugin{
 
 	public $task = 'settings';
 
@@ -36,8 +36,8 @@ class imscp_pw_changer extends rcube_plugin{
 		$rcmail = rcmail::get_instance();
 		// add Tab label
 		$rcmail->output->add_label('password');
-		$this->register_action('plugin.imscp_pw_changer', array($this, 'password_init'));
-		$this->register_action('plugin.imscp_pw_changer-save', array($this, 'password_save'));
+		$this->register_action('plugin.selity_pw_changer', array($this, 'password_init'));
+		$this->register_action('plugin.selity_pw_changer-save', array($this, 'password_save'));
 		$this->include_script('password.js');
 	}
 
@@ -76,7 +76,7 @@ class imscp_pw_changer extends rcube_plugin{
 			$rcmail->output->command('display_message', $res, 'error');
 		}
 
-		rcmail_overwrite_action('plugin.imscp_pw_changer');
+		rcmail_overwrite_action('plugin.selity_pw_changer');
 		$rcmail->output->send('plugin');
 	}
 
@@ -86,8 +86,8 @@ class imscp_pw_changer extends rcube_plugin{
 
 		// add some labels to client
 		$rcmail->output->add_label(
-		  'imscp_pw_changer.nopassword',
-		  'imscp_pw_changer.passwordinconsistency'
+		  'selity_pw_changer.nopassword',
+		  'selity_pw_changer.passwordinconsistency'
 		);
 
 		$rcmail->output->set_env('product_name', $rcmail->config->get('product_name'));
@@ -115,7 +115,7 @@ class imscp_pw_changer extends rcube_plugin{
 		  html::div(array('style' => "padding:15px"), $table->show() .
 			html::p(null,
 			  $rcmail->output->button(array(
-				'command' => 'plugin.imscp_pw_changer-save',
+				'command' => 'plugin.selity_pw_changer-save',
 				'type' => 'input',
 				'class' => 'button mainaction',
 				'label' => 'save'
@@ -123,14 +123,14 @@ class imscp_pw_changer extends rcube_plugin{
 		  )
 		);
 
-		$rcmail->output->add_gui_object('passform', 'imscp_pw_changer-form');
+		$rcmail->output->add_gui_object('passform', 'selity_pw_changer-form');
 
 		return $rcmail->output->form_tag(
 			array(
-				'id' => 'imscp_pw_changer-form',
-				'name' => 'imscp_pw_changer-form',
+				'id' => 'selity_pw_changer-form',
+				'name' => 'selity_pw_changer-form',
 				'method' => 'post',
-				'action' => './?_task=settings&_action=plugin.imscp_pw_changer-save',
+				'action' => './?_task=settings&_action=plugin.selity_pw_changer-save',
 			),
 			$out
 		);

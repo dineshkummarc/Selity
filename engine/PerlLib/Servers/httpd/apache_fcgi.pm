@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# i-MSCP - internet Multi Server Control Panel
-# Copyright (C) 2010 - 2011 by internet Multi Server Control Panel
+# Selity - multiserver hosting control panel
+# Copyright 2012 by Selity
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -10,18 +10,17 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-# @category		i-MSCP
-# @copyright	2010 - 2012 by i-MSCP | http://i-mscp.net
+# @category		Selity
+# @copyright	2012 by Selity | http://selity.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @version		SVN: $Id$
-# @link			http://i-mscp.net i-MSCP Home Site
+# @link			http://selity.net Selity Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
 package Servers::httpd::apache_fcgi;
@@ -1245,8 +1244,8 @@ sub addHtaccess{
 	my $fileContent	= $fileH->get() if -f $filePath;
 	$fileContent	= '' if !$fileContent;
 
-	my $bTag	=	"\t\t### START i-MSCP PROTECTION ###\n";
-	my $eTag	=	"\t\t### END i-MSCP PROTECTION ###\n";
+	my $bTag	=	"\t\t### START SELITY PROTECTION ###\n";
+	my $eTag	=	"\t\t### END SELITY PROTECTION ###\n";
 	my $tag		=	"\t\tAuthType $data->{AUTH_TYPE}\n".
 					"\t\tAuthName \"$data->{AUTH_NAME}\"\n".
 					"\t\tAuthUserFile $fileUser\n";
@@ -1289,8 +1288,8 @@ sub delHtaccess{
 	my $fileContent	= $fileH->get() if -f $filePath;
 	$fileContent	= '' if !$fileContent;
 
-	my $bTag	=	"\t\t### START i-MSCP PROTECTION ###\n";
-	my $eTag	=	"\t\t### END i-MSCP PROTECTION ###\n";
+	my $bTag	=	"\t\t### START SELITY PROTECTION ###\n";
+	my $eTag	=	"\t\t### END SELITY PROTECTION ###\n";
 
 	$fileContent = replaceBloc($bTag, $eTag, '', $fileContent, undef);
 

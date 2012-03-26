@@ -41,7 +41,7 @@
 # messages are provided.
 #
 # Also, when you include this file into your script, some i-MSCP configuration
-# parameters obtained from the 'imscp.conf' file are exported in your script.
+# parameters obtained from the 'selity.conf' file are exported in your script.
 #
 # To use library, you must include it at the beginning of your
 # script like this:
@@ -54,25 +54,25 @@
 ################################################################################
 
 # Retrieving the main i-MSCP configuration file path
-if [ -f "/etc/imscp/imscp.conf" ] ; then
-    CONF_FILE=/etc/imscp/imscp.conf
+if [ -f "/etc/selity/selity.conf" ] ; then
+    CONF_FILE=/etc/selity/selity.conf
 	CMD_SED=`which sed`
-elif [ -f "/usr/local/etc/imscp/imscp.conf" ] ; then
-    CONF_FILE=/usr/local/etc/imscp/imscp.conf
+elif [ -f "/usr/local/etc/selity/selity.conf" ] ; then
+    CONF_FILE=/usr/local/etc/selity/selity.conf
 	    if [ -f "$(which gsed)" ]; then
            CMD_SED=`which gsed`
         else
           printf "\033[1;31m[Error]\033[0m gsed not found!\n"
         fi
 else
-    printf "\033[1;31m[Error]\033[0m i-MSCP configuration file not found!\n"
+    printf "\033[1;31m[Error]\033[0m Selity configuration file not found!\n"
     exit 1
 fi
 
 OLD_IFS=$IFS
 IFS=$
 
-# Reading needed entries from imscp.conf
+# Reading needed entries from selity.conf
 for a in $(grep -E '^(AMAVIS|APACHE_|BASE_SERVER_IP|CMD_|DEBUG|DATABASE_HOST|DEFAULT_ADMIN_ADDRESS|ETC_|LOG_DIR|MTA_|ROOT_|PHP_FASTCGI|SPAMASSASSIN|Version)' \
 ${CONF_FILE} | $CMD_SED 's/\s*=\s*\(.*\)/="\1"/') ; do
 	 eval $a
@@ -87,14 +87,14 @@ if [ $DEBUG -eq 1 ]; then
 fi
 
 # i-MSCP version
-IMSCP_VERSION=$(echo $Version | $CMD_SED -e 's/\s\+\|[a-z]//gi')
+SELITY_VERSION=$(echo $Version | $CMD_SED -e 's/\s\+\|[a-z]//gi')
 
 ################################################################################
 #                                   Logging                                    #
 ################################################################################
 
 # Log file path
-LOGFILE="$LOG_DIR/setup/imscp-$1.log"
+LOGFILE="$LOG_DIR/setup/selity-$1.log"
 
 # Make sure that the log directory exists
 /usr/bin/install -d $LOG_DIR/setup -m 0755 -o $ROOT_USER -g $ROOT_GROUP

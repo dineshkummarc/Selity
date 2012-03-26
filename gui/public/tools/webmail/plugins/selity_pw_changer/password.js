@@ -28,24 +28,24 @@ if (window.rcmail) {
 	rcmail.addEventListener('init', function(evt) {
 		var tab = $('<span>').attr('id', 'settingstabpluginpassword').addClass('tablink');
 
-		var button = $('<a>').attr('href', rcmail.env.comm_path+'&_action=plugin.imscp_pw_changer').html(rcmail.gettext('password')).appendTo(tab);
-		button.bind('click', function(e){ return rcmail.command('plugin.imscp_pw_changer', this) });
+		var button = $('<a>').attr('href', rcmail.env.comm_path+'&_action=plugin.selity_pw_changer').html(rcmail.gettext('password')).appendTo(tab);
+		button.bind('click', function(e){ return rcmail.command('plugin.selity_pw_changer', this) });
 
 		// add button and register commands
 		rcmail.add_element(tab, 'tabs');
-		rcmail.register_command('plugin.imscp_pw_changer', function() { rcmail.goto_url('plugin.imscp_pw_changer') }, true);
-		rcmail.register_command('plugin.imscp_pw_changer-save', function() {
+		rcmail.register_command('plugin.selity_pw_changer', function() { rcmail.goto_url('plugin.selity_pw_changer') }, true);
+		rcmail.register_command('plugin.selity_pw_changer-save', function() {
 			var input_newpasswd = rcube_find_object('_newpasswd');
 			var input_confpasswd = rcube_find_object('_confpasswd');
 
 			if (input_newpasswd && input_newpasswd.value=='') {
-				alert(rcmail.gettext('nopassword', 'imscp_pw_changer'));
+				alert(rcmail.gettext('nopassword', 'selity_pw_changer'));
 				input_newpasswd.focus();
 			} else if (input_confpasswd && input_confpasswd.value=='') {
-				alert(rcmail.gettext('nopassword', 'imscp_pw_changer'));
+				alert(rcmail.gettext('nopassword', 'selity_pw_changer'));
 				input_confpasswd.focus();
 			} else if ((input_newpasswd && input_confpasswd) && (input_newpasswd.value != input_confpasswd.value)) {
-				alert(rcmail.gettext('passwordinconsistency', 'imscp_pw_changer'));
+				alert(rcmail.gettext('passwordinconsistency', 'selity_pw_changer'));
 				input_newpasswd.focus();
 			} else {
 				rcmail.gui_objects.passform.submit();

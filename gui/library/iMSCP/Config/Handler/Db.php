@@ -47,7 +47,7 @@ require_once 'iMSCP/Config/Handler.php';
  * @property int MAIL_WRITER_EXPIRY_TIME Mail writer expiry time
  * @property string PORT_POSTGREY Posgrey port
  * @property int FAILED_UPDATE Failed database update
- * @property string PORT_IMSCP_DAEMON i-MSCP daemon service properties
+ * @property string PORT_SELITY_DAEMON i-MSCP daemon service properties
  *
  * @package     iMSCP_Config
  * @subpackage  Handler

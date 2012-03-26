@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# i-MSCP - internet Multi Server Control Panel
-# Copyright (C) 2010 - 2011 by internet Multi Server Control Panel
+# Selity - multiserver hosting control panel
+# Copyright 2012 by Selity
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -10,28 +10,22 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-# @category		i-MSCP
-# @copyright	2010 - 2012 by i-MSCP | http://i-mscp.net
+# @category		Selity
+# @copyright	2012 by Selity | http://selity.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @version		SVN: $Id: selity-setup-methods.pl 5372 2011-10-01 21:39:16Z sci2tech $
-# @link			http://i-mscp.net i-MSCP Home Site
+# @link			http://selity.net Selity Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
 use strict;
 use warnings;
 
-################################################################################
-# Starting update process
-#
-# @return void
-#
 sub setup_start_up {
 
 	Selity::Boot->new(mode => 'setup')->init({nodatabase => 'yes'});
@@ -50,28 +44,28 @@ sub setup_engine {
 	user_dialog();
 
 	my @steps = (
-		[\&load_old_selity_cfg, 'Loading old i-MSCP configuration file: '],
+		[\&load_old_selity_cfg, 'Loading old Selity configuration file: '],
 		[\&update_selity_cfg, 'Save old variable if needed: '],
 		[\&setup_system_users, 'Creating default users: '],
-		[\&setup_selity_database_connection, 'i-MSCP database connection: '],
-		[\&setup_selity_database, 'i-MSCP database: '],
-		[\&setup_system_dirs, 'i-MSCP directories: '],
-		[\&setup_base_server_IP, 'i-MSCP system IP: '],
-		[\&setup_hosts, 'i-MSCP system hosts file: '],
-		[\&askVHOST, 'i-MSCP virtual hostname'],
-		[\&setup_resolver, 'i-MSCP system resolver: '],
+		[\&setup_selity_database_connection, 'Selity database connection: '],
+		[\&setup_selity_database, 'Selity database: '],
+		[\&setup_system_dirs, 'Selity directories: '],
+		[\&setup_base_server_IP, 'Selity system IP: '],
+		[\&setup_hosts, 'Selity system hosts file: '],
+		[\&askVHOST, 'Selity virtual hostname'],
+		[\&setup_resolver, 'Selity system resolver: '],
 		[\&askPHPTimezone, 'PHP timezone: '],
-		[\&setup_default_sql_data, 'i-MSCP default SQL data: '],
-		[\&setup_ssl, 'i-MSCP certificate setup: '],
-		[\&setup_gui_pma, 'i-MSCP PMA configuration file: '],
-		[\&preinstallServers, 'i-MSCP server preinstall task: '],
-		[\&preinstallAddons, 'i-MSCP addons preinstall task: '],
-		[\&installServers, 'i-MSCP server install task: '],
-		[\&installAddons, 'i-MSCP addons install task: '],
-		[\&postinstallServers, 'i-MSCP server postinstall task: '],
-		[\&postinstallAddons, 'i-MSCP addons postinstall task: '],
-		[\&setup_crontab, 'i-MSCP crontab file: '],
-		[\&setup_selity_daemon_network, 'i-MSCP init scripts: '],
+		[\&setup_default_sql_data, 'Selity default SQL data: '],
+		[\&setup_ssl, 'Selity certificate setup: '],
+		[\&setup_gui_pma, 'Selity PMA configuration file: '],
+		[\&preinstallServers, 'Selity server preinstall task: '],
+		[\&preinstallAddons, 'Selity addons preinstall task: '],
+		[\&installServers, 'Selity server install task: '],
+		[\&installAddons, 'Selity addons install task: '],
+		[\&postinstallServers, 'Selity server postinstall task: '],
+		[\&postinstallAddons, 'Selity addons postinstall task: '],
+		[\&setup_crontab, 'Selity crontab file: '],
+		[\&setup_selity_daemon_network, 'Selity init scripts: '],
 		[\&askBackup, 'Setting backup: '],
 		[\&rebuild_customers_cfg, 'Rebuilding all customers configuration files: '],
 		[\&set_permissions, 'Permissions setup: '],
@@ -90,11 +84,6 @@ sub setup_engine {
 	$rs;
 }
 
-################################################################################
-# User dialog
-#
-# @return void
-#
 sub user_dialog {
 
 	use Selity::Dialog;
@@ -105,7 +94,7 @@ sub user_dialog {
 	Selity::Dialog->factory()->set('no-label','EXIT');
 	if (Selity::Dialog->factory()->yesno(
 					"\n
-						Welcome to \\Z1i-MSCP version $main::selityConfig{'Version'}\\Zn Setup Dialog.
+						Welcome to \\Z1Selity version $main::selityConfig{'Version'}\\Zn Setup Dialog.
 
 						\\Zu\\Z4[NOTICE]\\Zn
 						Make sure you have read and performed all steps from docs/distro/INSTALL document (where distro is your linux distribution).
@@ -131,11 +120,6 @@ sub user_dialog {
 	0;
 }
 
-################################################################################
-# Load old i-MSCP main configuration file
-#
-# @return void
-#
 sub load_old_selity_cfg {
 
 	use Selity::Config;
@@ -151,11 +135,6 @@ sub load_old_selity_cfg {
 	0;
 }
 
-################################################################################
-# Creating i-MSCP database
-#
-# @return int 0 on success, other on failure
-#
 sub setup_selity_database_connection {
 
 	use Selity::Crypt;
@@ -236,20 +215,6 @@ sub setup_selity_database_connection {
 	0;
 }
 
-################################################################################
-# Check Sql connection
-#
-# This subroutine can be used to check an MySQL server connection with different
-# login credentials.
-#
-# @param string $dbType SQL server type
-# [@param string $dbName SQL database to use]
-# @param string $dbHost SQL server hostname
-# @param string $dbPort SQL server port
-# @param string $dbUser SQL username
-# @param string $dbPass SQL user password
-# @return int 0 on success, error string on failure
-#
 sub check_sql_connection{
 
 	my ($dbType, $dbName, $dbHost, $dbPort, $dbUser, $dbPass) = (@_);
@@ -266,11 +231,6 @@ sub check_sql_connection{
 	return $database->connect();
 }
 
-################################################################################
-# Creating / Update i-MSCP database
-#
-# @return int 0 on success, other on failure
-#
 sub setup_selity_database {
 
 	use Selity::Crypt;
@@ -355,11 +315,6 @@ sub setup_selity_database {
 	0;
 }
 
-################################################################################
-# Creating i-MSCP database
-#
-# @return int 0 on success, other on failure
-#
 sub createDB{
 	my $dbName = shift;
 	my $dbType = shift;
@@ -413,11 +368,6 @@ sub importSQLFile{
 	0;
 }
 
-################################################################################
-# Update i-MSCP database schema
-#
-# @return int 1 on success, other on failure
-#
 sub updateDb {
 
 	use Selity::File;
@@ -443,11 +393,6 @@ sub updateDb {
 	0;
 }
 
-################################################################################
-# create all directories required by i-MSCP and the managed services
-#
-# @return int 0 on success, other on failure
-#
 sub setup_system_dirs {
 
 	use Selity::Dir;
@@ -540,11 +485,6 @@ sub setup_base_server_IP{
 	0;
 }
 
-################################################################################
-# Create the system 'hosts' file
-#
-# @return int 0 on success, other on failure
-#
 sub setup_hosts {
 
 	use Selity::File;
@@ -600,7 +540,6 @@ sub setup_hosts {
 	$rs;
 }
 
-
 sub askHostname{
 
 	my ($out, $err, $hostname);
@@ -644,11 +583,6 @@ sub askHostname{
 	0;
 }
 
-################################################################################
-# Set the local dns resolver
-#
-# @return int 0 on success, -1 on failure
-#
 sub setup_resolver {
 
 	use Selity::File;
@@ -702,11 +636,6 @@ sub setup_resolver {
 	0;
 }
 
-################################################################################
-# i-MSCP crontab file - (Setup / Update)
-#
-# This subroutine built, store and install the i-MSCP crontab file
-#
 sub setup_crontab {
 
 	use Selity::File;
@@ -784,13 +713,6 @@ sub setup_crontab {
 	0;
 }
 
-################################################################################
-# i-MSCP Daemon, network - (Setup / Update)
-#
-# This subroutine install or update the i-MSCP daemon and network init scripts
-#
-# @return int 0 on success, other on failure
-#
 sub setup_selity_daemon_network {
 
 	my ($rs, $rdata, $fileName, $stdout, $stderr);
@@ -826,11 +748,6 @@ sub setup_selity_daemon_network {
 	0;
 }
 
-################################################################################
-# Set engine and gui permissions
-#
-# @return int 0 on success, other on failure
-#
 sub set_permissions {
 
 	use Selity::Rights;
@@ -852,11 +769,6 @@ sub set_permissions {
 	0;
 }
 
-################################################################################
-# Restart services
-#
-# This subroutines restart all the services managed by i-MSCP.
-#
 sub restart_services {
 
 	use Selity::Dialog;
@@ -897,16 +809,6 @@ sub restart_services {
 	0;
 }
 
-################################################################################
-# Setup i-MSCP database default data
-#
-# Default data are:
-#
-# - Data for the first i-MSCP administrator is none exists
-# - Data for the first Ip
-#
-# @return int 0 on success, other on failure
-#
 sub setup_default_sql_data {
 
 	use Selity::Crypt;
@@ -1027,13 +929,6 @@ sub askAdminEmail{
 	$admin_email;
 }
 
-################################################################################
-# i-MSCP GUI pma configuration file and pma SQL control user - (Setup / Update)
-#
-# This subroutine built, store and install the PhpMyAdmin configuration file
-#
-# @return int 0 on success, -1 otherwise
-#
 sub setup_gui_pma {
 
 	my $cfgDir	= "$main::selityConfig{'CONF_DIR'}/pma";
@@ -1314,7 +1209,7 @@ sub askVHOST{
 
 	my ($msg, @labels) = ('', ());
 	do{
-		while (! ($hostname = Selity::Dialog->factory()->inputbox( "Please enter the domain name where i-MSCP will be reachable on: $msg", $hostname))){}
+		while (! ($hostname = Selity::Dialog->factory()->inputbox( "Please enter the domain name where Selity will be reachable on: $msg", $hostname))){}
 		$msg = "\n\n$hostname is not a valid fqdn!";
 		@labels = split(/\./, $hostname);
 	} while (! (Data::Validate::Domain->new(%options)->is_domain($hostname) && ( @labels >= 3)));
@@ -1326,12 +1221,6 @@ sub askVHOST{
 	0;
 }
 
-################################################################################
-# Save old i-MSCP main configuration file to preserve curent settings,
-# because current will be overwritten on update
-#
-# @return int 0
-#
 sub save_conf{
 
 
@@ -1349,11 +1238,6 @@ sub save_conf{
 	0;
 }
 
-################################################################################
-# Update i-MSCP main configuration file
-#
-# @return int 0
-#
 sub update_selity_cfg {
 
 	for(qw/
@@ -1374,11 +1258,6 @@ sub update_selity_cfg {
 	0;
 }
 
-################################################################################
-# Create users and groups for different services
-#
-# @return int 0 on success, other on failure
-#
 sub setup_system_users{
 
 	use Modules::SystemGroup;
@@ -1392,7 +1271,6 @@ sub setup_system_users{
 }
 
 sub askBackup{
-
 
 	use Selity::Dialog;
 
@@ -1412,11 +1290,6 @@ sub askBackup{
 	0;
 }
 
-################################################################################
-# Run all update additional task such as rkhunter configuration
-#
-# @return void
-#
 sub additional_tasks{
 
 	use Selity::Stepper;
@@ -1424,7 +1297,7 @@ sub additional_tasks{
 	startDetail();
 
 	my @steps = (
-		[\&setup_rkhunter, 'i-MSCP Rkhunter configuration:']
+		[\&setup_rkhunter, 'Selity Rkhunter configuration:']
 	);
 	my $step = 1;
 	for (@steps){
@@ -1437,18 +1310,6 @@ sub additional_tasks{
 	0;
 }
 
-
-################################################################################
-# Setup rkhunter - (Setup / Update)
-#
-# This subroutine process the following tasks:
-#
-# - update rkhunter database files (only during setup process)
-# - Debian specific: Updates the configuration file and cron task, and
-# remove default unreadable created log file
-#
-# @return int 0 on success, other on failure
-#
 sub setup_rkhunter {
 
 	my ($rs, $rdata);
@@ -1461,7 +1322,7 @@ sub setup_rkhunter {
 	$file->mode(0644);
 
 	# Updates the rkhunter configuration provided by Debian like distributions
-	# to disable the default cron task (i-MSCP provides its own cron job for rkhunter)
+	# to disable the default cron task (Selity provides its own cron job for rkhunter)
 	if(-e '/etc/default/rkhunter') {
 		# Get the file as a string
 		$file = Selity::File->new (filename => '/etc/default/rkhunter');
@@ -1511,11 +1372,6 @@ sub setup_rkhunter {
 	0;
 }
 
-################################################################################
-# Rebuild all customers configuration files
-#
-# @return int 1 on success, other on failure
-#
 sub rebuild_customers_cfg {
 
 	use Selity::Boot;
@@ -1724,6 +1580,7 @@ sub preinstallServers{
 	$rs;
 
 }
+
 sub preinstallAddons{
 
 	use Selity::Dir;

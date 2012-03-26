@@ -76,8 +76,8 @@ function gen_reseller_mainmenu($tpl, $menu_file)
 			'TR_MENU_LOGOUT' => tr('Logout'),
 			'TR_MENU_OVERVIEW' => tr('Overview'),
 			'TR_MENU_LANGUAGE' => tr('Language'),
-			'SUPPORT_SYSTEM_PATH' => $cfg->IMSCP_SUPPORT_SYSTEM_PATH,
-			'SUPPORT_SYSTEM_TARGET' => $cfg->IMSCP_SUPPORT_SYSTEM_TARGET,
+			'SUPPORT_SYSTEM_PATH' => $cfg->SELITY_SUPPORT_SYSTEM_PATH,
+			'SUPPORT_SYSTEM_TARGET' => $cfg->SELITY_SUPPORT_SYSTEM_TARGET,
 			'TR_MENU_ORDERS' => tr('Manage Orders'),
 			'TR_MENU_ORDER_SETTINGS' => tr('Order settings'),
 			'TR_MENU_ORDER_EMAIL' => tr('Order email setup'),
@@ -111,7 +111,7 @@ function gen_reseller_mainmenu($tpl, $menu_file)
     $query = "SELECT `support_system` FROM `reseller_props` WHERE `reseller_id` = ?";
     $stmt = exec_query($query, $_SESSION['user_id']);
 
-    if (!$cfg->IMSCP_SUPPORT_SYSTEM || $stmt->fields['support_system'] == 'no') {
+    if (!$cfg->SELITY_SUPPORT_SYSTEM || $stmt->fields['support_system'] == 'no') {
         $tpl->assign('ISACTIVE_SUPPORT', '');
     }
 
@@ -159,8 +159,8 @@ function gen_reseller_menu($tpl, $menu_file)
 			'TR_MENU_LANGUAGE' => tr('Language'),
 			'ALIAS_MENU' => (!check_reseller_permissions($_SESSION['user_id'], 'alias'))
 				? '' : $tpl->parse('ALIAS_MENU', '.alias_menu'),
-			'SUPPORT_SYSTEM_PATH' => $cfg->IMSCP_SUPPORT_SYSTEM_PATH,
-			'SUPPORT_SYSTEM_TARGET' => $cfg->IMSCP_SUPPORT_SYSTEM_TARGET,
+			'SUPPORT_SYSTEM_PATH' => $cfg->SELITY_SUPPORT_SYSTEM_PATH,
+			'SUPPORT_SYSTEM_TARGET' => $cfg->SELITY_SUPPORT_SYSTEM_TARGET,
 			'TR_MENU_ORDERS' => tr('Manage Orders'),
 			'TR_MENU_ORDER_SETTINGS' => tr('Order settings'),
 			'TR_MENU_ORDER_EMAIL' => tr('Order email setup'),
@@ -174,7 +174,7 @@ function gen_reseller_menu($tpl, $menu_file)
     $query = "SELECT `support_system` FROM `reseller_props` WHERE `reseller_id` = ?";
     $stmt = exec_query($query, $_SESSION['user_id']);
 
-    if (!$cfg->IMSCP_SUPPORT_SYSTEM || $stmt->fields['support_system'] == 'no') {
+    if (!$cfg->SELITY_SUPPORT_SYSTEM || $stmt->fields['support_system'] == 'no') {
         $tpl->assign('ISACTIVE_SUPPORT', '');
     }
 

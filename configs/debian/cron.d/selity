@@ -14,7 +14,7 @@
 # Backup for all the customers' data depending of the domain properties
 @daily root umask 027; {BACKUP_ROOT_DIR}/selity-backup-all yes &>{LOG_DIR}/selity-backup-all-mngr.log
 
-# Backup for i-MSCP database and all /etc/selity/* configuration files
+# Backup for Selity database and all /etc/selity/* configuration files
 @daily root umask 027; {BACKUP_ROOT_DIR}/selity-backup-selity noreport &>{LOG_DIR}/selity-backup-selity-mngr.log
 
 # Remove config backups older than seven days

@@ -49,7 +49,7 @@ $tpl = new iMSCP_pTemplate();
 $tpl->define_dynamic(
 	array(
 		'layout' => 'shared/layouts/ui.tpl',
-		'page' => 'admin/imscp_updates.tpl',
+		'page' => 'admin/selity_updates.tpl',
 		'page_message' => 'layout',
 		'update_message' => 'page',
 		'update_infos' => 'page',

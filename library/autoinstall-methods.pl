@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# i-MSCP - internet Multi Server Control Panel
-# Copyright 2010 - 2012 by internet Multi Server Control Panel
+# Selity - multiserver hosting control panel
+# Copyright 2012 by Selity
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,30 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-# @category		i-MSCP
-# @copyright	2010 - 2012 by i-MSCP | http://i-mscp.net
+# @category		Selity
+# @copyright	2012 by Selity | http://selity.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @link			http://i-mscp.net i-MSCP Home Site
+# @link			http://selity.net Selity Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
-
-#####################################################################################
-# File description:
-#
-# This file contains all subroutines used by the selity-autoinstal script.
-#
 
 use strict;
 use warnings;
 
-#
-# Hight level subroutines
-#
-
-# Install pre-required packages.
-#
-# Ensure that 'lsb-release' and 'dialog' tools are installed on the system.
-#
-# @return int 0 on success, other on failure
 sub preInstall {
 	debug('Starting...');
 
@@ -68,12 +53,6 @@ sub preInstall {
 	0;
 }
 
-# Installs i-MSCP dependencies (required libraries, tools and softwares).
-#
-# This subroutine load specific distribution autoinstall class that is responsible to
-# install all dependencies for i-MSCP.
-#
-# @return int 0 on success, other on failure
 sub installDependencies {
 	debug('Starting...');
 
@@ -93,11 +72,6 @@ sub installDependencies {
 	0;
 }
 
-# Tests for i-MSCP requirements.
-#
-# @throw fatal error if a requirement is not meet
-# @See Requirements.pm
-# @return int 0
 sub testRequirements {
 	debug('Starting...');
 
@@ -107,15 +81,6 @@ sub testRequirements {
 	0;
 }
 
-# Process all xml nodes from an install.xml files.
-#
-# Note: If $conffile is not provided, the subroutine search for the
-# DISTNAME-variable.xml file.
-#
-# @throwns fatal error if a variable cannot be exported
-# @param string $conffile OPTIONAL XML configuration file path to be processed
-# @return int 0 on success, other on failure
-# @todo The chown nodes are not processed...
 sub processConfFile {
 	debug('Starting...');
 
@@ -193,10 +158,6 @@ sub processConfFile {
 	0;
 }
 
-# Process distribution specific configuration install.xml files.
-#
-# @see processConfFile
-# @return int 0 on success, other on failure
 sub processSpecificConfFile {
 	debug('Starting...');
 
@@ -253,9 +214,6 @@ sub processSpecificConfFile {
 	0;
 }
 
-# Build the i-MSCP daemon by running make.
-#
-# @return void
 sub buildSelityDaemon {
 	debug('Starting...');
 
@@ -296,10 +254,6 @@ sub buildSelityDaemon {
 	$return;
 }
 
-# Install the engine files by processing all install.xml files.
-#
-# @see processConfFile
-# @return int 0 on success, other on failure
 sub installEngine {
 	debug('Starting...');
 
@@ -340,9 +294,6 @@ sub installEngine {
 	0;
 }
 
-# Install GUI files in temporary folder.
-#
-# @return int
 sub installGui {
 	debug('Starting...');
 
@@ -356,49 +307,6 @@ sub installGui {
 	$rs;
 }
 
-# Install distribution maintainer scripts in temporary folder.
-#
-# Some distribution can require pre and post installation tasks managed by maintainers
-# scripts (preinst.DISTNAME or postinst.DISTNAME) written in Shell, PHP or Perl.
-# If a script is found for the current distribution, it will be intalled in the setup
-# directory with the distribution maintainer helper library (for shell scripts).
-#
-# @return void
-sub InstallDistMaintainerScripts {
-	debug('Starting...');
-
-	my $SO = Selity::SO->new();
-	my $dist = lc($SO->{Distribution});
-
-	foreach(
-		"$FindBin::Bin/maintscripts/preinst.$dist",
-		"$FindBin::Bin/maintscripts/postinst.$dist"
-	){
-		next if (! -f $_);
-		my $file = Selity::File->new();
-		$file->{filename} = $_;
-		$file->mode(0750) and return 1;
-		$file->owner(0, 0) and return 1;
-		$file->copyFile("$main::SYSTEM_ROOT/engine/setup/") and return 1;
-	}
-
-	if(-f "$FindBin::Bin/maintscripts/preinst.$SO->{Distribution}" ||
-		-f "$FindBin::Bin/maintscripts/postinst.$SO->{Distribution}"
-	) {
-		my $file = Selity::File->new();
-		$file->{filename} = "$FindBin::Bin/maintscripts/maintainer-helper.sh";
-		$file->mode(0750) and return 1;
-		$file->owner(0, 0) and return 1;
-		$file->copyFile("$main::SYSTEM_ROOT/engine/setup/") and return 1;
-	}
-
-	debug('Ending...');
-	0;
-}
-
-# Must be documented
-#
-# @return int 0 on success, other on failure
 sub finishBuild {
 	debug('Starting...');
 
@@ -414,9 +322,6 @@ sub finishBuild {
 	0;
 }
 
-# Cleanup temporary folder by removing uselless directories (eg .svn).
-#
-# @return int 0 on success, other on failure
 sub cleanUpTmp {
 	debug('Starting...');
 
@@ -437,9 +342,6 @@ sub cleanUpTmp {
 	0;
 }
 
-# Process i-MSCP backup.
-#
-# @return int 0 on success, other on failure
 sub doSelityBackup {
 	debug('Starting...');
 
@@ -467,18 +369,13 @@ sub doSelityBackup {
 	$rs;
 }
 
-# Saves GUI working data in temporary folder.
-#
-# @return int 0 on success, other on failure
 sub saveGuiWorkingData {
 	debug('Starting...');
 
 	my ($rs, $stdout, $stderr);
 	my $tmp = qualify_to_ref('INST_PREF', 'main');
 
-	# For selity versions >= 1.0.4
 	if(-d "$main::defaultConf{'ROOT_DIR'}/gui/data") {
-		# Save i-MSCP GUI data
 		$rs = execute(
 			"cp -vTRf $main::defaultConf{'ROOT_DIR'}/gui/data $$$tmp$main::defaultConf{'ROOT_DIR'}/gui/data",
 			\$stdout, \$stderr
@@ -487,77 +384,34 @@ sub saveGuiWorkingData {
 		debug("$stdout") if $stdout;
 		error("$stderr") if $stderr;
 		return $rs if $rs;
+	}
 
-		# Save filemanager data (ajaxplorer)
-		if(-d "$main::defaultConf{'ROOT_DIR'}/gui/public/tools/filemanager/data") {
-			$rs = execute(
-				"cp -vRTf $main::defaultConf{'ROOT_DIR'}/gui/public/tools/filemanager/data $$$tmp$main::defaultConf{'ROOT_DIR'}/gui/public/tools/filemanager/data",
-				\$stdout, \$stderr
-			);
+	if(-d "$main::defaultConf{'ROOT_DIR'}/gui/public/tools/filemanager/data") {
+		$rs = execute(
+			"cp -vRTf $main::defaultConf{'ROOT_DIR'}/gui/public/tools/filemanager/data $$$tmp$main::defaultConf{'ROOT_DIR'}/gui/public/tools/filemanager/data",
+			\$stdout, \$stderr
+		);
 
-			debug("$stdout") if $stdout;
-			error("$stderr") if $stderr;
-			return $rs if $rs;
-		}
+		debug("$stdout") if $stdout;
+		error("$stderr") if $stderr;
+		return $rs if $rs;
+	}
 
-		# Save GUI plugins
-		if(-d "$main::defaultConf{'ROOT_DIR'}/gui/plugins") {
-			$rs = execute(
-				"cp -vRTf $main::defaultConf{'ROOT_DIR'}/gui/plugins $$$tmp$main::defaultConf{'ROOT_DIR'}/gui/plugins",
-				\$stdout, \$stderr
-			);
+	if(-d "$main::defaultConf{'ROOT_DIR'}/gui/plugins") {
+		$rs = execute(
+			"cp -vRTf $main::defaultConf{'ROOT_DIR'}/gui/plugins $$$tmp$main::defaultConf{'ROOT_DIR'}/gui/plugins",
+			\$stdout, \$stderr
+		);
 
-			debug("$stdout") if $stdout;
-			error("$stderr") if $stderr;
-			return $rs if $rs;
-		}
-
-	# For i-MSCP versions prior 1.0.4
-	} else {
-		# Save i-MSCP GUI data (isp logos)
-		if(-d "$main::defaultConf{'ROOT_DIR'}/gui/themes/user_logos") {
-			$rs = execute(
-				"cp -TvRf $main::defaultConf{'ROOT_DIR'}/gui/themes/user_logos $$$tmp$main::defaultConf{'ROOT_DIR'}/gui/data/ispLogos",
-				\$stdout, \$stderr
-			);
-
-			debug("$stdout") if $stdout;
-			error("$stderr") if $stderr;
-			return $rs if $rs;
-		}
-
-		# Save i-MSCP GUI data (isp domain default index.html page)
-		if(-d "$main::defaultConf{'ROOT_DIR'}/gui/domain_default_page") {
-			$rs = execute(
-				"cp -TRfv $main::defaultConf{'ROOT_DIR'}/gui/domain_default_page $$$tmp$main::defaultConf{'ROOT_DIR'}/gui/data/domain_default_page",
-				\$stdout, \$stderr
-			);
-
-			debug("$stdout") if $stdout;
-			error("$stderr") if $stderr;
-			return $rs if $rs;
-		}
-
-		# Save i-MSCP GUI data (isp domain default index.html page for disabled domains)
-		if(-d "$main::defaultConf{'ROOT_DIR'}/gui/domain_disable_page") {
-			$rs = execute(
-				"cp -TRfv $main::defaultConf{'ROOT_DIR'}/gui/domain_disable_page $$$tmp$main::defaultConf{'ROOT_DIR'}/gui/data/domain_disable_page",
-				\$stdout, \$stderr
-			);
-
-			debug("$stdout") if $stdout;
-			error("$stderr") if $stderr;
-			return $rs if $rs;
-		}
+		debug("$stdout") if $stdout;
+		error("$stderr") if $stderr;
+		return $rs if $rs;
 	}
 
 	debug('Ending...');
 	0;
 }
 
-# Install temporary folder on file system.
-#
-# @return int 0 on success, other on failure
 sub installTmp {
 	debug('Starting...');
 
@@ -566,7 +420,6 @@ sub installTmp {
 	my ($rs, $stdout, $stderr);
 	my $tmp = qualify_to_ref('INST_PREF', 'main');
 
-	# i-MSCP daemon must be stopped before changing any file on the files system
 	if(-f "/etc/init.d/selity_daemon" && -f "$main::defaultConf{'ROOT_DIR'}/daemon/selity_daemon") {
 		$rs = execute("/etc/init.d/selity_daemon stop", \$stdout, \$stderr);
 		debug("$stdout") if $stdout;
@@ -574,7 +427,6 @@ sub installTmp {
 		return $rs if $rs;
 	}
 
-	# Session files must not be saved to prevent any troubles after update.
 	$rs = execute(
 		"rm -fr $$$tmp$main::defaultConf{'ROOT_DIR'}/gui/data/sessions/*",
 		\$stdout, \$stderr
@@ -584,7 +436,6 @@ sub installTmp {
 	error("$stderr") if $stderr;
 	return $rs if $rs;
 
-	# Cache files must not be saved to prevent any troubles after update.
 	$rs = execute(
 		"rm -fr $$$tmp$main::defaultConf{'ROOT_DIR'}/gui/data/cache/*",
 		\$stdout, \$stderr
@@ -594,7 +445,6 @@ sub installTmp {
 	error("$stderr") if $stderr;
 	return $rs if $rs;
 
-	# Process cleanup to avoid any security risks and conflicts
 	$rs = execute(
 		"rm -vfr ".
 		"$main::defaultConf{'ROOT_DIR'}/daemon ".
@@ -607,7 +457,6 @@ sub installTmp {
 	error("$stderr") if $stderr;
 	return $rs if $rs;
 
-	# Copy new i-MSCP files on the files system
 	$rs = execute("cp -Rf $$$tmp/* /", \$stdout, \$stderr);
 	debug("$stdout") if $stdout;
 	error("$stderr") if $stderr;
@@ -617,9 +466,6 @@ sub installTmp {
 	0;
 }
 
-# Removes temporary folder.
-#
-# @return int 0 on success, other on failure
 sub removeTmp {
 	debug('Starting...');
 
@@ -637,14 +483,6 @@ sub removeTmp {
 	0;
 }
 
-#
-# Low level subroutines
-#
-
-# Expands a variable.
-#
-# @param string $var variable to be expanded
-# @return string expanded variable
 sub _expandVars {
 	debug('Starting...');
 
@@ -665,11 +503,6 @@ sub _expandVars {
 	$var;
 }
 
-# Process a 'folder' node from an install.xml file.
-#
-# Process the xml 'folder' node by creating the described directory
-#
-# @return int 0 on success, other on failure
 sub _processFolder {
 	debug('Starting...');
 
@@ -695,9 +528,6 @@ sub _processFolder {
 	0;
 }
 
-# Process a 'copy_config' node from an install.xml file.
-#
-# @return int 0 on success, other on failure
 sub _copyConfig {
 	debug('Starting...');
 
@@ -746,9 +576,6 @@ sub _copyConfig {
 	0;
 }
 
-# Process the 'copy' node from an install.xml file.
-#
-# @return int 0 on success, other on failure
 sub _copy {
 	debug('Starting...');
 
@@ -785,10 +612,6 @@ sub _copy {
 	0;
 }
 
-# Create a file
-#
-# @param XML object $data XML create_file node
-# @return int 0 on success, other on failure
 sub _createFile {
 	debug('Starting...');
 
@@ -803,10 +626,6 @@ sub _createFile {
 	0;
 }
 
-# Change file/directory owner and/or group recursively.
-#
-# @param XML object $data XML chown_file node
-# @return int 0 on success, other on failure
 sub _chownFile {
 	debug('Starting...');
 
@@ -824,9 +643,6 @@ sub _chownFile {
 	0;
 }
 
-# Process chmod_file from an install.xml file.
-#
-# @return int 0 on success, other on failure
 sub _chmodFile {
 	debug('Starting...');
 
@@ -844,10 +660,6 @@ sub _chmodFile {
 	0;
 }
 
-# Checks for debian packager availability.
-#
-# @access private
-# @return int 0 on success, other on failure
 sub _checkPkgManager {
 	debug('Starting...');
 

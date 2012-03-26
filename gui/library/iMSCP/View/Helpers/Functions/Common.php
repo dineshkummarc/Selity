@@ -313,14 +313,14 @@ function generateNavigation($tpl)
 	// Dynamic links (All levels)
 	$tpl->assign(
 		array(
-			'SUPPORT_SYSTEM_PATH' => $cfg->IMSCP_SUPPORT_SYSTEM_PATH,
-			'SUPPORT_SYSTEM_TARGET' => $cfg->IMSCP_SUPPORT_SYSTEM_TARGET));
+			'SUPPORT_SYSTEM_PATH' => $cfg->SELITY_SUPPORT_SYSTEM_PATH,
+			'SUPPORT_SYSTEM_TARGET' => $cfg->SELITY_SUPPORT_SYSTEM_TARGET));
 
 	/** @var $navigation Zend_Navigation */
 	$navigation = iMSCP_Registry::get('navigation');
 
 	// Remove support system page if feature is globally disabled
-	if (!$cfg->IMSCP_SUPPORT_SYSTEM) {
+	if (!$cfg->SELITY_SUPPORT_SYSTEM) {
 		$navigation->removePage($navigation->findOneBy('class', 'support'));
 	}
 

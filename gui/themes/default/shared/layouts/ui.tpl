@@ -103,7 +103,7 @@
 		</div>
 	</div>
 	<div class="footer">
-		i-MSCP {VERSION}<br />Build: {BUILDDATE}<br />Codename: {CODENAME}
+		Selity {VERSION}<br />Build: {BUILDDATE}<br />Codename: {CODENAME}
 	</div>
 </body>
 </html>

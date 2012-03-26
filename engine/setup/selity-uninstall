@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# i-MSCP - internet Multi Server Control Panel
-# Copyright (C) 2010 - 2011 by internet Multi Server Control Panel
+# Selity - multiserver hosting control panel
+# Copyright 2012 by Selity
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,10 +17,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
-# @category		i-MSCP
-# @copyright	2010 - 2012 by i-MSCP | http://i-mscp.net
+# @category		Selity
+# @copyright	2012 by Selity | http://selity.net
 # @author		Daniel Andreca <sci2tech@gmail.com>
-# @link			http://i-mscp.net i-MSCP Home Site
+# @link			http://selity.net Selity Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
 use strict;
@@ -69,9 +69,9 @@ sub user_dialog {
 	Selity::Dialog->factory()->set('defaultno', '');
 	if (Selity::Dialog->factory()->yesno(
 					"\n
-						Welcome to \\Z1i-MSCP version $main::selityConfig{'Version'}\\Zn Un-Install Dialog.
+						Welcome to \\Z1Selity version $main::selityConfig{'Version'}\\Zn Un-Install Dialog.
 
-						This program will uninstall i-MSCP system from your server.
+						This program will uninstall Selity system from your server.
 
 						\\Zu\\Z1[WARNING]\\Zn
 						All domain users and their accounts will be removed.
@@ -106,7 +106,7 @@ sub uninstall_shut_down {
 					"\n
 					\\Z1Congratulations!!!\\Zn
 
-					You have uninstall i-MSCP successfully!\n\n
+					You have uninstall Selity successfully!\n\n
 
 					"
 	);
@@ -123,13 +123,13 @@ sub uninstall_engine {
 	my @steps = (
 
 		[\&uninstall_customers, 'Remove customers: '],
-		[\&uninstallServers, 'i-MSCP server uninstall task: '],
-		[\&uninstall_selityd, 'i-MSCP daemons uninstall task: '],
-		[\&uninstall_crontab, 'i-MSCP crontab uninstall task: '],
-		[\&uninstall_logrotate, 'i-MSCP logrotate uninstall task: '],
-		[\&uninstall_sql, 'i-MSCP sql uninstall task: '],
-		[\&uninstall_system_users, 'i-MSCP system user uninstall task: '],
-		[\&uninstall_system_dirs, 'i-MSCP system directory uninstall task: '],
+		[\&uninstallServers, 'Selity server uninstall task: '],
+		[\&uninstall_selityd, 'Selity daemons uninstall task: '],
+		[\&uninstall_crontab, 'Selity crontab uninstall task: '],
+		[\&uninstall_logrotate, 'Selity logrotate uninstall task: '],
+		[\&uninstall_sql, 'Selity sql uninstall task: '],
+		[\&uninstall_system_users, 'Selity system user uninstall task: '],
+		[\&uninstall_system_dirs, 'Selity system directory uninstall task: '],
 	);
 	my $rs = 0;
 	my $step = 1;

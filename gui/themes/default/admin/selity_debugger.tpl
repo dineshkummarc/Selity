@@ -13,7 +13,7 @@
 				<tr>
 					<td>
 						<p>
-							<span class="bold">{TR_DOMAIN_NAME}</span> - <a href="imscp_debugger.php?action=change_status&amp;id={CHANGE_ID}&amp;type={CHANGE_TYPE}" class="link">{TR_CHANGE_STATUS}</a>
+							<span class="bold">{TR_DOMAIN_NAME}</span> - <a href="selity_debugger.php?action=change_status&amp;id={CHANGE_ID}&amp;type={CHANGE_TYPE}" class="link">{TR_CHANGE_STATUS}</a>
 						</p>
 						<span style="color:red;">{TR_DOMAIN_ERROR}</span>
 					</td>
@@ -32,7 +32,7 @@
 				<!-- BDP: alias_list -->
 				<tr>
 					<td>
-						<span class="bold">{TR_ALIAS_NAME}</span> - <a href="imscp_debugger.php?action=change_status&amp;id={CHANGE_ID}&amp;type={CHANGE_TYPE}" class="link">{TR_CHANGE_STATUS}</a>
+						<span class="bold">{TR_ALIAS_NAME}</span> - <a href="selity_debugger.php?action=change_status&amp;id={CHANGE_ID}&amp;type={CHANGE_TYPE}" class="link">{TR_CHANGE_STATUS}</a>
 						<span style="color:red;">{TR_ALIAS_ERROR}</span>
 					</td>
 				</tr>
@@ -51,7 +51,7 @@
 				<tr>
 					<td>
 						<p>
-							<span class="bold">{TR_SUBDOMAIN_NAME}</span> - <a href="imscp_debugger.php?action=change_status&amp;id={CHANGE_ID}&amp;type={CHANGE_TYPE}" class="link">{TR_CHANGE_STATUS}</a>
+							<span class="bold">{TR_SUBDOMAIN_NAME}</span> - <a href="selity_debugger.php?action=change_status&amp;id={CHANGE_ID}&amp;type={CHANGE_TYPE}" class="link">{TR_CHANGE_STATUS}</a>
 						</p>
 						<span style="color:red;">{TR_SUBDOMAIN_ERROR}</span>
 					</td>
@@ -71,7 +71,7 @@
 				<tr>
 					<td>
 						<p>
-							<span class="bold">{TR_SUBDOMAIN_ALIAS_NAME}</span> - <a href="imscp_debugger.php?action=change_status&amp;id={CHANGE_ID}&amp;type={CHANGE_TYPE}" class="link">{TR_CHANGE_STATUS}</a>
+							<span class="bold">{TR_SUBDOMAIN_ALIAS_NAME}</span> - <a href="selity_debugger.php?action=change_status&amp;id={CHANGE_ID}&amp;type={CHANGE_TYPE}" class="link">{TR_CHANGE_STATUS}</a>
 						</p>
 						<span style="color:red;">{TR_SUBDOMAIN_ALIAS_ERROR}</span>
 					</td>
@@ -92,7 +92,7 @@
 				<tr>
 					<td>
 						<p>
-							<span class="bold">{TR_MAIL_NAME}</span> - <a href="imscp_debugger.php?action=change_status&amp;id={CHANGE_ID}&amp;type={CHANGE_TYPE}" class="link">{TR_CHANGE_STATUS}</a>
+							<span class="bold">{TR_MAIL_NAME}</span> - <a href="selity_debugger.php?action=change_status&amp;id={CHANGE_ID}&amp;type={CHANGE_TYPE}" class="link">{TR_CHANGE_STATUS}</a>
 						</p>
 						<span style="color:red;">{TR_MAIL_ERROR}</span></td>
 				</tr>
@@ -103,7 +103,7 @@
 					<th>{TR_DAEMON_TOOLS}</th>
 				</tr>
 				<tr>
-					<td><a href="imscp_debugger.php?action=run_engine" class="link">{EXEC_COUNT} {TR_EXEC_REQUESTS}</a></td>
+					<td><a href="selity_debugger.php?action=run_engine" class="link">{EXEC_COUNT} {TR_EXEC_REQUESTS}</a></td>
 				</tr>
 			</table>
 			<!-- EDP: props_list -->

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# i-MSCP a internet Multi Server Control Panel
+# Selity - multiserver hosting control panel
 #
 # The contents of this file are subject to the Mozilla Public License
 # Version 1.1 (the "License"); you may not use this file except in
@@ -21,17 +21,21 @@
 # Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
 # internet Multi Server Control Panel. All Rights Reserved.
 #
-# The i-MSCP Home Page is:
+# Portions created by the Selity Team are Copyright (C) 2012 by Selity.
+# All Rights Reserved.
 #
-#    http://i-mscp.net
+# The Selity Home Page is:
+#
+#    http://selity.net
 #
 # Copyright (C) 2006-2010 by isp Control Panel - http://ispcp.net
 # Copyright (C) 2010-2012 by internet Multi Server Control Panel - http://i-mscp.net
+# Copyright (C) 2012 by Selity - http://selity.net
 # Author Laurent Declercq <l.declercq@nuxwin.com>
 
 ################################################################################
 ## Script description:                                                        ##
-##  selity-apache-logger - i-MSCP apache logfiles handling                     ##
+##  selity-apache-logger - Selity apache logfiles handling                    ##
 ##                                                                            ##
 ## I. CustomLog handler:                                                      ##
 ##                                                                            ##
@@ -101,7 +105,7 @@ GetOptions(\%opt, 'loggingType|t=s', 'logDir|l=s');
 
 ################################################################################
 #
-# Load configuration from i-MSCP configuration file
+# Load configuration from Selity configuration file
 #
 # @return int 0 on success, negative int otherwise
 #
@@ -132,14 +136,14 @@ sub getConf {
 # Create/update all custom log files
 #
 # This subroutine is the handler that is responsible to grab and parse all error
-# log lines from apache and create the i-MSCP errors log files from them.
+# log lines from apache and create the Selity errors log files from them.
 #
 # @return void
 #
 sub ErrorLogHandler {
 
 	eventLog(
-		'notice', 'i-MSCP Apache Logger started ErrorLog Handler -- ' .
+		'notice', 'Selity Apache Logger started ErrorLog Handler -- ' .
 			'resuming normal operations'
 	);
 
@@ -152,7 +156,7 @@ sub ErrorLogHandler {
 			\/([\w\d.-]+)
 		/x;
 
-		# Error from i-MSCP Frontend ?
+		# Error from Selity Frontend ?
 		$vhost = $main::cfg{'BASE_SERVER_VHOST'} if ($vhost eq 'master');
 
 		# Write the error log line in the default|domain.tld-error.log
@@ -178,14 +182,14 @@ sub ErrorLogHandler {
 # Create/update all custom log files
 #
 # This subroutine is the handler that is responsible to grab and parse all
-# custom log lines from apache and create the i-MSCP custom logfiles from them.
+# custom log lines from apache and create the Selity custom logfiles from them.
 #
 # @return void
 #
 sub CustomLoghandler {
 
 	eventLog(
-		'notice', 'i-MSCP Apache Logger started CustomLog Handler -- ' .
+		'notice', 'Selity Apache Logger started CustomLog Handler -- ' .
 			'resuming normal operations'
 	);
 
@@ -295,13 +299,13 @@ sub signalHandler {
 ################################################################################
 
 umask(027);
-eventLog('notice', "Starting i-MSCP Apache logger (pid $$)");
+eventLog('notice', "Starting Selity Apache logger (pid $$)");
 
-# Get i-MSCP configuration file
+# Get Selity configuration file
 if(getConf() != 0) {
 	eventLog(
 		'err',
-		"Unable to load i-MSCP configuration from the selity.conf file."
+		"Unable to load Selity configuration from the selity.conf file."
 	);
 
 } else {

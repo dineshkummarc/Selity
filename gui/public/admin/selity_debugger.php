@@ -659,19 +659,19 @@ if (isset($_GET['action'])) {
 				break;
 			default:
 				set_page_message(tr('Unknown type.'), 'error');
-				redirectTo('imscp_debugger.php');
+				redirectTo('selity_debugger.php');
 		}
 
 		$stmt = exec_query($query, $_GET['id']);
 
 		if ($stmt !== false) {
 			set_page_message(tr('Done'), 'success');
-			redirectTo('imscp_debugger.php');
+			redirectTo('selity_debugger.php');
 		} else {
 			/** @var $db iMSCP_Database */
 			$db = iMSCP_Registry::get('db');
 			set_page_message(tr('Unknown Error') . '<br />' . $db->errorMsg(), 'error');
-			redirectTo('imscp_debugger.php');
+			redirectTo('selity_debugger.php');
 		}
 	}
 }
@@ -680,7 +680,7 @@ $tpl = new iMSCP_pTemplate();
 $tpl->define_dynamic(
 	array(
 		'layout' => 'shared/layouts/ui.tpl',
-		 'page' => 'admin/imscp_debugger.tpl',
+		 'page' => 'admin/selity_debugger.tpl',
 		 'page_message' => 'layout',
 		 'hosting_plans' => 'page',
 		 'domain_message' => 'page',

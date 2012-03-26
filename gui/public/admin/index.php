@@ -94,7 +94,7 @@ function admin_generateUpdateMessages($tpl)
 
     if ($cfg->CHECK_FOR_UPDATES) {
         if (iMSCP_Update_Version::getInstance()->isAvailableUpdate()) {
-            $tpl->assign('UPDATE', '<a href="imscp_updates.php" class="link">' .
+            $tpl->assign('UPDATE', '<a href="selity_updates.php" class="link">' .
                                    tr('New i-MSCP update is available') . '</a>');
         } else {
             if (iMSCP_Update_Version::getInstance()->getError() != '') {

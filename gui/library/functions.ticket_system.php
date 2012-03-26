@@ -669,7 +669,7 @@ function hasTicketSystem($userId = null)
     /** @var $cfg iMSCP_Config_Handler_File */
     $cfg = iMSCP_Registry::get('config');
 
-    if (!$cfg->IMSCP_SUPPORT_SYSTEM) {
+    if (!$cfg->SELITY_SUPPORT_SYSTEM) {
         return false;
     } elseif ($userId !== null) {
         $query = "SELECT`support_system` FROM `reseller_props` WHERE `reseller_id` = ?";
