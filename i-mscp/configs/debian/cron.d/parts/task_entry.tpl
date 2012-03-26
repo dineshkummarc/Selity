@@ -1,1 +1,0 @@
-{MINUTE} {HOUR}  {DAY} {MONTH} {DWEEK}  {USER} umask 027; {C0MMAND}
