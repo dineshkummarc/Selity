@@ -267,7 +267,7 @@ function client_registerIp($ipNumber, $domain, $alias, $netcard)
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -304,7 +304,7 @@ $tpl->define_dynamic(
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Admin / General settings / IPs management'),
+		'TR_PAGE_TITLE' => tr('Selity - Admin / General settings / IPs management'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'MANAGE_IPS' => tr('Manage IPs'),

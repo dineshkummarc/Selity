@@ -128,7 +128,7 @@ function _admin_generateResellerStatisticsEntry($tpl, $resellerId, $resellerName
  * main script
  */
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 check_login(__FILE__);
 
@@ -148,7 +148,7 @@ $tpl->define_dynamic(
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Admin / Reseller statistics'),
+		'TR_PAGE_TITLE' => tr('Selity - Admin / Reseller statistics'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'TR_RESELLER_NAME' => tr('Reseller name'),

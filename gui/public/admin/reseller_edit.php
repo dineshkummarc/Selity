@@ -902,7 +902,7 @@ function admin_checkResellerLimit($newLimit, $assignedByReseller, $usedByReselle
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -946,12 +946,12 @@ $tpl->define_dynamic(
 
 $tpl->assign(
 	array(
-		 'TR_PAGE_TITLE' => tr('i-MSCP - Admin / Manage users / Edit Reseller'),
+		 'TR_PAGE_TITLE' => tr('Selity - Admin / Manage users / Edit Reseller'),
 		 'THEME_CHARSET' => tr('encoding'),
 		 'ISP_LOGO' => layout_getUserLogo(),
 		 'EDIT_ID' => $resellerId,
 		 'TR_EDIT_RESELLER' => tr('Edit reseller'),
-		 'TR_NOTICE' => tr('i-MSCP Notice'),
+		 'TR_NOTICE' => tr('Selity Notice'),
 		 'TR_EVENT_NOTICE' => tr('The `Enter` key is disabled for performance reasons.'),
 		 //'TR_WARNING' => tr('Warning'),
 		 //'TR_PHP_SETTINGS_UPDATE_WARNING' => tr('If needed, when PHP settings for a reseller are updated, all PHP settings that belong to its customers are synchronized. Depending on number of customers, this task can take much time'),

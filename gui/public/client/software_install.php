@@ -61,7 +61,7 @@ function client_generatePage($tpl, $customerId)
  */
 
 // Include core library
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart);
 
@@ -289,7 +289,7 @@ if (isset($_POST['Submit2'])) {
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Install Software'),
+		'TR_PAGE_TITLE' => tr('Selity - Install Software'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'TR_INSTALL_SOFTWARE' => tr('Install Software'),

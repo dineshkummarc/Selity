@@ -325,7 +325,7 @@ function add_domain_alias()
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onResellerScriptStart);
 
@@ -347,7 +347,7 @@ if (!is_xhr()) {
 		array(
 			'THEME_CHARSET' => tr('encoding'),
 			'ISP_LOGO' => layout_getUserLogo(),
-			'TR_PAGE_TITLE' => tr('i-MSCP - User/Add domain alias'),
+			'TR_PAGE_TITLE' => tr('Selity - User/Add domain alias'),
 			'TR_MANAGE_DOMAIN_ALIAS' => tr('Manage domain alias'),
 			'TR_ADD_ALIAS' => tr('Add domain alias'),
 			'TR_DOMAIN_NAME' => tr('Domain name'),

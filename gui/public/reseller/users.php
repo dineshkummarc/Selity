@@ -281,7 +281,7 @@ function check_externel_events()
 /************************************************************************************
  * Main script
  */
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onResellerScriptStart);
 
@@ -309,7 +309,7 @@ $tpl->define_dynamic(
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Users'),
+		'TR_PAGE_TITLE' => tr('Selity - Users'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'TR_MANAGE_USERS' => tr('Manage users'),

@@ -570,7 +570,7 @@ function get_error_htaccess($tpl)
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -705,17 +705,17 @@ $errors += get_error_htaccess($tpl);
 
 $tpl->assign(
 	array(
-		 'TR_PAGE_TITLE' => tr('i-MSCP - Multi Server Control Panel'),
+		 'TR_PAGE_TITLE' => tr('Selity - multiserver hosting control panel'),
 		 'THEME_CHARSET' => tr('encoding'),
 		 'ISP_LOGO' => layout_getUserLogo(),
-		 'TR_DEBUGGER_TITLE' => tr('i-MSCP debugger'),
+		 'TR_DEBUGGER_TITLE' => tr('Selity debugger'),
 		 'TR_DOMAIN_ERRORS' => tr('Domain errors'),
 		 'TR_ALIAS_ERRORS' => tr('Domain alias errors'),
 		 'TR_SUBDOMAIN_ERRORS' => tr('Subdomain errors'),
 		 'TR_SUBDOMAIN_ALIAS_ERRORS' => tr('Alias subdomain errors'),
 		 'TR_MAIL_ERRORS' => tr('Mail account errors'),
 		 'TR_HTACCESS_ERRORS' => tr('.htaccess related errors'),
-		 'TR_DAEMON_TOOLS' => tr('i-MSCP Daemon tools'),
+		 'TR_DAEMON_TOOLS' => tr('Selity Daemon tools'),
 		 'TR_EXEC_REQUESTS' => tr('Execute requests'),
 		 'TR_CHANGE_STATUS' => tr("Set status to 'change'"),
 		 'EXEC_COUNT' => $exec_count,

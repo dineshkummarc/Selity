@@ -348,7 +348,7 @@ function add_domain_alias()
  */
 
 // Include core library
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart);
 
@@ -381,7 +381,7 @@ if (!is_xhr()) {
 		array(
 			'THEME_CHARSET' => tr('encoding'),
 			'ISP_LOGO' => layout_getUserLogo(),
-			'TR_PAGE_TITLE' => tr('i-MSCP Client : Add Alias'),
+			'TR_PAGE_TITLE' => tr('Selity Client : Add Alias'),
 			'TR_TITLE_ADD_DOMAIN_ALIAS' => tr('Add domain alias'),
 			'TR_DOMAIN_ALIAS_DATA' => tr('Domain alias data'),
 			'TR_DOMAIN_ALIAS_NAME' => tr('Domain alias name'),
@@ -389,10 +389,10 @@ if (!is_xhr()) {
 			'TR_MOUNT_POINT' => tr('Mount point'),
 			'TR_FORWARD' => tr('Redirect to URL'),
 			'TR_ADD' => tr('Add'),
-			'TR_DMN_HELP' => tr("You do not need 'www.' i-MSCP will add it automatically."),
-			'TR_ENABLE_FWD' => tr("Redirect"),
-			'TR_ENABLE' => tr("Enable"),
-			'TR_DISABLE' => tr("Disable"),
+			'TR_DMN_HELP' => tr('You do not need "www." i-MSCP will add it automatically.'),
+			'TR_ENABLE_FWD' => tr('Redirect'),
+			'TR_ENABLE' => tr('Enable'),
+			'TR_DISABLE' => tr('Disable'),
 			'TR_PREFIX_HTTP' => 'http://',
 			'TR_PREFIX_HTTPS' => 'https://',
 			'TR_PREFIX_FTP' => 'ftp://'

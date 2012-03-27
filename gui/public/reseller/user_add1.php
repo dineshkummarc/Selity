@@ -232,7 +232,7 @@ function get_hp_data_list($tpl, $reseller_id)
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onResellerScriptStart);
 
@@ -254,7 +254,7 @@ $tpl->define_dynamic(
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Reseller / Add customer - step 1'),
+		'TR_PAGE_TITLE' => tr('Selity - Reseller / Add customer - step 1'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'TR_ADD_USER' => tr('Add user'),

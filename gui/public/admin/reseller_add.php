@@ -654,7 +654,7 @@ function admin_checkAndCreateResellerAccount()
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -691,11 +691,11 @@ $tpl->define_dynamic(
 
 $tpl->assign(
 	array(
-		 'TR_PAGE_TITLE' => tr('i-MSCP - Admin / Manage users / Add Reseller'),
+		 'TR_PAGE_TITLE' => tr('Selity - Admin / Manage users / Add Reseller'),
 		 'THEME_CHARSET' => tr('encoding'),
 		 'ISP_LOGO' => layout_getUserLogo(),
 		 'TR_ADD_RESELLER' => tr('Add reseller'),
-		 'TR_NOTICE' => tr('i-MSCP Notice'),
+		 'TR_NOTICE' => tr('Selity Notice'),
 		 'TR_EVENT_NOTICE' => tr('The `Enter` key is disabled for performance reasons.'),
 		 'TR_CREATE' => tr('Create'),
 		 'TR_CANCEL' => tr('Cancel'),

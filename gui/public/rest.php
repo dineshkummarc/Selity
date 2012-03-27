@@ -31,7 +31,7 @@
 // Include core library
 if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && stristr($_SERVER['HTTP_X_REQUESTED_WITH'], 'RestHttpRequest') !== false) {
 	// Include core library
-	require_once 'imscp-lib.php'; // TODO avoid to load useless files
+	require_once 'selity-lib.php'; // TODO avoid to load useless files
 	iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onRestRequest, array('request' => $_REQUEST));
 } else {
 	die('Error - Only the REST requests are allowed through this door.');

@@ -317,7 +317,7 @@ function client_generateDomainExpiresInformation($tpl)
  */
 
 // Include core libraries
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart);
 
@@ -339,7 +339,7 @@ $tpl->define_dynamic(
 
 $tpl->assign(
 	array(
-		 'TR_PAGE_TITLE' => tr('i-MSCP Client / General Information'),
+		 'TR_PAGE_TITLE' => tr('Selity Client / General Information'),
 		 'THEME_CHARSET' => tr('encoding'),
 		 'ISP_LOGO' => layout_getUserLogo(),
 		 'TR_TITLE_GENERAL_INFORMATION' => tr('General information')));

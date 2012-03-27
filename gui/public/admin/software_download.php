@@ -26,7 +26,7 @@
  * @license     http://www.gnu.org/licenses/gpl-2.0.txt GPL v2
  */
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 

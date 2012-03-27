@@ -27,7 +27,7 @@
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -66,7 +66,7 @@ if (isset($_GET['id'])){
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Application Management'),
+		'TR_PAGE_TITLE' => tr('Selity - Application Management'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo()));
 
@@ -93,7 +93,7 @@ $tpl->assign(
 		'TR_RESELLER_COUNT_WAITING' => tr('Awaiting activation'),
 		'TR_RESELLER_COUNT_ACTIVATED' => tr('Activated softwares'),
 		'TR_RESELLER_SOFTWARE_IN_USE' => tr('Total installations'),
-		'TR_ADMIN_SOFTWARE_PAGE_TITLE' => tr('i-MSCP - Software Installer Management')));
+		'TR_ADMIN_SOFTWARE_PAGE_TITLE' => tr('Selity - Software Installer Management')));
 
 generateNavigation($tpl);
 generatePageMessage($tpl);

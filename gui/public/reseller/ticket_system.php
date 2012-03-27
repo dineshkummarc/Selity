@@ -40,7 +40,7 @@
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onResellerScriptStart);
 
@@ -86,7 +86,7 @@ $tpl->define_dynamic(
 $tpl->assign(
 	array(
 		'THEME_CHARSET' => tr('encoding'),
-		'TR_PAGE_TITLE' => tr('i-MSCP - Reseller / Support Ticket System / Open Tickets'),
+		'TR_PAGE_TITLE' => tr('Selity - Reseller / Support Ticket System / Open Tickets'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'TR_SUPPORT_SYSTEM' => tr('Support Ticket System'),
 		'TR_OPEN_TICKETS' => tr('Open tickets'),

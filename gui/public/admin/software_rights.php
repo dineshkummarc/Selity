@@ -27,7 +27,7 @@
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -65,7 +65,7 @@ if (isset($_GET['id']) || isset($_POST['id'])) {
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Application Management (Permissions)'),
+		'TR_PAGE_TITLE' => tr('Selity - Application Management (Permissions)'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo()));
 
@@ -95,7 +95,7 @@ $tpl->assign(
 		'TR_ADDED_BY' => tr('Added by'),
 		'TR_ADD_RIGHTS_BUTTON' => tr('Add permissions'),
 		'TR_SOFTWARE_RIGHTS' => tr('Software permissions'),
-		'TR_ADMIN_SOFTWARE_PAGE_TITLE' => tr('i-MSCP - Application Management (Permissions)')));
+		'TR_ADMIN_SOFTWARE_PAGE_TITLE' => tr('Selity - Application Management (Permissions)')));
 
 generateNavigation($tpl);
 generatePageMessage($tpl);

@@ -27,7 +27,7 @@
  */
 
 /** Include core library */
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -76,7 +76,7 @@ if($use_webdepot) {
 
 	$tpl->assign(
 		array(
-			'TR_WEBDEPOT' => tr('i-MSCP application installer Web softwares repository'),
+			'TR_WEBDEPOT' => tr('Selity application installer Web softwares repository'),
 			'TR_APPLY_CHANGES' => tr('Update from Web software repository'),
 			'TR_PACKAGE_TITLE' => tr('Package name'),
 			'TR_PACKAGE_INSTALL_TYPE' => tr('Package install type'),
@@ -273,7 +273,7 @@ if (isset($_POST['upload']) && $_SESSION['software_upload_token'] == $_POST['sen
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP / Software Installer / Management'),
+		'TR_PAGE_TITLE' => tr('Selity / Software Installer / Management'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo()));
 
@@ -317,7 +317,7 @@ $tpl->assign(
 		'TR_MESSAGE_IMPORT' => tr('Are you sure you want to import this package into the local software repository?', true),
 		'TR_MESSAGE_DELETE' => tr('Are you sure you want to delete this package?', true),
 		'TR_MESSAGE_INSTALL' => tr('Are you sure you want to install this package from the Web software repository?', true),
-		'TR_ADMIN_SOFTWARE_PAGE_TITLE' => tr('i-MSCP / Softwares Installer / Management')));
+		'TR_ADMIN_SOFTWARE_PAGE_TITLE' => tr('Selity / Softwares Installer / Management')));
 
 generateNavigation($tpl);
 generatePageMessage($tpl);

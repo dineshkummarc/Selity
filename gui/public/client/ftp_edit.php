@@ -36,7 +36,7 @@
  */
 
 // Include core library
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart);
 
@@ -212,7 +212,7 @@ function update_ftp_account($ftp_acc, $dmn_name) {
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Client/Edit FTP Account'),
+		'TR_PAGE_TITLE' => tr('Selity - Client/Edit FTP Account'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo()));
 

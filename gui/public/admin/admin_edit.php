@@ -171,7 +171,7 @@ function admin_isValidData()
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -227,7 +227,7 @@ $tpl->assign(
 	array(
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo(),
-		'TR_PAGE_TITLE' => tr('i-MSCP - Admin / Edit customer'),
+		'TR_PAGE_TITLE' => tr('Selity - Admin / Edit customer'),
 		'TR_EMPTY_OR_WORNG_DATA' => tr('Empty data or wrong field.'),
 		'TR_PASSWORD_NOT_MATCH' => tr("Passwords don't match!"),
 		'TR_CORE_DATA' => tr('Core data'),

@@ -154,7 +154,7 @@ function generateUserPersonalData($tpl)
  */
 
 // Include needed libraries
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onOrderPanelScriptStart);
 

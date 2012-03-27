@@ -201,7 +201,7 @@ function client_generatePage($tpl, $id, $type) {
  */
 
 // Include core library
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart);
 
@@ -230,7 +230,7 @@ if (!isset($_GET['id']) || !isset($_GET['type']) || !in_array($_GET['type'], arr
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Client/Manage certificates'),
+		'TR_PAGE_TITLE' => tr('Selity - Client/Manage certificates'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'TR_CERTIFICATE_DATA' => tr('Certificate data'),

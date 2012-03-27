@@ -35,6 +35,6 @@
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 createImage('image');

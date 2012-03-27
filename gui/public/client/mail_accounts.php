@@ -36,7 +36,7 @@
  */
 
 // Include core library
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart);
 
@@ -64,7 +64,7 @@ $tpl->define_dynamic('table_list', 'page');
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE'	=> tr('i-MSCP - Client / Manage mail'),
+		'TR_PAGE_TITLE'	=> tr('Selity - Client / Manage mail'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo()));
 

@@ -40,7 +40,7 @@
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onResellerScriptStart);
 
@@ -90,7 +90,7 @@ gen_def_language($tpl, $resellerCurrentLanguage);
 
 $tpl->assign(
 	array(
-		 'TR_PAGE_TITLE' => tr('i-MSCP - Reseller/Change Language'),
+		 'TR_PAGE_TITLE' => tr('Selity - Reseller/Change Language'),
 		 'THEME_CHARSET' => tr('encoding'),
 		 'ISP_LOGO' => layout_getUserLogo(),
 		 'TR_GENERAL_INFO' => tr('General information'),

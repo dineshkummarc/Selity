@@ -36,7 +36,7 @@
  */
 
 // Include core library
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 // Temporary fix for all 'Strict Standards' errors that come from the Net_DNS library
 error_reporting(E_ALL);
@@ -68,8 +68,8 @@ $add_mode = preg_match('~dns_add.php~', $_SERVER['REQUEST_URI']);
 $tpl->assign(
 	array(
 		'TR_PAGE_TITLE' => ($add_mode)
-			? tr("i-MSCP - Manage Domain Alias/Add DNS zones record")
-			: tr("i-MSCP - Manage Domain Alias/Edit DNS zones record"),
+			? tr('Selity - Manage Domain Alias/Add DNS zones record')
+			: tr('Selity - Manage Domain Alias/Edit DNS zones record'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'ACTION_MODE' => ($add_mode) ? 'dns_add.php' : 'dns_edit.php?edit_id={ID}'));
@@ -80,8 +80,8 @@ $tpl->assign(
 		'TR_CANCEL' => tr('Cancel'),
 		'TR_ADD' => tr('Add'),
 		'TR_DOMAIN' => tr('Domain'),
-		'TR_EDIT_DNS' => ($add_mode) ? tr("Add custom DNS record") : tr("Edit custom DNS record"),
-		'TR_DNS' => tr("Custom DNS record"),
+		'TR_EDIT_DNS' => ($add_mode) ? tr('Add custom DNS record') : tr('Edit custom DNS record'),
+		'TR_DNS' => tr('Custom DNS record'),
 		'TR_DNS_NAME' => tr('Name'),
 		'TR_DNS_CLASS' => tr('Class'),
 		'TR_DNS_TYPE' => tr('Type'),
@@ -97,7 +97,7 @@ $tpl->assign(
 		'TR_DNS_CNAME' => tr('Canonical name'),
 		'TR_DNS_PLAIN' => tr('Plain record data'),
 		'TR_DNS_TXT_DATA' => tr('TXT data'),
-		'TR_TITLE_CUSTOM_DNS_RECORD' => ($add_mode) ? tr("Add custom DNS record") : tr("Edit custom DNS record"),
+		'TR_TITLE_CUSTOM_DNS_RECORD' => ($add_mode) ? tr('Add custom DNS record') : tr('Edit custom DNS record'),
 		'TR_CUSTOM_DNS_RECORD_DATA' => tr('Custom DNS record data')));
 
 generateNavigation($tpl);

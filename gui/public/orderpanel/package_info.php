@@ -147,7 +147,7 @@ function gen_plan_details($tpl, $user_id, $plan_id)
  */
 
 // Include needed libraries
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onOrderPanelScriptStart);
 
@@ -210,7 +210,7 @@ $tpl->assign(
 		'TR_CUSTOM_LOGS' => tr('Custom apache logs'),
 		'TR_ONLINE_SUPPORT' => tr('Web & E-Mail Support'),
 		'TR_OWN_DOMAIN' => tr('Your own domain'),
-		'TR_IMSCP' => tr('i-MSCP Control Panel'),
+		'TR_IMSCP' => tr('Selity Control Panel'),
 		'TR_UPDATES' => tr('Automatic updates'),
 		'TR_PRICE' => tr('Price'),
 		'TRR_PRICE' => tr('Package price'),

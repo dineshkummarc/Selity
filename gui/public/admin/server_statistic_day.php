@@ -130,7 +130,7 @@ function admin_generatePage($tpl, $year, $month, $day)
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -161,7 +161,7 @@ if (isset($_GET['month']) && isset($_GET['year']) && isset($_GET['day'])) {
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Admin / Statistics / Server statistics / Server day statistics'),
+		'TR_PAGE_TITLE' => tr('Selity - Admin / Statistics / Server statistics / Server day statistics'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'TR_MONTH' => tr('Month'),

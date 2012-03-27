@@ -35,7 +35,7 @@
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onLostPasswordScriptStart);
 
@@ -72,11 +72,11 @@ $tpl->define_dynamic(
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Multi Server Control Panel / Lost password'),
+		'TR_PAGE_TITLE' => tr('Selity - multiserver hosting control panel / Lost password'),
 		'THEME_CHARSET' => tr('encoding'),
 		'CONTEXT_CLASS' => 'login',
 		'productLongName' => tr('multiserver hosting control panel'),
-		'productLink' => 'http://www.i-mscp.net',
+		'productLink' => 'http://selity.net',
 		'productCopyright' => tr('© 2010-2012 Selity Team<br/>All Rights Reserved'),
 		'TR_CAPCODE' => tr('Security code'),
 		'GET_NEW_IMAGE' => tr('Get a new image'),

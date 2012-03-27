@@ -36,7 +36,7 @@
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -57,7 +57,7 @@ $tpl->define_dynamic(
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - Multi Server Control Panel'),
+		'TR_PAGE_TITLE' => tr('Selity - multiserver hosting control panel'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo()));
 
@@ -100,7 +100,7 @@ generateNavigation($tpl);
 
 $tpl->assign(
 	array(
-		'TR_UPDATES_TITLE' => tr('i-MSCP updates'),
+		'TR_UPDATES_TITLE' => tr('Selity updates'),
 		'TR_AVAILABLE_UPDATES' => tr('Available i-MSCP updates'),
 		'TR_MESSAGE' => tr('No new i-MSCP updates available'),
 		'TR_UPDATE' => tr('Update'),

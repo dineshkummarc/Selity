@@ -397,9 +397,9 @@ function layout_getUserLogo($searchForCreator = true, $returnDefault = true)
 		if (!$returnDefault) {
 			return '';
 		} elseif (file_exists($cfg->GUI_ROOT_DIR . '/public/themes/' .
-			$_SESSION['user_theme'] . '/images/imscp_logo.png')
+			$_SESSION['user_theme'] . '/images/selity_logo.png')
 		) {
-			return '../themes/' . $_SESSION['user_theme'] . '/images/imscp_logo.png';
+			return '../themes/' . $_SESSION['user_theme'] . '/images/selity_logo.png';
 		} else {
 			// no logo available, we are using default
 			return $cfg->ISP_LOGO_PATH . '/' . 'isp_logo.gif';
@@ -547,7 +547,7 @@ function layout_isUserLogo($logoPath)
 	/** @var $cfg iMSCP_Config_Handler_File */
 	$cfg = iMSCP_Registry::get('config');
 
-	if ($logoPath == '../themes/' . $_SESSION['user_theme'] . '/images/imscp_logo.png'
+	if ($logoPath == '../themes/' . $_SESSION['user_theme'] . '/images/selity_logo.png'
 		|| $logoPath == $cfg->ISP_LOGO_PATH . '/' . 'isp_logo.gif'
 	) {
 		return false;

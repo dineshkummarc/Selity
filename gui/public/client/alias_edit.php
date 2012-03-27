@@ -36,7 +36,7 @@
  */
 
 // Include core library
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart);
 
@@ -57,7 +57,7 @@ $tpl->define_dynamic('page_message', 'layout');
 
 $tpl->assign(
 	array(
-		 'TR_PAGE_TITLE' => tr('i-MSCP - Manage Domain Alias/Edit Alias'),
+		 'TR_PAGE_TITLE' => tr('Selity - Manage Domain Alias/Edit Alias'),
 		 'THEME_CHARSET' => tr('encoding'),
 		 'ISP_LOGO' => layout_getUserLogo()));
 
@@ -70,9 +70,9 @@ $tpl->assign(
 		'TR_MOUNT_POINT' => tr('Mount Point'),
 		'TR_MODIFY' => tr('Modify'),
 		'TR_CANCEL' => tr('Cancel'),
-		'TR_ENABLE_FWD' => tr("Enable Forward"),
-		'TR_ENABLE' => tr("Enable"),
-		'TR_DISABLE' => tr("Disable"),
+		'TR_ENABLE_FWD' => tr('Enable Forward'),
+		'TR_ENABLE' => tr('Enable'),
+		'TR_DISABLE' => tr('Disable'),
 		'TR_PREFIX_HTTP' => 'http://',
 		'TR_PREFIX_HTTPS' => 'https://',
 		'TR_PREFIX_FTP' => 'ftp://',

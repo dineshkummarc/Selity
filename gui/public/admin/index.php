@@ -223,7 +223,7 @@ function admin_generateServerTrafficInfo($tpl)
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -245,7 +245,7 @@ $tpl->define_dynamic(
 $tpl->assign(
 	array(
 		'THEME_CHARSET' => tr('encoding'),
-		'TR_PAGE_TITLE' => tr('i-MSCP - Admin / General information'),
+		'TR_PAGE_TITLE' => tr('Selity - Admin / General information'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'TR_GENERAL_INFORMATION' => tr('General information'),
 		'TR_PROPERTIES' => tr('Properties'),

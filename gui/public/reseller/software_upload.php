@@ -27,7 +27,7 @@
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onResellerScriptStart);
 
@@ -79,7 +79,7 @@ if (ask_reseller_is_allowed_web_depot($_SESSION['user_id']) == "yes") {
 
 		$tpl->assign(
 			array(
-				 'TR_WEBDEPOT' => tr('i-MSCP application installer web software depot'),
+				 'TR_WEBDEPOT' => tr('Selity application installer web software depot'),
 				 'TR_APPLY_CHANGES' => tr('Update from web depot'),
 				 'TR_PACKAGE_TITLE' => tr('Package title'),
 				 'TR_PACKAGE_INSTALL_TYPE' => tr('Package install type'),
@@ -305,7 +305,7 @@ if (isset($_POST['upload']) && $_SESSION['software_upload_token'] == $_POST['sen
 
 $tpl->assign(
 	array(
-		 'TR_PAGE_TITLE' => tr('i-MSCP - Application Management'),
+		 'TR_PAGE_TITLE' => tr('Selity - Application Management'),
 		 'THEME_CHARSET' => tr('encoding'),
 		 'ISP_LOGO' => layout_getUserLogo()));
 
@@ -332,7 +332,7 @@ $tpl->assign(
 		 'TR_SOFTWARE_FILE' => tr('Choose file (Max: %1$d MB)', ini_get('upload_max_filesize')),
 		 'TR_SOFTWARE_URL' => tr('or remote file (Max: %1$d MB)', formatFilesize($cfg->MAX_REMOTE_FILESIZE)),
 		 'TR_UPLOAD_SOFTWARE_BUTTON' => tr('Upload now'),
-		 'TR_UPLOAD_SOFTWARE_PAGE_TITLE' => tr('i-MSCP - Application Management'),
+		 'TR_UPLOAD_SOFTWARE_PAGE_TITLE' => tr('Selity - Application Management'),
 		 'TR_MESSAGE_DELETE' => tr('Are you sure you want to delete this package?', true),
 		 'TR_MESSAGE_INSTALL' => tr('Are you sure to install this package from the webdepot?', true),
 		 'TR_SOFTWARE_NAME_ASC' => 'software_upload.php?sortby=name&order=asc',

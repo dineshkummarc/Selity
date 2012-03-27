@@ -69,7 +69,7 @@ function _admin_generateIssueTrackerLink($detail)
 {
 	return preg_replace(
 		'/#([0-9]+)/',
-		'<a href="http://trac.i-mscp.net/ticket/\1" target="_blank" title="' .
+		'<a href="http://trac.selity.net/ticket/\1" target="_blank" title="' .
 			tr('More Details') .'">#\1</a>',
 		$detail);
 }
@@ -79,7 +79,7 @@ function _admin_generateIssueTrackerLink($detail)
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -115,7 +115,7 @@ $tpl->define_dynamic(
 $tpl->assign(
 	array(
 		'THEME_CHARSET' => tr('encoding'),
-		'TR_PAGE_TITLE' => tr('i-MSCP - Admin / System tools / Database Update'),
+		'TR_PAGE_TITLE' => tr('Selity - Admin / System tools / Database Update'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'TR_SECTION_TITLE' => tr('Database updates')));
 

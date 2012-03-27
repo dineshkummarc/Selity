@@ -40,7 +40,7 @@
  */
 
 // Include core library
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart);
 
@@ -89,7 +89,7 @@ if (!empty($_POST)) {
 
 $tpl->assign(
 	array(
-		 'TR_PAGE_TITLE' => tr('i-MSCP - Client / Change Language'),
+		 'TR_PAGE_TITLE' => tr('Selity - Client / Change Language'),
 		 'TR_TITLE_CHANGE_LANGUAGE' => tr('Change language'),
 		 'THEME_CHARSET' => tr('encoding'),
 		 'ISP_LOGO' => layout_getUserLogo(),

@@ -91,7 +91,7 @@ function reseller_generateDomainAcountDeletionValidationPage($domainId)
 
     $tpl->assign(
 		array(
-			'TR_PAGE_TITLE' => tr('i-MSCP - Reseller / Domain Account Deletion Validation'),
+			'TR_PAGE_TITLE' => tr('Selity - Reseller / Domain Account Deletion Validation'),
 			'THEME_CHARSET' => tr('encoding'),
 			'ISP_LOGO' => layout_getUserLogo(),
 			'TR_DELETE_DOMAIN' => tr('Delete domain'),
@@ -288,7 +288,7 @@ function reseller_generateDomainAcountDeletionValidationPage($domainId)
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onResellerScriptStart);
 

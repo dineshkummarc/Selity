@@ -86,7 +86,7 @@ function gen_page_ftp_list($tpl)
  */
 
 // Include core library
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart);
 
@@ -112,7 +112,7 @@ $tpl->define_dynamic(
 
 $tpl->assign(
 	array(
-		 'TR_PAGE_TITLE' => tr('i-MSCP - Client/Manage Users'),
+		 'TR_PAGE_TITLE' => tr('Selity - Client/Manage Users'),
 		 'THEME_CHARSET' => tr('encoding'),
 		 'ISP_LOGO' => layout_getUserLogo(),
 		 'TR_TOTAL_FTP_ACCOUNTS' => tr('FTPs total'),

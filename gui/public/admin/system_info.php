@@ -36,7 +36,7 @@
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
@@ -93,7 +93,7 @@ $tpl->parse('DISK_LIST', 'disk_list');
 
 $tpl->assign(
 	array(
-		'TR_PAGE_TITLE' => tr('i-MSCP - admin / System tools / System information'),
+		'TR_PAGE_TITLE' => tr('Selity - admin / System tools / System information'),
 		'THEME_CHARSET' => tr('encoding'),
 		'ISP_LOGO' => layout_getUserLogo(),
 		'TR_CPU_BOGOMIPS' => tr('CPU bogomips'),

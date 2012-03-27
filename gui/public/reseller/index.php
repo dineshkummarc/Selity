@@ -274,7 +274,7 @@ function reseller_generatePageData($tpl, $resellerId, $resellerName)
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onResellerScriptStart);
 
@@ -295,7 +295,7 @@ $tpl->define_dynamic(
 $tpl->assign(
 	array(
 		 'THEME_CHARSET' => tr('encoding'),
-		 'TR_PAGE_TITLE' => tr('i-MSCP - Reseller / General information'),
+		 'TR_PAGE_TITLE' => tr('Selity - Reseller / General information'),
 		 'ISP_LOGO' => layout_getUserLogo(),
 		 'TR_SAVE' => tr('Save'),
 		 'TR_TRAFFIC_USAGE' => tr('Traffic usage'),

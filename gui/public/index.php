@@ -35,7 +35,7 @@
  */
 
 // Include core library
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onLoginScriptStart);
 
@@ -90,7 +90,7 @@ $tpl->define_dynamic(
 $tpl->assign(
 	array(
 		'productLongName' => tr('multiserver hosting control panel'),
-		'productLink' => 'http://www.i-mscp.net',
+		'productLink' => 'http://selity.net',
 		'productCopyright' => tr('© 2010-2012 Selity Team<br/>All Rights Reserved'),
 		'THEME_CHARSET' => tr('encoding')));
 
@@ -101,7 +101,7 @@ if ($cfg->MAINTENANCEMODE && !isset($_GET['admin'])) {
 	$tpl->define_dynamic('page', 'box.tpl');
 	$tpl->assign(
 		array(
-			'TR_PAGE_TITLE' => tr('i-MSCP - Multi Server Control Panel / Maintenance'),
+			'TR_PAGE_TITLE' => tr('Selity - multiserver hosting control panel / Maintenance'),
 			'CONTEXT_CLASS' => 'box_message',
 			'BOX_MESSAGE_TITLE' => tr('System under maintenance'),
 			'BOX_MESSAGE' => nl2br(tohtml($cfg->MAINTENANCEMODE_MESSAGE)),
@@ -115,7 +115,7 @@ if ($cfg->MAINTENANCEMODE && !isset($_GET['admin'])) {
 
 	$tpl->assign(
 		array(
-			'TR_PAGE_TITLE' => tr('i-MSCP - Multi Server Control Panel / Login'),
+			'TR_PAGE_TITLE' => tr('Selity - multiserver hosting control panel / Login'),
 			'CONTEXT_CLASS' => 'login',
 			'TR_LOGIN' => tr('Login'),
 			'TR_USERNAME' => tr('Username'),

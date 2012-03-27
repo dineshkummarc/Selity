@@ -36,7 +36,7 @@
  */
 
 // Include core library
-require_once 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onClientScriptStart);
 
@@ -172,7 +172,7 @@ if (isset($_SESSION['email_support']) && $_SESSION['email_support'] == "no") {
 
 $tpl->assign(
 	array(
-		 'TR_PAGE_TITLE' => tr('i-MSCP - Client/Enable Mail Auto Responder'),
+		 'TR_PAGE_TITLE' => tr('Selity - Client/Enable Mail Auto Responder'),
 		 'THEME_CHARSET' => tr('encoding'),
 		 'ISP_LOGO' => layout_getUserLogo()));
 
@@ -182,7 +182,7 @@ generateNavigation($tpl);
 
 $tpl->assign(
 	array(
-		 'TR_ENABLE_MAIL_AUTORESPONDER' => tr('i-MSCP - Client / Manage mail / Enable autoresponder'),
+		 'TR_ENABLE_MAIL_AUTORESPONDER' => tr('Selity - Client / Manage mail / Enable autoresponder'),
 		 'TR_ARSP_MESSAGE' => tr('Your message'),
 		 'TR_ENABLE' => tr('Save'),
 		 'TR_CANCEL' => tr('Cancel'),

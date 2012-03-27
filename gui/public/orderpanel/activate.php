@@ -112,7 +112,7 @@ function confirmOrder($orderId)
 			$from = $fromEmail;
 		}
 
-		$subject = encode(tr('i-MSCP - Service Mailer - You have a new order'));
+		$subject = encode(tr('Selity - Service Mailer - You have a new order'));
 		$message = tr('
 
 Dear {RESELLER},
@@ -145,7 +145,7 @@ i-MSCP Service Mailer
  */
 
 // Include needed libraries
-require 'imscp-lib.php';
+require_once 'selity-lib.php';
 
 iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onOrderPanelScriptStart);
 
@@ -181,7 +181,7 @@ $tpl->assign(
 		'TR_PAGE_TITLE' => tr('Order Panel / Order confirmation'),
 		'CONTEXT_CLASS' => 'box_message',
 		'productLongName' => tr('multiserver hosting control panel'),
-		'productLink' => 'http://www.i-mscp.net',
+		'productLink' => 'http://selity.net',
 		'productCopyright' => tr('© 2010-2012 Selity Team<br/>All Rights Reserved'),
 		'BOX_MESSAGE_TITLE' => tr('Order confirmation'),
 		'BOX_MESSAGE' => $msg,
