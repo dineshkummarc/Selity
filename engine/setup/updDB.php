@@ -52,8 +52,8 @@ set_include_path('.' . PATH_SEPARATOR . $guiRootDir . '/library');
 require_once 'selity-lib.php';
 
 try {
-	// Gets an Selity_Update_Database instance
-	$databaseUpdate = Selity_Update_Database::getInstance();
+	// Gets an iMSCP_Update_Database instance
+	$databaseUpdate = iMSCP_Update_Database::getInstance();
 
 	if(!$databaseUpdate->applyUpdates()) {
 		print "\n[ERROR]: " . $databaseUpdate->getError() . "\n\n";
