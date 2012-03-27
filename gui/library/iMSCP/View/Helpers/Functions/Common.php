@@ -218,7 +218,7 @@ function gen_purchase_haf($userId, $encode = false)
 	<meta name="robots" content="nofollow, noindex" />
 	<meta http-equiv="Content-Type" content="text/html; charset={THEME_CHARSET}" />
 	<meta http-equiv="Content-Script-Type" content="text/javascript" />
-	<link href="{THEME_COLOR_PATH}/css/imscp.css" rel="stylesheet" type="text/css" />
+	<link href="{THEME_COLOR_PATH}/css/selity.css" rel="stylesheet" type="text/css" />
 	<link href="{THEME_COLOR_PATH}/css/{THEME_COLOR}.css" rel="stylesheet" type="text/css" />
 	<link href="{THEME_COLOR_PATH}/css/jquery-ui-{THEME_COLOR}.css" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="{THEME_COLOR_PATH}/js/jquery.js"></script>

@@ -179,9 +179,9 @@ class iMSCP_Exception_Writer_Browser extends iMSCP_Exception_Writer
 
 		$tpl->assign(
 			array(
-				'TR_PAGE_TITLE' => 'i-MSCP - internet Multi Server Control Panel - Exception',
+				'TR_PAGE_TITLE' => 'Selity - multiserver hosting control panel - Exception',
 				'CONTEXT_CLASS' => 'box_message',
-				'productLink' => 'http://www.i-mscp.net',
+				'productLink' => 'http://selity.net',
 				'productLongName' => 'multiserver hosting control panel',
 				'productCopyright' => '© 2010-2012 Selity Team<br/>All Rights Reserved',
 				'THEME_COLOR_PATH' => '/themes/' . 'default',
