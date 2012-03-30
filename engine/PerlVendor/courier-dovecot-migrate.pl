@@ -194,7 +194,7 @@ sub read_courier_pop3 {
 
 	my $line = 0;
 	do {
-		chomp $_;
+		chomp $_ if $_;
 		unless ($_){
 			print STDERR "$pop3_fname: Broken header: $pop3_hdr\n";
 			close $f;
