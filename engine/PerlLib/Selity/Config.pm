@@ -29,10 +29,16 @@ use strict;
 use warnings;
 use Tie::File;
 use Selity::Debug;
+use Selity::Args;
 
 use vars qw/@ISA/;
 @ISA = ('Common::SimpleClass');
 use Common::SimpleClass;
+
+sub _init{
+	my $self				= shift;
+	$self->{comLineOpts}	= Selity::Args->new();
+}
 
 sub TIEHASH {
 	my $self = shift;
@@ -82,10 +88,12 @@ sub FETCH {
 	my $self	= shift;
 	my $config	= shift;
 
-	debug("Fetching ${config}..." );
-
-	if (!exists($self->{configValues}->{$config}) && !$self->{args}->{noerrors}){
-		error(sprintf('Accessing non existing config value %s', $config));
+	unless (exists($self->{configValues}->{$config})){
+		if( defined $self->{comLineOpts}->get($config)){
+			$self->STORE($config, $self->{comLineOpts}->get($config));
+		} else {
+			error("Accessing non existing config value $config") unless($self->{args}->{noerrors});
+		}
 	}
 
 	return $self->{configValues}->{$config};
