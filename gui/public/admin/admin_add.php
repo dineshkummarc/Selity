@@ -1,47 +1,51 @@
 <?php
-# Selity - multiserver hosting control panel
-#
-# The contents of this file are subject to the Mozilla Public License
-# Version 1.1 (the "License"); you may not use this file except in
-# compliance with the License. You may obtain a copy of the License at
-# http://www.mozilla.org/MPL/
-#
-# Software distributed under the License is distributed on an "AS IS"
-# basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-# License for the specific language governing rights and limitations
-# under the License.
-#
-# The Original Code is "ispCP ω (OMEGA) a Virtual Hosting Control Panel".
-#
-# The Initial Developer of the Original Code is ispCP Team.
-# Portions created by Initial Developer are Copyright (C) 2006-2010 by
-# isp Control Panel. All Rights Reserved.
-#
-# Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
-# internet Multi Server Control Panel. All Rights Reserved.
-#
-# Portions created by the Selity Team are Copyright (C) 2012 by Selity.
-# All Rights Reserved.
-#
-# The Selity Home Page is:
-#
-#    http://selity.net
-#
-# Copyright (C) 2006-2010 by isp Control Panel - http://ispcp.net
-# Copyright (C) 2010-2012 by internet Multi Server Control Panel - http://i-mscp.net
-# Copyright (C) 2012 by Selity - http://selity.net
+/**
+ * i-MSCP a internet Multi Server Control Panel
+ *
+ * The contents of this file are subject to the Mozilla Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ *
+ * The Original Code is "VHCS - Virtual Hosting Control System".
+ *
+ * The Initial Developer of the Original Code is moleSoftware GmbH.
+ * Portions created by Initial Developer are Copyright (C) 2001-2006
+ * by moleSoftware GmbH. All Rights Reserved.
+ *
+ * Portions created by the ispCP Team are Copyright (C) 2006-2010 by
+ * isp Control Panel. All Rights Reserved.
+ *
+ * Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
+ * i-MSCP a internet Multi Server Control Panel. All Rights Reserved.
+ *
+ * @category	i-MSCP
+ * @package		iMSCP_Core
+ * @subpackage	Admin
+ * @copyright   2001-2006 by moleSoftware GmbH
+ * @copyright   2006-2010 by ispCP | http://isp-control.net
+ * @copyright   2010-2012 by i-MSCP | http://i-mscp.net
+ * @author      ispCP Team
+ * @author      i-MSCP Team
+ * @link        http://i-mscp.net
+ */
 
 // Include core library
 require_once 'selity-lib.php';
 
-SELITY_Events_Manager::getInstance()->dispatch(SELITY_Events::onAdminScriptStart);
+iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
 
 check_login(__FILE__);
 
-/** @var $cfg SELITY_Config_Handler_File */
-$cfg = SELITY_Registry::get('config');
+/** @var $cfg iMSCP_Config_Handler_File */
+$cfg = iMSCP_Registry::get('config');
 
-$tpl = new SELITY_pTemplate();
+$tpl = new iMSCP_pTemplate();
 $tpl->define_dynamic(
 	array(
 		'layout' => 'shared/layouts/ui.tpl',
@@ -55,17 +59,17 @@ $tpl->assign(
 		'ISP_LOGO' => layout_getUserLogo()));
 
 /**
- * @param  $tpl SELITY_pTemplate
+ * @param  $tpl iMSCP_pTemplate
  * @return void
  */
 function add_user($tpl)
 {
-    /** @var $cfg SELITY_Config_Handler_File */
-    $cfg = SELITY_Registry::get('config');
+    /** @var $cfg iMSCP_Config_Handler_File */
+    $cfg = iMSCP_Registry::get('config');
 
     if (isset($_POST['uaction']) && $_POST['uaction'] === 'add_user') {
 
-		SELITY_Events_Manager::getInstance()->dispatch(SELITY_Events::onBeforeAddUser);
+		iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onBeforeAddUser);
 
         if (check_user_data()) {
             $upass = crypt_user_pass($_POST['pass']);
@@ -108,8 +112,8 @@ function add_user($tpl)
                                     $firm, $zip, $city, $state, $country, $email,
                                     $phone, $fax, $street1, $street2, $gender));
 
-            /** @var $db SELITY_Database */
-            $db = SELITY_Registry::get('db');
+            /** @var $db iMSCP_Database */
+            $db = iMSCP_Registry::get('db');
             $new_admin_id = $db->insertId();
             $user_logged = $_SESSION['user_logged'];
 
@@ -129,7 +133,7 @@ function add_user($tpl)
 
             exec_query($query, array($new_admin_id, $user_def_lang, $user_theme_color));
 
-			SELITY_Events_Manager::getInstance()->dispatch(SELITY_Events::onAfterAddUser);
+			iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAfterAddUser);
 
             send_add_user_auto_msg($user_id, clean_input($_POST['username']),
                                    clean_input($_POST['pass']),
@@ -195,8 +199,8 @@ function add_user($tpl)
  */
 function check_user_data()
 {
-    /** @var $cfg SELITY_Config_Handler_File */
-    $cfg = SELITY_Registry::get('config');
+    /** @var $cfg iMSCP_Config_Handler_File */
+    $cfg = iMSCP_Registry::get('config');
 
     if (!validates_username($_POST['username'])) {
         set_page_message(tr('Incorrect username length or syntax.'), 'error');
@@ -281,7 +285,7 @@ generatePageMessage($tpl);
 
 $tpl->parse('LAYOUT_CONTENT', 'page');
 
-SELITY_Events_Manager::getInstance()->dispatch(SELITY_Events::onAdminScriptEnd, array('templateEngine' => $tpl));
+iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptEnd, array('templateEngine' => $tpl));
 
 $tpl->prnt();
 
