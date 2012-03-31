@@ -32,7 +32,6 @@ sub new {
 	my $proto	= shift;
 	my $class	= ref($proto) || $proto;
 	my $self	= {
-		'errors'	=> [],
 		'args'		=> {@_} || {}
 	};
 

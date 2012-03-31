@@ -39,7 +39,6 @@ sub new {
 	return ${*$x} if defined ${*$x};
 
 	my $self = {
-		'errors'	=> [],
 		'args'		=> {@_} || {}
 	};
 

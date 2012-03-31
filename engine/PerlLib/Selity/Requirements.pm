@@ -72,11 +72,6 @@ sub _init{
 	};
 }
 
-# Checks for test availability.
-#
-# @throws fatal error if a test is not available
-# @param self $self Selity::Requirements instance
-# @return void
 sub test{
 	my $self = shift;
 	my $test = shift;
@@ -88,10 +83,6 @@ sub test{
 	}
 }
 
-# Process all tests for requirements.
-#
-# @param self $self Selity::Requirements instance
-# @return void
 sub all{
 
 	my $self = shift;
@@ -101,20 +92,10 @@ sub all{
 	$self->_externalProgram();
 }
 
-# Checks for user that run the selity-autoinstaller script.
-#
-# @throws fatal error if the script is not run as root user
-# @param self $self Selity::Requirements instance
-# @return void
 sub user{
 	fatal('The script must be run by root user.') if( $< != 0 );
 }
 
-# Checks for perl module availability.
-#
-# @throws fatal error if a Perl module is missing
-# @param self $self Selity::Requirements instance
-# @return void
 sub _modules {
 
 	my $self = shift;
@@ -137,12 +118,6 @@ sub _modules {
 	fatal("Modules [@mod_missing] was not found on your system.") if (scalar @mod_missing);
 }
 
-# Checks for external program availability and their versions.
-#
-# @throws fatal error if a program is not found on the system
-# @throws fatal error if a program version is older than required
-# @param self $self Selity::Requirements instance
-# @return void
 sub _externalProgram{
 
 	my $self = shift;
@@ -165,15 +140,6 @@ sub _externalProgram{
 	}
 }
 
-# Check for program version.
-#
-# @throws fatal error if a program is not found on the system
-# @access private
-# @param self $self Selity::Requirements instance
-# @param string $program program name
-# @param string $regexp regular expression to find the program version
-# @param string $minversion program minimum version required
-# @return void
 sub _programVersions{
 
 	my ($self, $program, $regexp, $minversion) = @_;
@@ -189,13 +155,6 @@ sub _programVersions{
 	$result;
 }
 
-# Checks for version.
-#
-# @param self $self Selity::Requirements instance
-# @param string $version version to be checked
-# @param string $minversion minimum accepted version
-# @param string $maxversion OPTIONAL maximum accepted version
-# @return mixed 0 on success, string on failure
 sub checkVersion{
 	my $self		= shift;
 	my $version		= shift;

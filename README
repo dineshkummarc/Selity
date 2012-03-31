@@ -31,30 +31,26 @@ your install instructions.
 LICENSING
 =========
 
-Selity was originally developed by moleSoftware http://molesoftware.com/ under the
-Name VHCS and forked a first time under the name ispCP. After getting Open Source it
-was released under the MPL (Mozilla Public License) Version 1.1. Also some integrated
-libraries was released under the terms of the GPL (GNU General Public License)
-version 2.0.
+Selity is developed by Selity Team under the name Selity under the terms of the
+GPL (GNU General Public License) version 2.0.
 
 The maillogconvert.pl script is from awstats which is licensed under the GNU General
 Public License version 2 and states the following: Copyright (C) 2000-2007 - Laurent
 Destailleur - eldy@users.sourceforge.net
 
 Unless otherwise stated all code is licensed under GPL 2.0 and has the following
-copyright: Copyright 2010-2012 by Selity Team - All rights reserved.
+copyright: Copyright 2012 by Selity Team - All rights reserved.
 
 Please have a look at these Licenses if interested. They are shipped with this
 release in the next files:
 
-LICENSE-MPL1.1
 LICENSE-GPL2
 LICENSE-LGPL2.1
 
 CREDITS
 =======
 
-Selity is a project of Selity.net.
+Selity is a project of Selity Team.
 Selity,  and the Selity logo are trademarks of the Selity Team.
 
 Please visit our site under http://selity.net for further information on Selity and
