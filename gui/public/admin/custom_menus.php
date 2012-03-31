@@ -1,39 +1,36 @@
 <?php
-/**
- * i-MSCP a internet Multi Server Control Panel
- *
- * The contents of this file are subject to the Mozilla Public License
- * Version 1.1 (the "License"); you may not use this file except in
- * compliance with the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS"
- * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
- * License for the specific language governing rights and limitations
- * under the License.
- *
- * The Original Code is "VHCS - Virtual Hosting Control System".
- *
- * The Initial Developer of the Original Code is moleSoftware GmbH.
- * Portions created by Initial Developer are Copyright (C) 2001-2006
- * by moleSoftware GmbH. All Rights Reserved.
- *
- * Portions created by the ispCP Team are Copyright (C) 2006-2010 by
- * isp Control Panel. All Rights Reserved.
- *
- * Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
- * i-MSCP a internet Multi Server Control Panel. All Rights Reserved.
- *
- * @category	i-MSCP
- * @package		iMSCP_Core
- * @subpackage	Admin
- * @copyright   2001-2006 by moleSoftware GmbH
- * @copyright   2006-2010 by ispCP | http://isp-control.net
- * @copyright   2010-2012 by i-MSCP | http://i-mscp.net
- * @author      ispCP Team
- * @author      i-MSCP Team
- * @link        http://i-mscp.net
- */
+# Selity - multiserver hosting control panel
+#
+# The contents of this file are subject to the Mozilla Public License
+# Version 1.1 (the "License"); you may not use this file except in
+# compliance with the License. You may obtain a copy of the License at
+# http://www.mozilla.org/MPL/
+#
+# Software distributed under the License is distributed on an "AS IS"
+# basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+# License for the specific language governing rights and limitations
+# under the License.
+#
+# The Original Code is "ispCP ω (OMEGA) a Virtual Hosting Control Panel".
+#
+# The Initial Developer of the Original Code is ispCP Team.
+# Portions created by Initial Developer are Copyright (C) 2006-2010 by
+# isp Control Panel. All Rights Reserved.
+#
+# Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
+# internet Multi Server Control Panel. All Rights Reserved.
+#
+# Portions created by the Selity Team are Copyright (C) 2012 by Selity.
+# All Rights Reserved.
+#
+# The Selity Home Page is:
+#
+#    http://selity.net
+#
+# Copyright (C) 2006-2010 by isp Control Panel - http://ispcp.net
+# Copyright (C) 2010-2012 by internet Multi Server Control Panel - http://i-mscp.net
+# Copyright (C) 2012 by Selity - http://selity.net
+
 
 /*************************************************************************************
  * Script functions
@@ -42,7 +39,7 @@
 /**
  * Generates menus list.
  *
- * @param iMSCP_pTemplate $tpl Template engine instance
+ * @param SELITY_pTemplate $tpl Template engine instance
  * @return void
  */
 function admin_generateMenusList($tpl)
@@ -95,12 +92,12 @@ function admin_generateMenusList($tpl)
 /**
  * Generate form.
  *
- * @param iMSCP_pTemplate $tpl Template engine
+ * @param SELITY_pTemplate $tpl Template engine
  */
 function admin_generateForm($tpl)
 {
-	/** @var $cfg iMSCP_Config_Handler_File */
-	$cfg = iMSCP_Registry::get('config');
+	/** @var $cfg SELITY_Config_Handler_File */
+	$cfg = SELITY_Registry::get('config');
 
 	$customMenu = array(
 		'menu_id' => '', 'menu_name' => '', 'menu_link' => '', 'menu_target' => '_self', 'menu_level' => 'a',
@@ -205,7 +202,7 @@ function admin_isValidMenu($menuName, $menuLink, $menuTarget, $menuLevel, $menuO
 	}
 
 	if(Zend_Session::namespaceIsset('pageMessages')) {
-		iMSCP_Registry::set('errorFieldsStack', $errorFieldsStack);
+		SELITY_Registry::set('errorFieldsStack', $errorFieldsStack);
 		return false;
 	}
 
@@ -300,7 +297,7 @@ function admin_deleteMenu($menuId)
 // Include core library
 require_once 'selity-lib.php';
 
-iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptStart);
+SELITY_Events_Manager::getInstance()->dispatch(SELITY_Events::onAdminScriptStart);
 
 check_login(__FILE__);
 
@@ -320,10 +317,10 @@ if(isset($_POST['uaction'])) {
 	admin_deleteMenu($_GET['delete_id']);
 }
 
-/** @var $cfg iMSCP_Config_Handler_File */
-$cfg = iMSCP_Registry::get('config');
+/** @var $cfg SELITY_Config_Handler_File */
+$cfg = SELITY_Registry::get('config');
 
-$tpl = new iMSCP_pTemplate();
+$tpl = new SELITY_pTemplate();
 $tpl->define_dynamic(
 	array(
 		'layout' => 'shared/layouts/ui.tpl',
@@ -357,8 +354,8 @@ $tpl->assign(
 		'TR_CANCEL' => tr('Cancel'),
 		'TR_MESSAGE_DELETE' => json_encode(tr('Are you sure you want to delete the %s menu?', true, '%s')),
 		'DATATABLE_TRANSLATIONS' => getDataTablesPluginTranslations(),
-		'ERR_FIELDS_STACK' => iMSCP_Registry::isRegistered('errorFieldsStack')
-			? json_encode(iMSCP_Registry::get('errorFieldsStack')) : '[]'));
+		'ERR_FIELDS_STACK' => SELITY_Registry::isRegistered('errorFieldsStack')
+			? json_encode(SELITY_Registry::get('errorFieldsStack')) : '[]'));
 
 generateNavigation($tpl);
 admin_generateMenusList($tpl);
@@ -367,7 +364,7 @@ generatePageMessage($tpl);
 
 $tpl->parse('LAYOUT_CONTENT', 'page');
 
-iMSCP_Events_Manager::getInstance()->dispatch(iMSCP_Events::onAdminScriptEnd, array('templateEngine' => $tpl));
+SELITY_Events_Manager::getInstance()->dispatch(SELITY_Events::onAdminScriptEnd, array('templateEngine' => $tpl));
 
 $tpl->prnt();
 
