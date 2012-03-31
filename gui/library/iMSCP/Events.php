@@ -1,29 +1,35 @@
 <?php
-/**
- * i-MSCP - internet Multi Server Control Panel
- * Copyright (C) 2010-2012 by i-MSCP team
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
- * @category	iMSCP
- * @package		iMSCP_Events
- * @copyright	2010-2012 by i-MSCP team
- * @author		Laurent Declercq <l.declercq@nuxwin.com>
- * @link		http://www.i-mscp.net i-MSCP Home Site
- * @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
- */
+# Selity - When virtual hosting becomes scalable
+#
+# The contents of this file are subject to the Mozilla Public License
+# Version 1.1 (the "License"); you may not use this file except in
+# compliance with the License. You may obtain a copy of the License at
+# http://www.mozilla.org/MPL/
+#
+# Software distributed under the License is distributed on an "AS IS"
+# basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+# License for the specific language governing rights and limitations
+# under the License.
+#
+# The Original Code is "ispCP ω (OMEGA) a Virtual Hosting Control Panel".
+#
+# The Initial Developer of the Original Code is ispCP Team.
+# Portions created by Initial Developer are Copyright (C) 2006-2010 by
+# isp Control Panel. All Rights Reserved.
+#
+# Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
+# internet Multi Server Control Panel. All Rights Reserved.
+#
+# Portions created by the Selity Team are Copyright (C) 2012 by Selity.
+# All Rights Reserved.
+#
+# The Selity Home Page is:
+#
+#    http://selity.net
+#
+# Copyright (C) 2006-2010 by isp Control Panel - http://ispcp.net
+# Copyright (C) 2010-2012 by internet Multi Server Control Panel - http://i-mscp.net
+# Copyright (C) 2012 by Selity - http://selity.net
 
 /**
  * Describes all events triggered in the iMSCP core code.
