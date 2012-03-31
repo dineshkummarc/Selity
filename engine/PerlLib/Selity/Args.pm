@@ -23,74 +23,33 @@
 # @link			http://selity.net Selity Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
-package Selity::SO;
+package Selity::Args;
 
 use strict;
 use warnings;
-
 use Selity::Debug;
-use Selity::Execute qw/execute/;
+use Data::Dumper;
 
 use vars qw/@ISA/;
+
 @ISA = ('Common::SingletonClass');
 use Common::SingletonClass;
 
-
 sub _init{
-	my $self = shift;
-	$self->{Distribution}	= '';
-	$self->{CodeName}		= '';
-	$self->{Version}		= '';
-	fatal('Can not guess operating system') if ($self->getSO);
-}
-
-sub getSO{
 
 	my $self = shift;
-
-	if($^O =~ /bsd$/){
-
-		$self->{Distribution} = $^O;
-		return 0;
-
-	} elsif($^O =~ /linux/) {
-
-		for (qw/_get_By_LSB _get_By_Release_File/){
-
-			return 0 unless $self->$_;
-
-		}
-
+	for (@ARGV){
+		my @a = split '=', $_, 2;
+		next unless $a[0] && $a[1];
+		$self->{args}->{$a[0]} = $a[1];
 	}
-	
-	return 1;
 }
 
-
-sub _get_By_LSB{
-	return 1;
+sub get{
+	my $self	= shift;
+	my $var		= shift;
 	
-	my $self = shift;
-	my ($rs, $stdout, $stderr);
-
-	return 1 if execute('which lsb_release', \$stdout, \$stderr);
-
-	$rs = execute('lsb_release -sirc', \$stdout, \$stderr);
-	debug("Distribution is $stdout") if $stdout;
-	error("Can not guess operating system: $stderr") if $stderr;
-	return $rs if $rs;
-	
-	($self->{Distribution}, $self->{Version}, $self->{CodeName}) = split "\n", $stdout;
-	return 1 unless $self->{Distribution} && $self->{Version} && $self->{CodeName};
-
-	debug ("Found $self->{Distribution} $self->{Version} $self->{CodeName}");
-	
-	0;
-}
-
-sub _get_By_Release_File{
-	
-	return 1;
+	return (defined $self->{args}->{$var} ? $self->{args}->{$var} : undef);
 }
 
 1;

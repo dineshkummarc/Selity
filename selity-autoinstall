@@ -34,6 +34,8 @@ use lib "$FindBin::Bin/engine/PerlVendor";
 umask(027);
 
 use Selity::Debug;
+use Selity::Dialog;
+use Selity::SO;
 
 newDebug('selity-build.log');
 
@@ -43,8 +45,10 @@ Selity::Requirements->new()->user();
 # Entering in silent mode
 silent(1);
 
-
-
+#Selity::Dialog->new();
+Selity::Dialog->new()->msgbox( text => "that went well" );
+Selity::Dialog->new()->yesno( text => 'A binary type question?');
+Selity::SO->new();
 0;
 
 END{

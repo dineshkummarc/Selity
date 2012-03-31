@@ -23,74 +23,45 @@
 # @link			http://selity.net Selity Home Site
 # @license		http://www.gnu.org/licenses/gpl-2.0.html GPL v2
 
-package Selity::SO;
+package Selity::Dialog;
 
 use strict;
 use warnings;
 
-use Selity::Debug;
-use Selity::Execute qw/execute/;
-
-use vars qw/@ISA/;
+use vars qw/@ISA $AUTOLOAD/;
 @ISA = ('Common::SingletonClass');
 use Common::SingletonClass;
-
+use AutoLoader;
+use UI::Dialog;
+use Data::Dumper;
+use Selity::Args;
+use Selity::Debug;
 
 sub _init{
 	my $self = shift;
-	$self->{Distribution}	= '';
-	$self->{CodeName}		= '';
-	$self->{Version}		= '';
-	fatal('Can not guess operating system') if ($self->getSO);
+	$self->{UI} = UI::Dialog->new(
+			title => 'Selity setup', backtitle => 'Selity - When virtual hosting becomes scalable',
+			order => [ 'ascii', 'cdialog', 'whiptail' ] );
 }
 
-sub getSO{
-
+sub AUTOLOAD {
 	my $self = shift;
-
-	if($^O =~ /bsd$/){
-
-		$self->{Distribution} = $^O;
-		return 0;
-
-	} elsif($^O =~ /linux/) {
-
-		for (qw/_get_By_LSB _get_By_Release_File/){
-
-			return 0 unless $self->$_;
-
-		}
-
-	}
-	
-	return 1;
+	my $prompt	= Selity::Args->new->get('noprompt');
+	fatal('No prompt switch is on but some value need user input. Exiting') if $prompt && $prompt =~ m/^y$|^yes$/i;
+	$AUTOLOAD =~ /([^:]+)$/;
+	return $self->{UI}->$1(@_) if $1 && $self->{UI}->can($1);
+	fatal('Method'.($1?$1:'unknown').'not implemented');
 }
 
+sub msgbox{
+	my $self	= shift;
+	my $prompt	= Selity::Args->new->get('noprompt');
+	return $self->{UI}->msgbox(@_) unless $prompt && $prompt =~ m/^y$|^yes$/i;
+}
 
-sub _get_By_LSB{
-	return 1;
-	
+sub DESTROY{
 	my $self = shift;
-	my ($rs, $stdout, $stderr);
-
-	return 1 if execute('which lsb_release', \$stdout, \$stderr);
-
-	$rs = execute('lsb_release -sirc', \$stdout, \$stderr);
-	debug("Distribution is $stdout") if $stdout;
-	error("Can not guess operating system: $stderr") if $stderr;
-	return $rs if $rs;
-	
-	($self->{Distribution}, $self->{Version}, $self->{CodeName}) = split "\n", $stdout;
-	return 1 unless $self->{Distribution} && $self->{Version} && $self->{CodeName};
-
-	debug ("Found $self->{Distribution} $self->{Version} $self->{CodeName}");
-	
-	0;
-}
-
-sub _get_By_Release_File{
-	
-	return 1;
+	$self->{UI}->DESTROY(@_);
 }
 
 1;
