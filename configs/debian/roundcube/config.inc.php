@@ -1,6 +1,6 @@
 <?php
 /**
- * Selity - multiserver hosting control panel
+ * Selity - When virtual hosting becomes scalable
  * Copyright (C) 2010-2011 by i-MSCP team
  * Copyright (C) 2012 by Selity team
  *

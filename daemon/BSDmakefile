@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-# Selity - multiserver hosting control panel
+# Selity - When virtual hosting becomes scalable
 # Copyright 2012 by Selity
 #
 # This program is free software; you can redistribute it and/or

@@ -1,10 +1,9 @@
 --
--- i-MSCP a internet Multi Server Control Panel
+-- Selity - When virtual hosting becomes scalable
 --
 -- Copyright (C) 2006-2010 by isp Control Panel - http://ispcp.net
 -- Copyright (C) 2010-2012 by internet Multi Server Control Panel - http://i-mscp.net
---
--- Version: $Id$
+-- Copyright (C) 2012 by Selity - http://selity.net
 --
 -- The contents of this file are subject to the Mozilla Public License
 -- Version 1.1 (the "License"); you may not use this file except in
@@ -25,9 +24,9 @@
 -- Portions created by the i-MSCP Team are Copyright (C) 2010-2012 by
 -- internet Multi Server Control Panel. All Rights Reserved.
 --
--- The i-MSCP Home Page is:
+-- The Selity Home Page is:
 --
---    http://i-mscp.net
+--    http://selity.net
 --
 -- --------------------------------------------------------
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Selity - multiserver hosting control panel
+ * Selity - When virtual hosting becomes scalable
  *
  * phpMyAdmin configuration file preedided by Selity
  *
