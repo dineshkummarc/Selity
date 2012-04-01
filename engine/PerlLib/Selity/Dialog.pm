@@ -41,22 +41,33 @@ sub _init{
 	my $self = shift;
 	$self->{UI} = UI::Dialog->new(
 			title => 'Selity setup', backtitle => 'Selity - When virtual hosting becomes scalable',
-			order => [ 'ascii', 'cdialog', 'whiptail' ] );
+			order => [ 'cdialog', 'whiptail', 'ascii' ] );
+}
+
+sub reinit{
+	my $self = shift;
+	$self->_init();
 }
 
 sub AUTOLOAD {
 	my $self = shift;
-	my $prompt	= Selity::Args->new->get('noprompt');
-	fatal('No prompt switch is on but some value need user input. Exiting') if $prompt && $prompt =~ m/^y$|^yes$/i;
+	my $noprompt	= Selity::Args->new->get('noprompt');
 	$AUTOLOAD =~ /([^:]+)$/;
+	fatal('No prompt switch is on but some value need user input. Exiting from method:'. $1) if $noprompt;
 	return $self->{UI}->$1(@_) if $1 && $self->{UI}->can($1);
 	fatal('Method'.($1?$1:'unknown').'not implemented');
 }
 
 sub msgbox{
 	my $self	= shift;
-	my $prompt	= Selity::Args->new->get('noprompt');
-	return $self->{UI}->msgbox(@_) unless $prompt && $prompt =~ m/^y$|^yes$/i;
+	my $noprompt	= Selity::Args->new->get('noprompt');
+	return $self->{UI}->msgbox(@_) unless $noprompt;
+}
+
+sub textbox{
+	my $self	= shift;
+	my $noprompt	= Selity::Args->new->get('noprompt');
+	return $self->{UI}->msgbox(@_) unless $noprompt;
 }
 
 sub DESTROY{

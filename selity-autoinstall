@@ -45,10 +45,25 @@ Selity::Requirements->new()->user();
 # Entering in silent mode
 silent(1);
 
-#Selity::Dialog->new();
-Selity::Dialog->new()->msgbox( text => "that went well" );
-Selity::Dialog->new()->yesno( text => 'A binary type question?');
-Selity::SO->new();
+my $SO = Selity::SO->new();
+my $rs = $SO->getSO();
+exit $rs if $rs;
+
+Selity::Dialog->new()->textbox(path => $FindBin::Bin.'/README');
+
+if(
+	!Selity::Args->new->get('noprompt') || Selity::Dialog->new()->yesno(
+		"\nThe Installer detected that you are using $SO->{Distribution} $SO->{CodeName}. Is this ok?"
+	)
+) {
+	error(
+		"Sorry, the installer failing to detect your distribution.\n\n" .
+		"Note: For now, only Debian like operating systems are supported."
+	);
+	exit 1;
+}
+
+
 0;
 
 END{
