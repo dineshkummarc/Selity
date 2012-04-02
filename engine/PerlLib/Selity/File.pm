@@ -102,16 +102,10 @@ sub owner{
 }
 
 sub get{
-
+	my $self = shift;
 	use FileHandle;
 
-	my $self	= shift;
-	my $option	= shift;
 	my @lines;
-
-	$option = {} if(ref $option ne 'HASH');
-
-	$self->{filename} = $option->{filename} if($option->{filename});
 
 	if(!$self->{filename}){
 		error("File name not set!");
@@ -138,8 +132,6 @@ sub copyFile{
 	my $option	= shift;
 
 	$option = {} if(ref $option ne 'HASH');
-
-	$self->{filename} = $option->{filename} if($option->{filename});
 
 	use File::Copy;
 	use File::Basename;

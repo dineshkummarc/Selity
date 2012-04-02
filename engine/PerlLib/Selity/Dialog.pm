@@ -28,51 +28,41 @@ package Selity::Dialog;
 use strict;
 use warnings;
 
-use vars qw/@ISA $AUTOLOAD/;
-@ISA = ('Common::SingletonClass');
-use Common::SingletonClass;
-use AutoLoader;
-use UI::Dialog;
-use Data::Dumper;
-use Selity::Args;
 use Selity::Debug;
+use Selity::Execute qw/execute/;
+use Common::SingletonClass;
 
-sub _init{
-	my $self = shift;
-	$self->{UI} = UI::Dialog->new(
-			title => 'Selity setup', backtitle => 'Selity - When virtual hosting becomes scalable',
-			order => [ 'cdialog', 'whiptail', 'ascii' ] );
+use vars qw/@ISA/;
+@ISA = ('Common::SingletonClass');
+
+sub factory{
+
+	my $self	= Selity::Dialog->new();
+
+	unless($self->{instance}){
+		my ($dialog, $whiptail, $rs, $stdout, $stderr, $file, $class);
+		if(!execute('which dialog', \$stdout, \$stderr)){
+			$file	= "Selity/Dialog/Dialog.pm";
+			$class	= "Selity::Dialog::Dialog";
+			require $file;
+			$self->{instance} = $class->new();
+		}elsif(!execute('which whiptail', \$stdout, \$stderr)){
+			$file	= "Selity/Dialog/Whiptail.pm";
+			$class	= "Selity::Dialog::Whiptail";
+			require $file;
+			$self->{instance} = $class->new();
+		} else {
+			fatal('Can not find whiptail or dialog. Please reinstall...');
+		}
+		$self->{instance}->set('title', 'Selity Setup');
+		$self->{instance}->set('backtitle',	'Selity internet Multi Server Control Panel');
+	}
+	$self->{instance};
 }
 
-sub reinit{
-	my $self = shift;
-	$self->_init();
+sub reset{
+	my $self	= Selity::Dialog->new();
+	$self->{instance} = undef;
+	0;
 }
-
-sub AUTOLOAD {
-	my $self = shift;
-	my $noprompt	= Selity::Args->new->get('noprompt');
-	$AUTOLOAD =~ /([^:]+)$/;
-	fatal('No prompt switch is on but some value need user input. Exiting from method:'. $1) if $noprompt;
-	return $self->{UI}->$1(@_) if $1 && $self->{UI}->can($1);
-	fatal('Method'.($1?$1:'unknown').'not implemented');
-}
-
-sub msgbox{
-	my $self	= shift;
-	my $noprompt	= Selity::Args->new->get('noprompt');
-	return $self->{UI}->msgbox(@_) unless $noprompt;
-}
-
-sub textbox{
-	my $self	= shift;
-	my $noprompt	= Selity::Args->new->get('noprompt');
-	return $self->{UI}->msgbox(@_) unless $noprompt;
-}
-
-sub DESTROY{
-	my $self = shift;
-	$self->{UI}->DESTROY(@_);
-}
-
 1;
